@@ -1,0 +1,62 @@
+{
+ "version": "20261015T164539",
+ "gcc": "7.3.0-atmel3.6.1-arduino7",
+ "core": "1.8.6",
+ "fastled": "3.7.8",
+ "sdk": "avr-sdk.tar.gz",
+ "sdkSize": 4023901,
+ "tools": {
+  "xgcc": {
+   "file": "xgcc.wasm.gz",
+   "size": 309167
+  },
+  "xg++": {
+   "file": "xg++.wasm.gz",
+   "size": 310157
+  },
+  "cc1plus": {
+   "file": "cc1plus.wasm.gz",
+   "size": 4622529
+  },
+  "cc1": {
+   "file": "cc1.wasm.gz",
+   "size": 4195039
+  },
+  "collect2": {
+   "file": "collect2.wasm.gz",
+   "size": 221748
+  },
+  "lto-wrapper": {
+   "file": "lto-wrapper.wasm.gz",
+   "size": 254481
+  },
+  "lto1": {
+   "file": "lto1.wasm.gz",
+   "size": 3716218
+  },
+  "as": {
+   "file": "as.wasm.gz",
+   "size": 395903
+  },
+  "ld": {
+   "file": "ld.wasm.gz",
+   "size": 464220
+  },
+  "ar": {
+   "file": "ar.wasm.gz",
+   "size": 317544
+  },
+  "objcopy": {
+   "file": "objcopy.wasm.gz",
+   "size": 398901
+  },
+  "size": {
+   "file": "size.wasm.gz",
+   "size": 308579
+  },
+  "nm": {
+   "file": "nm.wasm.gz",
+   "size": 341713
+  }
+ }
+}
