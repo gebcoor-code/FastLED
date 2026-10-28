@@ -1,0 +1,46 @@
+{
+  "items": [
+    { "file": "GyverMatrixOS_v1.12_24x12.zip", "name": "GyverMatrixOS 1.12 (24×12)", "board": "mega" },
+    { "file": "Matrix10x10-nano.zip", "name": "Matrix 10×10", "board": "nano" },
+    { "file": "Earth-new-smooth.zip", "name": "Earth 24x24", "board": "mega" },    
+    { "file": "new3dscroll.c", "name": "Scrolling String 3D" },    
+    { "file": "adjustive.c", "name": "Adjustive (Soulmate)" },
+    { "file": "AttractingBoids.c", "name": "Attracting Boids (Soulmate)" },
+    { "file": "fire bengal.c", "name": "Fire Bengal (Soulmate)" },
+    { "file": "prismata.c", "name": "Prismata (Soulmate)" },
+    { "file": "spectrum.c", "name": "Spectrum (Soulmate)" },
+    { "file": "wandering souls.c", "name": "Wandering Souls (Soulmate)" },
+    { "file": "3d-circle.c", "name": "Circle 3D" },
+    { "file": "3d-cube.c", "name": "Cube 3D" },    
+    { "file": "3d-cubedots.c", "name": "CubeDots 3D" },        
+    { "file": "3d-cube-hiddenedges.c", "name": "Cube 3D hidden edges" },            
+    { "file": "3d-dnaspirale.c", "name": "DNA Spirale 3D" },            
+    { "file": "dodecahedron.c", "name": "Dodecahedron 3D" },                
+    { "file": "3d-happyyear.c", "name": "Happy Year 3D" },                
+    { "file": "3d-icosahedron.c", "name": "Icosahedron 3D" },                    
+    { "file": "3d-octahdron.c", "name": "Octahedron 3D" },                        
+    { "file": "3d-sphere.c", "name": "Sphere 3D" },                            
+    { "file": "3d-sphere-intarray.c", "name": "Sphere 3D int" },                                
+    { "file": "3d-sphere-neon.c", "name": "Sphere 3D neon" },                                    
+    { "file": "3d-text.c", "name": "Text 3D" },                                        
+    { "file": "3d-tor.c", "name": "Tor 3D" },                                            
+    { "file": "3d-xtree.c", "name": "X-Tree 3D" },                                                
+    { "file": "colorfrizzles.c", "name": "Color Frizzles" }, 
+    { "file": "earth16.c", "name": "Earth 16x16" },     
+    { "file": "fireringcollapsed.c", "name": "Fire Ring Collapsing" },         
+    { "file": "happynewyear.c", "name": "Happy New Year colored" },             
+    { "file": "noises.c", "name": "Noises" },                 
+    { "file": "scrolling.c", "name": "Scrolling String (Gyver)" },                     
+    { "file": "simplesparkles.c", "name": "Simple Sparkles" },                         
+    { "file": "snowfall.c", "name": "Snowfall" },                             
+    { "file": "something.c", "name": "Something" },                                 
+    { "file": "spiraltunnel.c", "name": "Spirale Tunnel" },                                     
+    { "file": "spiraltunnel-memopt.c", "name": "Spirale Tunnel mem opt" }                                 
+  ]
+}
+
+
+
+
+
+

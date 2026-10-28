@@ -1,0 +1,90 @@
+Web FastLED
+Copyright (c) 2026 ae485
+
+MIT License
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+
+-------------------------------------------------------------------------------
+Third-party components
+-------------------------------------------------------------------------------
+
+MIT license above covers code of Web FastLED itself (page, scripts, service
+worker, Arduino core for WebAssembly in runtime/core, build tools, tests).
+Components below are distributed with it under their own licenses; their full
+texts come with their sources.
+
+FastLED 3.7.8
+  Daniel Garcia, Mark Kriegsman and contributors. MIT license.
+  https://github.com/FastLED/FastLED
+  Used in WebAssembly SDK (stub platform: clockless_stub.h, led_sysdefs_stub.h
+  patched) and in real build for AVR.
+
+Arduino AVR core 1.8.6, libraries SPI, Wire, SoftwareSerial, EEPROM
+  Arduino and contributors. GNU Lesser General Public License 2.1.
+  https://github.com/arduino/ArduinoCore-avr
+  Precompiled for real build (rt/avr/avr-sdk.tar.gz); sources of core and
+  libraries are inside that archive.
+
+Bootloaders of Arduino AVR core 1.8.6: Optiboot (Peter Knight, Bill
+Westfield), ATmegaBOOT (Arduino), stk500v2 (Peter Fleury, Mark Sproul)
+  GNU General Public License 2.
+  Their .hex files are merged into ".hex with bootloader" files, as Arduino
+  IDE does. Sources: https://github.com/arduino/ArduinoCore-avr/tree/1.8.6/bootloaders
+
+LLVM / Clang 21
+  LLVM project. Apache License 2.0 with LLVM exceptions.
+  https://llvm.org
+YoWASP build of LLVM for WebAssembly (rt/clang.js, rt/llvm*.gz)
+  whitequark and contributors. ISC license.
+  https://github.com/YoWASP/clang
+
+GCC 7.3.0 (avr-gcc of Arduino toolchain 7.3.0-atmel3.6.1-arduino7)
+  Free Software Foundation. GNU General Public License 3; libgcc with GCC
+  Runtime Library Exception 3.1 (code of libgcc linked into sketch may be
+  used under any terms).
+GNU Binutils 2.26 (avr-as, avr-ld, avr-ar, avr-nm, avr-objcopy, avr-size)
+  Free Software Foundation. GNU General Public License 3.
+  Built for WebAssembly (rt/avr/*.wasm.gz) from Arduino toolchain sources
+  (https://github.com/arduino/toolchain-avr, Atmel 3.6.1 patches) with
+  WASI patches of Web FastLED. Complete corresponding source of these
+  WebAssembly builds (upstream sources, patches, build scripts) is available
+  from the author on request, for at least three years from distribution.
+
+avr-libc 2.0.0 (with Arduino patch: malloc margin)
+  avr-libc developers. Modified BSD license.
+  https://github.com/avrdudes/avr-libc
+
+avr8js 0.21
+  Uri Shaked and contributors. MIT license.
+  https://github.com/wokwi/avr8js
+  Bundled as web/js/avr8.js (emulator of Real CPU timing).
+
+CodeMirror 6
+  Marijn Haverbeke and contributors. MIT license.
+  https://codemirror.net
+  Bundled as web/js/editor.js.
+
+Color themes
+  Palettes of Visual Studio Code themes Dark+, Light+, High Contrast
+  (Microsoft, MIT license), Monokai, Solarized (Ethan Schoonover, MIT license).
+
+Library samples (repo/, separate package)
+  GyverMatrixOS (AlexGyver) and Soulmate sketches belong to their authors.

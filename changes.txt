@@ -1,0 +1,604 @@
+Web FastLED — version history
+
+  [!] - serious bug fixed
+  [+] - new feature
+  [-] - obsolete feature removed
+  [*] - minor fixes
+  [@] - feature changed
+
+
+        version 0.1.0                   8 oct 2026
+
++ first build: editor and window shell, no emulator core yet
++ project = .zip with sketch (.ino, .h, .c, .cpp); Load (button, Ctrl+O,
+  drag & drop); main .ino (with setup() / loop()) is first tab, other
+  sources follow alphabetically, then text files (.txt)
++ loose .ino / .h files are added to open project (or start new one)
++ changed file is marked with * before its name on its tab; project name
+  in toolbar gets dot while anything is unsaved
++ Save (button, Ctrl+S): whole project back as <name>.zip — unchanged
+  files byte for byte, changed ones in their own encoding (UTF-8, UTF-8 BOM
+  or Windows-1251) and line endings (CRLF / LF); other files of archive
+  are kept untouched
++ editor (CodeMirror 6): C / C++ highlighting, own undo history per tab,
+  find / replace, go to line, folding, bracket matching, multi-cursor,
+  comment toggle, auto-closed brackets
++ color themes as in Visual Studio Code: Dark+, Light+, Monokai,
+  Solarized Dark / Light, High Contrast Dark / Light, Auto (system);
+  toolbar button switches light / dark
++ Options window (Board / Editor / About): Arduino Nano (ATmega328P) or
+  Arduino Mega 2560 (ATmega2560); font, font size, tab size, line numbers,
+  word wrap, current line, whitespace, auto-close brackets, keep session
++ session (open project, unsaved changes, active tab) is kept in browser
+  and restored on next visit
++ LED window: 16x16, 24x12, 32x32, 64x64 (and sketch's own size), square
+  pixels sized by window, grid on / off; drag by title, resize by edges;
+  wiring as in GyverMatrix: zigzag / parallel, start corner, direction
++ LED "From sketch": WIDTH / HEIGHT / MATRIX_TYPE / CONNECTION_ANGLE /
+  STRIP_DIRECTION (and kMatrixWidth / kMatrixHeight / kMatrixSerpentineLayout
+  of FastLED examples) read from sources, also on project load
++ LED window: mouse over pixel shows x, y, leds[index] and its color
++ Start / Stop (F5): until emulator core is built, test pattern runs along
+  strip in wiring order (white head from leds[0])
++ status bar: board, run state, line / column, indentation, encoding,
+  line endings, language
++ Help window (F1), keys: Ctrl+O, Ctrl+S, F5, F6, Ctrl+, , Alt+1..9
+
+
+        version 0.2.0                   8 oct 2026
+
++ sketch really runs: Start (F5) compiles project with clang 21 (LLVM,
+  YoWASP build for WebAssembly) right in browser and runs it as WebAssembly
+  in real time; test pattern of 0.1.0 is gone
++ compiler is downloaded once (about 26 MB, rt/*.gz, unpacked by page),
+  then comes from browser cache; it starts loading in background when
+  project is opened
++ Arduino core for Nano / Mega 2560: pins and A0.., millis / micros /
+  delay / delayMicroseconds, digital / analog I/O, random / map / constrain
+  and other macros, String, Print / Stream, Serial (Serial1-3 on Mega),
+  EEPROM (1 KB / 4 KB), PROGMEM / pgm_read_* / F() / far pointers,
+  avr/pgmspace.h, avr/io.h, avr/interrupt.h, avr/eeprom.h, util/delay.h
++ FastLED 3.7.8 built in (stub platform): FastLED.show() hands final pixels
+  (brightness, color correction, power limit, dithering, color order) to
+  LED window and takes its real time on wire (30 us per WS2812 LED)
++ .ino files are joined as in Arduino IDE (main one first, then
+  alphabetically) with function prototypes; .h / .c / .cpp of sketch
+  folder (and src/) are compiled too; #line keeps file names and lines
++ -fpermissive as in Arduino IDE: conversions that g++ only warns about
+  (const discarded, pointer <-> integer) get cast, file is compiled again
+  and Problems shows warning (effects.ino:1122 of GyverMatrix)
++ names AVR libc lacks but sketches use as variables (y1, j0, index ...)
+  do not clash with C library
++ Verify (F7, Ctrl+R): compile only; build is cached while sources, board
+  and optimization stay same
++ panel below editor (Ctrl+J), as in VS Code: Problems (click = go to
+  line), Output (compiler log), Serial Monitor (output, input line with
+  line ending, autoscroll, baud rate of Serial.begin)
++ errors and warnings are underlined in editor, with marker in gutter;
+  error / warning counts in status bar
++ LED window: buttons for input pins of running sketch (INPUT /
+  INPUT_PULLUP): hold = pressed, Shift+click = keep pressed (D3 of
+  GyverMatrix switches modes)
++ LED window: "LED-like" display (linear light of LED converted to sRGB of
+  monitor) or raw values
++ Options / Board / Build: optimization -O0 (fast build, default), -O1,
+  -O2, -Os
++ status bar: compiling / loading compiler, loops and FastLED.show() per
+  second while running
++ .htaccess / web.config: cross-origin isolation headers (sketch waits in
+  delay() without loading CPU), .gz served as is
+@ LED window: frame has length of strip (NUM_LEDS + 1 of GyverMatrix is
+  fine); size still comes from sketch
+
+
+        version 0.3.0                   8 oct 2026
+
+@ LED window: all controls are in its title bar: size box, rebuild with
+  this size, size from sketch, pause, speed, scale, fit, effects, inputs,
+  reset and close
++ size box understands 24x12, 24-12, 24 12, 24*12, 24х12, 2412 (and 16 =
+  16x16)
++ rebuild with size: sketch is compiled with WIDTH / HEIGHT (or
+  MATRIX_WIDTH, kMatrixWidth ...) of box instead of its own — only for
+  this build, code is not changed — and restarted; "from sketch" goes back
+  to sketch's size
++ pause / continue (also Space outside editor): sketch clock stands still
++ speed 0.1x .. 10x: sketch clock (millis, micros, delay, time of
+  FastLED.show() on wire) runs faster or slower than real time
++ scale 0.1x .. 5x (1x = 16 px per LED) fits window to matrix; "fit"
+  does it on request
++ reset: same build starts again from setup()
++ Inputs window: each pin sketch uses — mode, level, PWM, tone, FastLED
+  data pin with its LED count; button for INPUT / INPUT_PULLUP pins (hold,
+  Shift+click keeps it), slider or noise for analogRead pins
++ tabs can be dragged to another place; order is kept in session
+@ closing LED window stops sketch
+@ wiring (zigzag / parallel, start corner, direction) and colors
+  (LED-like / raw) moved to Options -> LED
+
+
+        version 0.4.0                   8 oct 2026
+
+@ LEDs grow and shrink with LED window, down to 1 screen pixel per LED
+  (whole device pixels per LED, no blur); height down to 1 pixel per LED
+- scale menu removed: window size sets LED size; "fit" removes black
+  margins around matrix
++ fps (FastLED.show() calls per second) back in corner of LED window
++ effects menu: coordinates under cursor on / off (off by default)
+@ "get WIDTH and HEIGHT from sketch" takes only size; wiring is set in
+  Options -> LED (also on project load only size is taken)
+@ server package without rt/ (compiler is unchanged since 0.2.0)
+
+
+        version 0.5.0                   8 oct 2026
+
+! float → unsigned integer casts work as on AVR: negative value wraps
+  ((uint8_t)-64.0 = 192), wasm gave 0 — rMap effects of GyverMatrix
+  (Lotus and others using atan2 angles) drew only half of picture right
++ search box in toolbar (Ctrl+Shift+F): all files of project as you type;
+  Aa — match case, ab — whole word, .* — regular expression; results in
+  panel tab Search, grouped by file, click selects match; Enter jumps to
+  first one, Esc clears
+
+
+        version 0.6.0                   8 oct 2026
+
++ LED window: rotate view by 90°
+@ size box: Enter or leaving box rebuilds sketch with new WIDTH / HEIGHT
+  right away (matrix of other size than build drew nonsense)
++ rebuild with new size continues from same moment: new build is made
+  while old one runs, then catches up to its sketch time without waiting
+  and without frames, replaying inputs (buttons, sliders, Serial input)
+  and same noise of floating pins; status bar shows catching up
++ floating pins / analogRead noise / random_get are seeded per run
++ Options -> Board -> Build: "LED data time (30 us per WS2812 LED)", on
+  by default; off — FastLED.show() is instant
+* LED drawing much faster on big matrices
+
+
+        version 0.6.1                   8 oct 2026
+
+@ LED data time is button in LED window, off by default: on —
+  FastLED.show() waits so that frames come every 20 ms of sketch time,
+  50 fps at 1x; off — sketch runs as fast as it can
+@ speed works only with LED data time on: 0.1x .. 10x = 5 .. 500 fps,
+  sketch clock (millis, delay) runs at same speed
+- Options -> Build "LED data time (30 us per WS2812 LED)" removed
+! new size from size box is shown only when new build runs: while it
+  compiles and catches up, old build keeps its size and last frame
+* compile error after size change keeps old size and old build running
+
+
+        version 0.7.0                   8 oct 2026
+
++ profile (trace, mode 1): panel tab Profile, "Profile build" button —
+  each function of .ino files gets timer (line numbers stay); table: calls
+  per second, Busy, Waits (delay, LED data time), Total, file:line;
+  function that calls FastLED.show() is marked; click row — go to
+  function; sort by column; turning it on while sketch runs rebuilds and
+  continues from same moment
++ LED effects menu: strip route — line through LEDs in index order with
+  arrows, green dot at leds[0], red at last LED (also when stopped)
++ LED window: mirror horizontally
+@ Pause and Reset moved from LED window to toolbar: compile, start / stop,
+  pause, reset
++ sw.js: service worker adds cross-origin isolation headers when server
+  does not send them (HTTPS or localhost; page reloads once on first
+  visit); without isolation waits of sketch keep one CPU core busy —
+  Output says so on start
+* catching up after rebuild: sketch time also moves by computing time x25,
+  so sketches without delay() catch up minutes in seconds
+
+
+        version 0.7.1                   8 oct 2026
+
+@ LED data time turned round: on — FastLED.show() takes as long as data on
+  real strip (30 us per WS2812 LED), speed inactive; off (default) —
+  frames every 20 ms of sketch time, 50 fps at 1x, speed 0.1x .. 10x =
+  5 .. 500 fps; sketch never runs unlimited any more
+@ project load takes size and wiring (MATRIX_TYPE, CONNECTION_ANGLE,
+  STRIP_DIRECTION) from sketch once; later wiring comes only from
+  Options -> LED
+@ "Get W×H" moved from LED window to toolbar, between Load and Save;
+  takes only WIDTH and HEIGHT
+@ Options -> LED -> Dim colors: slider instead of menu — Raw ... LED-like
+  (default, as before) ... brighter; double click — LED-like
+
+
+        version 0.7.2                   8 oct 2026
+
+@ Options -> LED -> Dim colors: up to +200%; default +100% (double click
+  returns it)
+
+
+        version 0.8.0                   9 oct 2026
+
++ .c sketches (Soulmate style, project without .ino): .c files are
+  compiled as C++ sketch; LED_COLS / COLS -> WIDTH, LED_ROWS / ROWS ->
+  HEIGHT; without setup() pattern.c from server root is added: includes,
+  defines, globals before sketch, XY(), setup(), loop() (draw() +
+  FastLED.show()) after it; what sketch has itself is commented in
+  pattern, sketch's #define of same name takes pattern's place; defines
+  that became #define WIDTH (WIDTH) are commented; errors show
+  pattern.c:line; Options -> Build: two switches, both on by default
++ pattern.c in distribution (16x16, as given, plus loop() calling draw());
+  it is read again on each build, so it can be edited on server
++ project load of .c sketch: size from pattern.c (unless sketch has its
+  own), wiring zigzag from bottom left, right (as XY() of pattern)
+! C++ library headers are not used for sketches (-nostdinc++), as on AVR:
+  <math.h> is C header, so float sqrt(float) of sketch does not clash with
+  libc++ overloads (AttractingBoids.c)
+* -fpermissive casts of last build are applied before next build of same
+  project: rebuild with new size needs one compile round, not two
+  (GyverMatrix: about half time)
++ Output: "Caught up to m:ss in x s" after rebuild with continuation
+* .htaccess / web.config: type of .c files
+
+
+        version 0.9.0                   9 oct 2026
+
++ Options -> Build: "C++ standard library" switch (libc++ headers:
+  <vector>, <algorithm> ...), off by default (-nostdinc++, as on AVR)
+@ .c sketch: on loading, ROWS / COLS -> WIDTH / HEIGHT and pattern.c go
+  into sketch text itself, so editor shows what is compiled: pattern head
+  at top, its functions at end, between "// ===== pattern.c" marks; file
+  gets * mark, Save keeps it; build adds pattern only if sketch still has
+  no setup()
+@ LED data time, rotate, mirror and inputs buttons moved from LED window
+  to toolbar, next to LED window button, in own group
+
+
+        version 0.10.0                  9 oct 2026
+
+! -O0: float -> unsigned casts made AVR-like before code generation:
+  narrow results (uint8_t / uint16_t) were not wrapped to their width, so
+  inoise8((uint16_t)negative float) read outside table — "memory access
+  out of bounds" (r-plamia.c)
++ Load button opens menu: local file (Ctrl+O as before) and library —
+  projects of server folder repo/, listed in repo/index.json
+  ({ "items": [ { "file", "name", "board" } ] }, board optional);
+  library item always opens as new project; filter box from 10 items
++ welcome screen: "Open from library…"
++ repo/ sample (index.json, GyverMatrix, Matrix 10x10, three Soulmate
+  sketches) comes as separate webfastled-repo.zip, server zip does not
+  touch repo/
++ size change: #define NUM_LEDS <number> equal to WIDTH x HEIGHT of
+  sketch follows new size (r-plamia.c: NUM_LEDS 256)
+@ rebuild button moved from LED window to toolbar LED group
+* loading other project does not ask about changes made by loading
+  itself (.c sketch: names, pattern.c)
+
+
+        version 0.11.0                  9 oct 2026
+
++ catch-up (continue from same moment after rebuild: new size, profile)
+  is switch now: Options -> Build and toolbar button, off by default;
+  off: new build is made while old one runs, then starts from beginning
+@ rotate is action (+90° each click); mirror stays switch
+
+
+        version 0.12.0                  9 oct 2026
+
+! project load without MATRIX_TYPE / CONNECTION_ANGLE / STRIP_DIRECTION
+  kept wiring of previous project, so picture looked scrambled (Earth
+  after GyverMatrix); now wiring comes from XY() of sketch: zigzag when
+  odd rows are reversed (y & 1, y % 2), else parallel; bottom left, right
+* error ranges were on physical lines of preprocessed sketch (2 lines off
+  after prototypes / #line), now on lines of file
+@ pattern.c is not in server zip any more (it goes with webfastled-repo.zip)
++ library sample: Earth (24x24 gif frames)
+
+
+        version 0.13.0                  9 oct 2026
+
+@ LED window: dim colors curve is applied to brightest channel of LED,
+  other channels keep their proportion in linear light, so lifted dim
+  colors stay saturated (before each channel was lifted by itself and
+  colors went greyish)
++ Options -> LED -> Contrast: dark and middle tones darker, full
+  brightness stays (power 1...2 of curve output); default 0%
+
+
+        version 0.14.0                  9 oct 2026
+
++ Options -> Build -> "Power limit of sketch": on — FastLED
+  setMaxPowerInVoltsAndMilliamps / InMilliWatts work as on real strip and
+  dim whole frame when many LEDs are lit (3d-icosahedron.c with pattern.c,
+  5 V 1000 mA: white lines become grey, 52 of 255); off drops these calls
+  for build; Output tells which of two happens
+
+
+        version 0.14.1                  9 oct 2026
+
+@ Options -> Build -> "Power limit of sketch" is off by default
+  (setMaxPower... calls are dropped for build; on = as real strip)
+
+
+        version 0.15.0                  9 oct 2026
+
++ editor tab has small × (on hover and on active tab): removes file from
+  project after confirmation; if it was main file, next .ino / .c becomes
+  main; last file closes project and start screen is shown as on first
+  load
+
+
+        version 0.16.0                  9 oct 2026
+
++ LED window: 3D view (button 3D, menu ▾ next to it): matrix as window
+  shows it is wrapped on cylinder (columns round, rows down: running text
+  runs round it) or sphere (golden angle points, as many as LEDs, each
+  takes LED under its longitude / latitude); dots (canvas, back side
+  dimmer) or solid (WebGL, LEDs as round dots on lit dark surface);
+  arcball rotation with inertia, wheel / pinch zoom, rotate on / off
+  (random rotation when idle, as object3D)
+* phone: toolbar scrolls sideways when it does not fit; iOS does not
+  enlarge text in landscape
+
+
+        version 0.16.1                  9 oct 2026
+
+@ LED window in 3D: fit makes window square around figure at its present
+  size on screen (zoom becomes 1); in 3D window may be lower than matrix
+  in 2D
+@ 3D: smallest zoom 30% smaller (0.21 instead of 0.3)
+
+
+        version 0.17.0                  10 oct 2026
+
++ Options -> LED -> "W×H from sketch on load", off by default: loading
+  project / file keeps size of LED window, build gets it instead of
+  sketch's WIDTH / HEIGHT (as size box does; NUM_LEDS given as number
+  follows); Output says so; Get W×H still takes sketch's; on = as before
++ Options -> LED -> 3D: dot size (30...100%, 100% = largest, as before)
+  for dots and solid; cylinder height (20...300%, 100% = same LED pitch
+  round and along axis, as before; lower = shorter and wider)
+@ all scripts in js/ (sw.js stays in root: service worker serves only
+  folder it is in); old *.js in server root can be deleted
+
+
+        version 0.18.0                  10 oct 2026
+
++ 3D: new figures — globe (rows are parallels, columns meridians, LEDs
+  crowd to poles), torus (columns round ring, rows round tube), disc
+  (polar: rows are rings from centre, columns angle clockwise from top)
+  and dome (polar on hemisphere facing viewer); dots and solid for each;
+  where LEDs crowd (poles, centre of disc, inner side of torus) dots get
+  smaller; in solid dots stay round
+@ 3D: double click returns front view too (not only zoom)
+
+
+        version 0.19.0                  11 oct 2026
+
+* 3D dots: brightness by how LED faces viewer, not by depth (disc facing
+  viewer was dim: it lies at middle depth); back side seen through stays
+  dim
+* 3D dome: columns go counter-clockwise from top, as north half of globe
+  seen from above (picture was mirrored)
++ Options -> LED -> Display: "LED data time" checkbox (same as toolbar
+  button)
+* phones (touch screen): bottom line is kept off screen edge, status bar
+  scrolls sideways
+
+
+        version 0.19.1                  15 oct 2026
+
+@ 3D menu closes when figure or mode is chosen (Rotate keeps it open)
+@ removing file: own confirmation window with OK in focus (Enter = OK,
+  Esc = cancel)
+
+
+        version 0.20.0                  15 oct 2026
+
++ board binary (real build), first step of "Real CPU timing": button with
+  chip and arrow next to Save builds sketch with avr-gcc 7.3.0 in browser
+  (WebAssembly), same compiler, flags and steps as Arduino IDE (AVR core
+  1.8.6, FastLED 3.7.8, LTO); result is byte for byte IDE's: checked on
+  Nano sketch (.hex, .eep, with bootloader .hex / .bin all equal)
++ its menu: download .hex, .hex with bootloader, .elf (with debug info),
+  .eep, all files in .zip (<project>.arduino.avr.<board>.zip); build only
+  with size report as IDE ("Sketch uses ... bytes (..%) of program storage
+  space ..."; too big sketch or RAM is error, over 75% RAM is warning)
++ Nano: bootloader choice as in IDE Processor menu — ATmega328P
+  (Optiboot) or ATmega328P (Old Bootloader); kept between sessions
++ libraries found by #include as IDE does (preprocessor): FastLED, SPI,
+  Wire, SoftwareSerial, EEPROM; core and these libraries come precompiled
++ project is built as saved (encoding, line ends), with sketch's own
+  sizes (LED window size box does not apply); errors go to Problems
++ avr-gcc is loaded on first use (about 16 MB, then from browser cache);
+  C compiler (cc1, 4 MB) only when project has .c files
+
+
+        version 0.21.0                  15 oct 2026
+
+! board binary: Mega sketch was 14 bytes longer than Arduino IDE's (gcc
+  sorts with qsort, order of equal elements decides register choice; IDE
+  on Windows uses msvcrt quicksort, so that one is used now): Mega
+  GyverMatrixOS .hex, .eep, with bootloader .hex / .bin are byte for byte
+  IDE's
+! board binary: .ino files after main one go in byte order of names
+  (upper case first), as IDE joins them (order of PROGMEM tables)
++ board binary of .c sketch (no .ino): built as in emulator — .c files
+  are sketch, COLS / ROWS -> WIDTH / HEIGHT, pattern.c gives setup() /
+  loop() (Options -> Build); files are named after project
+
+
+        version 0.21.1                  15 oct 2026
+
+! board binary: sketch with more RAM (or flash) than board has failed at
+  link ("section .bss is not within region data") instead of size report;
+  now report says "Global variables use 2857 bytes (139%) ... Not enough
+  memory" and "Compilation error: data section exceeds available space in
+  board", as IDE 2 does
+
+
+        version 0.22.0                  15 oct 2026
+
++ Real CPU timing (chip with clock in toolbar, next to LED window button;
+  off by default): sketch is real build (avr-gcc, same as board binary)
+  and its .hex runs on emulated ATmega328P at 16 MHz, instruction by
+  instruction (avr8js core): delays, interrupts, timers and FastLED.show()
+  take exactly as long as on board
++ in it LED colors are read from data pin by pulse widths, as strip reads
+  them (any pin, several strips); fps in LED window = frames on pin per
+  second; Serial monitor talks to USART (both ways), Inputs drive pins
+  (pull-up works) and ADC (pots); status bar shows % of real speed when
+  computer cannot keep up with 16 MHz
++ Options -> LED -> Display: strip color order (GRB default: WS2812,
+  WS2812B, SK6812; RGB for many WS2811) — sketch with wrong order in
+  addLeds shows colors swapped, as on real strip
+@ with Real CPU timing on: speed 1x, 3D view, size rebuild, profile and
+  catch-up are off; size box only lays out LEDs read from pin; switching
+  while sketch runs starts it again in other mode; Nano only for now
+- LED data time (button and Options checkbox) removed: Real CPU timing
+  replaces it; without it frames come every 20 ms x speed, as before
+
+
+        version 0.23.0                  16 oct 2026
+
++ Memory tab in panel (Real CPU timing): RAM of board as bar — variables
+  (.data, .bss), heap, free, stack — and table now / max: heap and stack
+  high-water marks (free RAM is filled with pattern at reset, growth
+  overwrites it), free RAM between heap and stack (min), flash use; red
+  dot on tab and message when reserve is small or stack ran into
+  variables (with board time when it happened)
++ Profile in Real CPU timing: share of board CPU time per function,
+  always on and costless (program counter sampled ~10 000 times a second
+  of board time; Total found from return addresses on stack): all
+  functions — sketch, FastLED, core, interrupts by name (TIMER0_OVF
+  (millis), USART_RX ...); head line: waiting in delay(), LED data out
+  (showPixels), interrupts; click row goes to sketch function
+
+
+        version 0.24.0                  16 oct 2026
+
++ upload to board over USB (Web Serial: Chrome, Edge, Opera, new Firefox):
+  button with arrow into board next to board binary button, Ctrl+U, or
+  board binary menu; real build is written through bootloader as avrdude
+  does — Nano: STK500v1, Optiboot 115200 or Old Bootloader 57600 (both
+  tried, found one is kept in menu); Mega 2560: STK500v2 115200; device
+  signature checked, every page read back and compared; progress in
+  status bar, log in Output
++ port chosen once is remembered; board binary menu -> Choose port...
++ Serial monitor of real board: speed and Connect board in Serial
+  Monitor panel (opening port resets board, as in IDE); input line goes to
+  board while connected; upload closes monitor and opens it again
+
+
+        version 0.25.0                  16 oct 2026
+
+! upload: bootloader chosen in menu is tried first (other one only when
+  it does not answer)
+@ Upload button got own menu (▾ next to it; button itself uploads at
+  once): Upload to board; Port — "Choose port…" when none, else its name
+  (CH340, CH9102, FT232R…) and Change; Release port — closes Serial
+  monitor of board and forgets port, so other programs (Arduino IDE) can
+  take it; Bootloader of Nano (moved here from board binary menu); USB
+  drivers, troubleshooting…
++ help: USB drivers — CH340 / CH341, CH9102 / CH343 (USB-C boards),
+  FT232R, CP2102, ATmega16U2 — download links for Windows / macOS, Linux
+  notes (dialout group, brltty)
++ help in Russian: EN / RU button in its title bar (choice is kept)
+
+
+        version 0.26.0                  16 oct 2026
+
++ debugger in Real CPU timing: breakpoint by click left of line number
+  (red dot, moves with text when edited); board stops before line runs:
+  arrow and highlight on line, status bar tells where and why
++ Debug tab of panel: call stack (click goes to place), registers r0…r31,
+  X / Y / Z, SP, PC, SREG flags, cycles; RAM as hex with address box and
+  links to variables / stack, bytes changed since previous stop in
+  yellow; breakpoints list (× removes, line without own code moves to
+  next one or is marked "no code")
++ step over (F10), into (F11), out (Shift+F11) — buttons appear in
+  toolbar while Real CPU timing runs; continue: F5, Space or Pause;
+  Pause stops board at once as breakpoint; interrupts run inside steps,
+  their code is passed over; board time stands while stopped
+
+
+        version 0.27.0                  16 oct 2026
+
++ board select in toolbar (after Upload button)
+! Upload ▾ menu did not open before first project / upload
+@ breakpoint: click on line number itself sets / removes it too
+
+
+        version 0.27.1                  16 oct 2026
+
+! debugger: breakpoint on line that only calls function inlined by
+  optimizer (case 1: VUSpectrum();) had no code and moved to other line;
+  now board stops at entry of inlined copy; mark stays on breakpoint line
+@ Real CPU timing: strip color order "As sketch (addLeds)" is new default:
+  order of addLeds<…, ORDER> (or #define COLOR_ORDER behind it; no order:
+  RGB, NEOPIXEL GRB) — colors as sketch means them; fixed GRB / RGB …
+  shows what such strip would show
+@ Real CPU timing: on start LED window takes WIDTH / HEIGHT (and wiring)
+  of sketch, as Get W×H: build is sketch as it is
+
+
+        version 0.28.0                  16 oct 2026
+
++ Real CPU timing on Arduino Mega 2560: emulated ATmega2560 at 16 MHz —
+  256 KB flash, 8 KB RAM, ports A…L with Mega pin numbers (D0…D53,
+  A0…A15), timers 0…5 (PWM of pins 2…13, 44…46), USART0 (Serial
+  monitor) and USART1…3 (Serial1…3 run, output not shown), ADC with 16
+  channels, external interrupts INT0…7, pin change PCINT0 / PCINT2,
+  SPI, TWI, EEPROM 4 KB, watchdog
++ Mega: Memory tab (8 KB), profile, debugger
+! debugger: breakpoint on line that calls inlined function inside loop
+  (loop() { customRoutine(); }) stopped only once: optimizer turns loop
+  so that later passes jump back into inlined copy past its entry; now
+  board stops on every pass
+* debugger: call stack ends at main() (startup code above it hidden)
+
+
+        version 0.29.0                  16 oct 2026
+
++ loop that never ends because its counter is too small (byte i <
+  NUM_LEDS with 256 LEDs or more — e.g. Matrix10x10 after size rebuild
+  to 24x24 / 48x48: TwinklesRoutine hangs) is warning in Problems even
+  with warnings off, with toast after build
++ WebAssembly sketch that does not answer for 3 s: status bar says "Not
+  responding (endless loop?)", Output names line of such warning
+! debugger: frame sent by FastLED.show() appeared in LED window only after
+  continue; now strip latches at once when board stops (breakpoint, step,
+  pause)
+
+
+        version 0.29.1                  16 oct 2026
+
+! editor: selection on current line was hidden under line highlight (all
+  color themes; in Solarized Light selection had same color as line
+  highlight); line highlight is now off while text is selected
+
+
+        version 0.30.0                  27 oct 2026
+
++ offline mode: site opened once (over https) starts without internet —
+  page and scripts kept in browser per build (service worker sw.js, also
+  iPhone / iPad home screen); compilers (rt/) and library (repo/,
+  pattern.c) kept once used and shared by builds; network first, kept
+  copy when site does not answer in 4 s
++ Options -> Offline: status (build, files kept, space used), Make offline
+  (downloads checked parts in advance: clang about 26 MB, avr-gcc about
+  16 MB, library), Clear files, "Show 'offline'" (red offline left of fps
+  in LED window when site does not answer), "Check connection every 20
+  sec" (off: checked once, at start)
++ new build on server: open page (also iOS home screen) reloads into it
+! first start / restored session: build took sketch's WIDTH / HEIGHT
+  while LED window showed other size (Enter in size box was needed); now
+  build gets size of LED window
+
+
+        version 0.30.1                  28 oct 2026
+
+@ compiler: rt/llvm.core.wasm.gz (22 MB) comes as two parts,
+  llvm.core.wasm.p1.gz and .p2.gz (11 MB each; git hosts and upload forms
+  limit file size); page joins them before unpacking, rt/version.json says
+  how many parts; old whole file on server is not needed any more
+
+
+        version 0.30.2                  28 oct 2026
+
+@ compiler: rt/llvm.core.wasm.gz comes as four parts of 5.5 MB
+  (llvm.core.wasm.p1.gz … p4.gz) instead of two of 11 MB

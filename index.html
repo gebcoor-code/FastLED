@@ -1,0 +1,1270 @@
+<!doctype html>
+<html lang="en" data-theme="dark-plus">
+<head>
+<meta charset="utf-8">
+<meta name="build" content="20261028193402">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="icon.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<title>Web FastLED</title>
+<script>
+// cross-origin isolation (Atomics.wait: sketch waits without CPU load) when server does not send COOP / COEP:
+// service worker sw.js adds them; page reloads once to come under it (sw.js?v=<build>: same address as offline copy registers)
+(function () {
+  try {
+    if (window.crossOriginIsolated || !window.isSecureContext || !('serviceWorker' in navigator)) return;
+    var m = document.querySelector('meta[name="build"]');
+    navigator.serviceWorker.register('sw.js?v=' + (m ? m.content : 'dev')).then(function (reg) {
+      if (navigator.serviceWorker.controller) return; // already under it: nothing more to do here
+      if (sessionStorage.getItem('wfl.coi')) return; // reloaded once already
+      var go = function () { sessionStorage.setItem('wfl.coi', '1'); location.reload(); };
+      if (reg.active) go();
+      else (reg.installing || reg.waiting).addEventListener('statechange', function (e) { if (e.target.state === 'activated') go(); });
+    }).catch(function () {});
+  } catch (e) {}
+})();
+</script>
+<style>
+/* ---------- color schemes (VS Code palettes): UI chrome + editor + syntax tokens ---------- */
+:root, [data-theme="dark-plus"] {
+  color-scheme: dark;
+  --bg: #1e1e1e; --panel: #252526; --panel2: #2d2d2d; --title: #323233; --line: #3c3c3c; --text: #cccccc; --dim: #8b8b8b;
+  --accent: #0078d4; --accent-fg: #ffffff; --focus: #007fd4; --ok: #89d185; --warn: #f48771;
+  --btn-bg: #3a3d41; --btn-fg: #cccccc; --btn-hover: #45494e; --input-bg: #3c3c3c;
+  --tab-bg: #2d2d2d; --tab-fg: #969696; --tab-act-bg: #1e1e1e; --tab-act-fg: #ffffff; --tab-border: #252526; --tab-top: #0078d4; --tab-mod: #e2c08d;
+  --status-bg: #007acc; --status-fg: #ffffff; --status-run: #cc6633; --status-empty: #68217a;
+  --shadow: rgba(0,0,0,.55); --scroll: rgba(121,121,121,.4);
+  --ed-bg: #1e1e1e; --ed-fg: #d4d4d4; --ed-cursor: #aeafad; --ed-sel: #264f78; --ed-line: #2a2d2e; --ed-gutter-fg: #858585; --ed-gutter-act: #c6c6c6;
+  --ed-bracket-bg: rgba(0,100,0,.1); --ed-bracket-line: #888888; --ed-match: rgba(173,214,255,.15); --ed-find: rgba(234,92,0,.33); --ed-find-line: transparent; --ed-find-cur: #515c6a; --ed-ws: #3b3b3b;
+  --tk-comment: #6a9955; --tk-control: #c586c0; --tk-keyword: #569cd6; --tk-type: #4ec9b0; --tk-function: #dcdcaa; --tk-variable: #9cdcfe;
+  --tk-string: #ce9178; --tk-escape: #d7ba7d; --tk-number: #b5cea8; --tk-preproc: #c586c0; --tk-macro: #569cd6; --tk-meta: #9cdcfe;
+  --tk-operator: #d4d4d4; --tk-bracket: #ffd700; --tk-invalid: #f44747;
+}
+[data-theme="light-plus"] {
+  color-scheme: light;
+  --bg: #ffffff; --panel: #f3f3f3; --panel2: #ececec; --title: #dddddd; --line: #d4d4d4; --text: #333333; --dim: #6f6f6f;
+  --accent: #005fb8; --accent-fg: #ffffff; --focus: #0090f1; --ok: #388a34; --warn: #c72e0f;
+  --btn-bg: #e4e4e4; --btn-fg: #333333; --btn-hover: #d6d6d6; --input-bg: #ffffff;
+  --tab-bg: #ececec; --tab-fg: #6f6f6f; --tab-act-bg: #ffffff; --tab-act-fg: #333333; --tab-border: #f3f3f3; --tab-top: #005fb8; --tab-mod: #895503;
+  --status-bg: #007acc; --status-fg: #ffffff; --status-run: #cc6633; --status-empty: #68217a;
+  --shadow: rgba(0,0,0,.22); --scroll: rgba(100,100,100,.4);
+  --ed-bg: #ffffff; --ed-fg: #000000; --ed-cursor: #000000; --ed-sel: #add6ff; --ed-line: #f5f5f5; --ed-gutter-fg: #237893; --ed-gutter-act: #0b216f;
+  --ed-bracket-bg: rgba(0,100,0,.1); --ed-bracket-line: #b9b9b9; --ed-match: rgba(173,214,255,.5); --ed-find: rgba(234,92,0,.33); --ed-find-line: transparent; --ed-find-cur: #a8ac94; --ed-ws: #d3d3d3;
+  --tk-comment: #008000; --tk-control: #af00db; --tk-keyword: #0000ff; --tk-type: #267f99; --tk-function: #795e26; --tk-variable: #001080;
+  --tk-string: #a31515; --tk-escape: #ee0000; --tk-number: #098658; --tk-preproc: #af00db; --tk-macro: #0000ff; --tk-meta: #001080;
+  --tk-operator: #000000; --tk-bracket: #0431fa; --tk-invalid: #cd3131;
+}
+[data-theme="monokai"] {
+  color-scheme: dark;
+  --bg: #272822; --panel: #1e1f1c; --panel2: #34352f; --title: #1e1f1c; --line: #414339; --text: #f8f8f2; --dim: #90908a;
+  --accent: #75715e; --accent-fg: #f8f8f2; --focus: #99947c; --ok: #a6e22e; --warn: #f92672;
+  --btn-bg: #414339; --btn-fg: #f8f8f2; --btn-hover: #4e5046; --input-bg: #414339;
+  --tab-bg: #34352f; --tab-fg: #ccccc7; --tab-act-bg: #272822; --tab-act-fg: #ffffff; --tab-border: #1e1f1c; --tab-top: #f92672; --tab-mod: #e6db74;
+  --status-bg: #414339; --status-fg: #f8f8f2; --status-run: #ac6218; --status-empty: #414339;
+  --shadow: rgba(0,0,0,.6); --scroll: rgba(121,121,121,.4);
+  --ed-bg: #272822; --ed-fg: #f8f8f2; --ed-cursor: #f8f8f0; --ed-sel: #878b9180; --ed-line: #3e3d32; --ed-gutter-fg: #90908a; --ed-gutter-act: #c2c2bf;
+  --ed-bracket-bg: rgba(0,0,0,0); --ed-bracket-line: #f8f8f2; --ed-match: #575b6180; --ed-find: #ffe79233; --ed-find-line: #e6db74; --ed-find-cur: #ffe79266; --ed-ws: #464741;
+  --tk-comment: #88846f; --tk-control: #f92672; --tk-keyword: #66d9ef; --tk-type: #a6e22e; --tk-function: #a6e22e; --tk-variable: #f8f8f2;
+  --tk-string: #e6db74; --tk-escape: #ae81ff; --tk-number: #ae81ff; --tk-preproc: #f92672; --tk-macro: #a6e22e; --tk-meta: #f8f8f2;
+  --tk-operator: #f92672; --tk-bracket: #f8f8f2; --tk-invalid: #f44747;
+}
+[data-theme="solarized-dark"] {
+  color-scheme: dark;
+  --bg: #002b36; --panel: #00212b; --panel2: #003847; --title: #002c39; --line: #0f4a59; --text: #93a1a1; --dim: #657b83;
+  --accent: #2aa198; --accent-fg: #002b36; --focus: #2aa198; --ok: #859900; --warn: #dc322f;
+  --btn-bg: #073642; --btn-fg: #93a1a1; --btn-hover: #0b4554; --input-bg: #003847;
+  --tab-bg: #004052; --tab-fg: #93a1a1; --tab-act-bg: #002b36; --tab-act-fg: #fdf6e3; --tab-border: #00212b; --tab-top: #2aa198; --tab-mod: #b58900;
+  --status-bg: #00212b; --status-fg: #93a1a1; --status-run: #b58900; --status-empty: #00212b;
+  --shadow: rgba(0,0,0,.6); --scroll: rgba(42,161,152,.3);
+  --ed-bg: #002b36; --ed-fg: #839496; --ed-cursor: #d30102; --ed-sel: #1f5a66; --ed-line: #073642; --ed-gutter-fg: #586e75; --ed-gutter-act: #93a1a1;
+  --ed-bracket-bg: rgba(0,0,0,0); --ed-bracket-line: #586e75; --ed-match: #005a6faa; --ed-find: #2aa19844; --ed-find-line: transparent; --ed-find-cur: #2aa19888; --ed-ws: #0f4a59;
+  --tk-comment: #586e75; --tk-control: #859900; --tk-keyword: #859900; --tk-type: #b58900; --tk-function: #268bd2; --tk-variable: #839496;
+  --tk-string: #2aa198; --tk-escape: #dc322f; --tk-number: #d33682; --tk-preproc: #cb4b16; --tk-macro: #cb4b16; --tk-meta: #839496;
+  --tk-operator: #859900; --tk-bracket: #839496; --tk-invalid: #dc322f;
+}
+[data-theme="solarized-light"] {
+  color-scheme: light;
+  --bg: #fdf6e3; --panel: #eee8d5; --panel2: #e6dfc8; --title: #eee8d5; --line: #ddd6c1; --text: #586e75; --dim: #93a1a1;
+  --accent: #b58900; --accent-fg: #fdf6e3; --focus: #b58900; --ok: #859900; --warn: #dc322f;
+  --btn-bg: #e6dfc8; --btn-fg: #586e75; --btn-hover: #ddd6c1; --input-bg: #fdf6e3;
+  --tab-bg: #d9d2c2; --tab-fg: #586e75; --tab-act-bg: #fdf6e3; --tab-act-fg: #333333; --tab-border: #ddd6c1; --tab-top: #b58900; --tab-mod: #cb4b16;
+  --status-bg: #eee8d5; --status-fg: #586e75; --status-run: #cb4b16; --status-empty: #eee8d5;
+  --shadow: rgba(0,0,0,.2); --scroll: rgba(147,161,161,.5);
+  --ed-bg: #fdf6e3; --ed-fg: #657b83; --ed-cursor: #657b83; --ed-sel: #d3cbb4; --ed-line: #eee8d5; --ed-gutter-fg: #93a1a1; --ed-gutter-act: #567983;
+  --ed-bracket-bg: rgba(0,0,0,0); --ed-bracket-line: #93a1a1; --ed-match: #d9d2c2; --ed-find: #b5890044; --ed-find-line: transparent; --ed-find-cur: #b5890088; --ed-ws: #ddd6c1;
+  --tk-comment: #93a1a1; --tk-control: #859900; --tk-keyword: #859900; --tk-type: #b58900; --tk-function: #268bd2; --tk-variable: #657b83;
+  --tk-string: #2aa198; --tk-escape: #dc322f; --tk-number: #d33682; --tk-preproc: #cb4b16; --tk-macro: #cb4b16; --tk-meta: #657b83;
+  --tk-operator: #859900; --tk-bracket: #657b83; --tk-invalid: #dc322f;
+}
+[data-theme="hc-dark"] {
+  color-scheme: dark;
+  --bg: #000000; --panel: #000000; --panel2: #0c0c0c; --title: #000000; --line: #6fc3df; --text: #ffffff; --dim: #c0c0c0;
+  --accent: #f38518; --accent-fg: #000000; --focus: #f38518; --ok: #89d185; --warn: #f48771;
+  --btn-bg: #000000; --btn-fg: #ffffff; --btn-hover: #1a1a1a; --input-bg: #000000;
+  --tab-bg: #000000; --tab-fg: #ffffff; --tab-act-bg: #000000; --tab-act-fg: #ffffff; --tab-border: #6fc3df; --tab-top: #f38518; --tab-mod: #f38518;
+  --status-bg: #000000; --status-fg: #ffffff; --status-run: #5a1e02; --status-empty: #000000;
+  --shadow: rgba(0,0,0,.8); --scroll: rgba(111,195,223,.6);
+  --ed-bg: #000000; --ed-fg: #ffffff; --ed-cursor: #ffffff; --ed-sel: #ffffff40; --ed-line: #000000; --ed-gutter-fg: #ffffff; --ed-gutter-act: #f38518;
+  --ed-bracket-bg: rgba(0,0,0,0); --ed-bracket-line: #6fc3df; --ed-match: #ffffff20; --ed-find: transparent; --ed-find-line: #f38518; --ed-find-cur: #f3851860; --ed-ws: #7c7c7c;
+  --tk-comment: #7ca668; --tk-control: #c586c0; --tk-keyword: #569cd6; --tk-type: #4ec9b0; --tk-function: #dcdcaa; --tk-variable: #9cdcfe;
+  --tk-string: #ce9178; --tk-escape: #d7ba7d; --tk-number: #b5cea8; --tk-preproc: #c586c0; --tk-macro: #569cd6; --tk-meta: #9cdcfe;
+  --tk-operator: #ffffff; --tk-bracket: #ffffff; --tk-invalid: #f44747;
+}
+[data-theme="hc-light"] {
+  color-scheme: light;
+  --bg: #ffffff; --panel: #ffffff; --panel2: #f2f2f2; --title: #ffffff; --line: #0f4a85; --text: #292929; --dim: #4d4d4d;
+  --accent: #0f4a85; --accent-fg: #ffffff; --focus: #006bbd; --ok: #388a34; --warn: #b5200d;
+  --btn-bg: #ffffff; --btn-fg: #292929; --btn-hover: #e6e6e6; --input-bg: #ffffff;
+  --tab-bg: #ffffff; --tab-fg: #292929; --tab-act-bg: #ffffff; --tab-act-fg: #292929; --tab-border: #0f4a85; --tab-top: #b5200d; --tab-mod: #b5200d;
+  --status-bg: #ffffff; --status-fg: #292929; --status-run: #f9d7c7; --status-empty: #ffffff;
+  --shadow: rgba(0,0,0,.25); --scroll: rgba(15,74,133,.5);
+  --ed-bg: #ffffff; --ed-fg: #292929; --ed-cursor: #0f4a85; --ed-sel: #0f4a8540; --ed-line: #ffffff; --ed-gutter-fg: #292929; --ed-gutter-act: #0f4a85;
+  --ed-bracket-bg: rgba(0,0,0,0); --ed-bracket-line: #0f4a85; --ed-match: #0f4a8520; --ed-find: transparent; --ed-find-line: #b5200d; --ed-find-cur: #b5200d40; --ed-ws: #a0a0a0;
+  --tk-comment: #515151; --tk-control: #b5200d; --tk-keyword: #0f4a85; --tk-type: #185e73; --tk-function: #5e2cbc; --tk-variable: #001080;
+  --tk-string: #0f4a85; --tk-escape: #ee0000; --tk-number: #096d48; --tk-preproc: #b5200d; --tk-macro: #0f4a85; --tk-meta: #001080;
+  --tk-operator: #000000; --tk-bracket: #292929; --tk-invalid: #b5200d;
+}
+[data-theme^="hc-"] .tab, [data-theme^="hc-"] #status, [data-theme^="hc-"] #toolbar { border-color: var(--line) !important; }
+[data-theme^="hc-"] #status { border-top: 1px solid var(--line); }
+
+/* ---------- layout ---------- */
+:root { --ed-font: Consolas, "Cascadia Mono", Menlo, "DejaVu Sans Mono", ui-monospace, monospace; --ed-font-size: 14px; }
+* { box-sizing: border-box; scrollbar-width: thin; scrollbar-color: var(--scroll) transparent; }
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-thumb { background: var(--scroll); }
+::-webkit-scrollbar-track, ::-webkit-scrollbar-corner { background: transparent; }
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+html, body { font-feature-settings: "calt" 0; margin: 0; height: 100%; overflow: hidden; background: var(--bg); color: var(--text); font: 13px/1.4 system-ui, -apple-system, "Segoe UI", sans-serif; }
+#app { display: flex; flex-direction: column; height: 100%; min-width: 320px; }
+#toolbar { flex: none; display: flex; align-items: center; gap: 2px; height: 36px; padding: 0 6px; background: var(--title); border-bottom: 1px solid var(--tab-border); user-select: none; }
+#toolbar .brand { display: flex; align-items: center; gap: 6px; padding: 0 8px 0 2px; font-weight: 600; font-size: 12px; letter-spacing: .02em; color: var(--text); white-space: nowrap; }
+#toolbar .brand img { width: 18px; height: 18px; image-rendering: pixelated; }
+#toolbar .sep { width: 1px; height: 18px; background: var(--line); margin: 0 5px; }
+#toolbar .spacer { flex: 1; }
+/* narrow screens (phone): toolbar scrolls sideways instead of being cut */
+#toolbar { overflow-x: auto; overflow-y: hidden; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+#toolbar::-webkit-scrollbar { display: none; }
+#toolbar > * { flex-shrink: 0; }
+#toolbar > .gsearch { flex-shrink: 1; }
+.gsearch { display: flex; align-items: center; gap: 2px; height: 26px; margin-left: 6px; padding: 0 3px 0 7px; width: 260px; min-width: 120px; flex: 0 1 260px;
+  background: var(--input-bg); border: 1px solid var(--line); border-radius: 5px; color: var(--dim); }
+.gsearch:focus-within { border-color: var(--focus); }
+.gsearch svg { width: 14px; height: 14px; flex: none; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
+.gsearch input { flex: 1; min-width: 0; border: 0; background: transparent; color: var(--text); font: 12.5px system-ui, sans-serif; height: 22px; padding: 0 4px; outline: none !important; }
+.gsearch button { flex: none; height: 20px; min-width: 22px; padding: 0 3px; border: 1px solid transparent; border-radius: 3px; background: transparent; color: var(--dim); font: 600 11px ui-monospace, Consolas, monospace; }
+.gsearch button:hover { color: var(--text); background: var(--btn-hover); }
+.gsearch button.on { color: var(--text); border-color: var(--focus); background: color-mix(in srgb, var(--focus) 20%, transparent); }
+@media (max-width: 900px) { .gsearch { flex-basis: 160px; } .gsearch button { display: none; } }
+.profbar { display: flex; align-items: center; gap: 12px; padding: 6px 12px 4px; }
+.profbar .note { margin: 0; }
+#profbtn.on { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
+#dbgview { padding: 6px 12px; font-size: 12.5px; display: flex; gap: 8px 24px; align-items: flex-start; overflow-x: auto; }
+#dbgview .col { min-width: 150px; flex: none; }
+#dbgview .hd { color: var(--dim); font-size: 11px; text-transform: uppercase; letter-spacing: .06em; margin: 4px 0; }
+#dbgview .stack div, #dbgview .bps div { padding: 1px 4px; cursor: pointer; border-radius: 3px; white-space: nowrap; }
+#dbgview .stack div:hover, #dbgview .bps div:hover { background: var(--btn-hover); }
+#dbgview .stack .cur { color: #e8b400; }
+#dbgview .dim { color: var(--dim); }
+#dbgview table.regs { border-collapse: collapse; font: 12px var(--ed-font); }
+#dbgview table.regs td { padding: 0 8px 0 0; white-space: nowrap; } #dbgview table.regs td.n { color: var(--dim); }
+#dbgview .ch { color: #e8b400; font-weight: 600; }
+#dbgview pre.mem { margin: 0; font: 12px/1.45 var(--ed-font); }
+#dbgview .memad { width: 64px; height: 20px; font: 12px var(--ed-font); background: var(--input-bg); color: var(--text); border: 1px solid var(--line); border-radius: 3px; padding: 0 4px; }
+#dbgview .bps .x { color: var(--dim); margin-left: 6px; } #dbgview .bps .off { color: var(--dim); text-decoration: line-through; }
+.dbgb { color: #e8b400; }
+.dbgb[hidden] { display: none; }
+#memview { padding: 8px 12px; font-size: 12.5px; }
+#memview .mbar { display: flex; height: 18px; border: 1px solid var(--line); border-radius: 3px; overflow: hidden; margin: 4px 0 10px; max-width: 760px; background: var(--input-bg); }
+#memview .mbar span { height: 100%; min-width: 0; }
+#memview .k-data { background: #3b82c4; } #memview .k-bss { background: #2aa198; } #memview .k-heap { background: #d08a2c; }
+#memview .k-free { background: transparent; } #memview .k-stack { background: #a35bc4; } #memview .k-flash { background: #3b82c4; }
+#memview table { border-collapse: collapse; } #memview td { padding: 2px 14px 2px 0; white-space: nowrap; } #memview td.v { text-align: right; font-variant-numeric: tabular-nums; }
+#memview .sw { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: -1px; }
+#memview .bad { color: var(--err, #e5534b); font-weight: 600; } #memview .hd { color: var(--dim); font-size: 11px; text-transform: uppercase; letter-spacing: .06em; margin-top: 4px; }
+#memview .note { color: var(--dim); max-width: 760px; margin-top: 8px; }
+.ptabs .dot.warn { background: var(--err, #e5534b); }
+.profhead { padding: 2px 12px 6px; font-size: 12.5px; color: var(--dim); }
+.profhead b { color: var(--text); font-weight: 600; }
+table.prof { border-collapse: collapse; width: 100%; font-size: 12.5px; }
+table.prof th { text-align: right; font-weight: 600; font-size: 11px; color: var(--dim); padding: 2px 10px; border-bottom: 1px solid var(--line); white-space: nowrap; user-select: none; }
+table.prof th:first-child, table.prof td.fn, table.prof td.pl { text-align: left; }
+table.prof th.sortable { cursor: pointer; } table.prof th.sortable:hover, table.prof th.on { color: var(--text); }
+table.prof td { padding: 1px 10px; text-align: right; white-space: nowrap; font: 12px/1.6 var(--ed-font); position: relative; }
+table.prof td.fn { max-width: 420px; overflow: hidden; text-overflow: ellipsis; }
+table.prof td.pl { color: var(--dim); }
+table.prof tr[data-id] { cursor: pointer; } table.prof tr[data-id]:hover { background: var(--ed-line); }
+table.prof tr.cur td.fn { color: var(--focus); font-weight: 600; }
+table.prof .bar { position: absolute; left: 0; top: 3px; bottom: 3px; background: color-mix(in srgb, var(--focus) 25%, transparent); z-index: 0; pointer-events: none; }
+#searchres { padding: 2px 0 6px; font-size: 13px; }
+.sfile { display: flex; align-items: center; gap: 6px; padding: 3px 10px; font-weight: 600; cursor: pointer; user-select: none; }
+.sfile:hover { background: var(--ed-line); }
+.sfile .cnt { margin-left: auto; font-weight: 400; font-size: 11px; background: var(--btn-bg); border-radius: 9px; padding: 0 6px; }
+.sfile .tw { width: 10px; color: var(--dim); font-size: 10px; }
+.shit { display: flex; gap: 10px; padding: 1px 10px 1px 28px; cursor: pointer; white-space: pre; overflow: hidden; font: 12.5px/1.5 var(--ed-font); }
+.shit:hover { background: var(--ed-line); }
+.shit .ln { color: var(--dim); min-width: 34px; text-align: right; flex: none; }
+.shit .tx { overflow: hidden; text-overflow: ellipsis; }
+.shit mark { background: var(--ed-find); color: inherit; border-radius: 2px; outline: 1px solid var(--ed-find-line); }
+.sfold .shit { display: none; }
+.snone { padding: 6px 14px; color: var(--dim); }
+#projname { color: var(--dim); font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 40vw; padding: 0 8px; }
+button { font: inherit; color: var(--btn-fg); cursor: pointer; }
+button.ico { width: 32px; height: 28px; padding: 0; border: 1px solid transparent; border-radius: 5px; background: transparent; color: var(--text);
+  display: inline-flex; align-items: center; justify-content: center; position: relative; }
+button.ico svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+button.ico:hover:not(:disabled) { background: var(--btn-hover); }
+button.ico:focus-visible, .btn:focus-visible { outline: 1px solid var(--focus); outline-offset: -1px; }
+button.ico:disabled { opacity: .4; cursor: default; }
+button.ico.on { background: var(--btn-hover); border-color: var(--line); }
+#runbtn .i-stop { display: none; }
+#runbtn.on .i-run { display: none; } #runbtn.on .i-stop { display: block; }
+#runbtn .i-run { color: var(--ok); }
+#runbtn.on { color: var(--warn); }
+#realbtn { color: var(--dim); }
+#realbtn.on { color: #e8b400; background: color-mix(in srgb, #e8b400 18%, transparent); border-color: color-mix(in srgb, #e8b400 55%, transparent); }
+[data-theme="light-plus"] #realbtn.on, [data-theme="solarized-light"] #realbtn.on, [data-theme="hc-light"] #realbtn.on { color: #9a7400; }
+.btn { background: var(--btn-bg); color: var(--btn-fg); border: 1px solid var(--line); border-radius: 4px; padding: 4px 12px; font-size: 13px; white-space: nowrap; }
+.btn:hover:not(:disabled) { background: var(--btn-hover); }
+.btn.primary { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
+.btn.primary:hover:not(:disabled) { filter: brightness(1.1); background: var(--accent); }
+.btn:disabled { opacity: .45; cursor: default; }
+select, input[type=number], input[type=text] { background: var(--input-bg); color: var(--text); border: 1px solid var(--line); border-radius: 4px; height: 26px; padding: 0 6px; font: inherit; font-size: 13px; }
+select:focus, input:focus { outline: 1px solid var(--focus); outline-offset: -1px; }
+select option { background: var(--panel); color: var(--text); }
+
+/* tabs */
+#tabs { flex: none; display: flex; height: 35px; background: var(--panel); overflow-x: auto; overflow-y: hidden; scrollbar-width: thin; user-select: none; }
+#tabs::-webkit-scrollbar { height: 3px; }
+#tabs:empty { display: none; }
+.tab { flex: none; display: flex; align-items: center; gap: 6px; height: 35px; padding: 0 14px 0 10px; background: var(--tab-bg); color: var(--tab-fg);
+  border-right: 1px solid var(--tab-border); cursor: pointer; font-size: 13px; white-space: nowrap; position: relative; }
+.tab:hover { color: var(--tab-act-fg); }
+.tab.on { background: var(--tab-act-bg); color: var(--tab-act-fg); }
+.tab.on::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 1px; background: var(--tab-top); }
+.tab .ext { font: 600 9px ui-monospace, Consolas, monospace; padding: 1px 3px; border-radius: 3px; letter-spacing: .02em; color: #519aba; border: 1px solid currentColor; opacity: .9; }
+.tab .ext.h { color: #a074c4; } .tab .ext.txt { color: var(--dim); } .tab .ext.c { color: #6d8086; }
+.tab .mod { color: var(--tab-mod); font-weight: 700; }
+.tab .tx { width: 16px; height: 16px; margin: 0 -8px 0 2px; display: inline-flex; align-items: center; justify-content: center; border-radius: 3px; font-size: 14px; line-height: 1; color: var(--dim); visibility: hidden; }
+.tab:hover .tx, .tab.on .tx { visibility: visible; }
+.tab .tx:hover { background: var(--btn-hover); color: var(--tab-act-fg); }
+.tab.main .nm { font-weight: 600; }
+.tab.dragging { opacity: .45; }
+.tab.dropl { box-shadow: inset 2px 0 0 var(--focus); }
+.tab.dropr { box-shadow: inset -2px 0 0 var(--focus); }
+.ledhead .hb.open { color: var(--focus); }
+#toolbar .tgroup { display: flex; align-items: center; gap: 1px; padding: 1px; border: 1px solid color-mix(in srgb, var(--text) 22%, transparent); border-radius: 7px; margin: 0 4px; background: color-mix(in srgb, var(--bg) 35%, transparent); }
+#toolbar .tgroup .ico { height: 26px; }
+.ico .badge { position: absolute; right: 1px; bottom: 0; font: 600 7.5px/1 ui-monospace, Consolas, monospace; color: var(--focus); pointer-events: none; }
+.ico .badge:empty { display: none; }
+#toolbar .tgroup .ico.on, #toolbar .tgroup .ico.open { color: var(--focus); }
+/* inputs: blue while its window is open; green dot — sketch reads pins (buttons, pots) */
+#ledinputs.has::after { content: ''; position: absolute; right: 4px; top: 4px; width: 5px; height: 5px; border-radius: 50%; background: var(--ok); pointer-events: none; }
+
+/* editor area */
+#main { flex: 1 1 auto; min-height: 0; position: relative; background: var(--ed-bg); }
+#editor { position: absolute; inset: 0; }
+#editor[hidden] { display: none; }
+#editor .cm-editor { height: 100%; }
+#editor .cm-editor.cm-focused { outline: none; }
+#welcome { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; padding: 24px; overflow: auto; }
+#welcome[hidden] { display: none; }
+.wbox { max-width: 520px; display: flex; flex-direction: column; gap: 14px; }
+.wbox h1 { margin: 0; font-size: 26px; font-weight: 300; color: var(--text); display: flex; align-items: center; gap: 12px; }
+.wbox h1 img { width: 40px; height: 40px; image-rendering: pixelated; }
+.wbox p { margin: 0; color: var(--dim); }
+.wbox .acts { display: flex; flex-direction: column; gap: 4px; margin-top: 4px; }
+.wbox .acts button { display: flex; align-items: center; gap: 8px; border: 0; background: transparent; color: var(--focus); padding: 3px 0; font-size: 14px; text-align: left; }
+.wbox .acts button:hover { text-decoration: underline; }
+.wbox .acts svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.wbox kbd, .keys kbd { font: 11px ui-monospace, Consolas, monospace; color: var(--text); background: var(--panel2); border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 3px; padding: 0 4px; }
+#dropmark { position: absolute; inset: 8px; border: 2px dashed var(--focus); border-radius: 8px; display: none; align-items: center; justify-content: center;
+  background: color-mix(in srgb, var(--bg) 70%, transparent); color: var(--text); font-size: 16px; z-index: 5; pointer-events: none; }
+body.drag #dropmark { display: flex; }
+
+/* status bar */
+#status { flex: none; display: flex; align-items: center; height: 22px; padding: 0 4px; background: var(--status-bg); color: var(--status-fg); font-size: 12px; user-select: none; white-space: nowrap; overflow: hidden; }
+#status.run { background: var(--status-run); }
+#status.empty { background: var(--status-empty); }
+#status .si { padding: 0 7px; height: 22px; display: flex; align-items: center; gap: 4px; cursor: default; }
+#status .si.click { cursor: pointer; }
+#status .si.click:hover { background: rgba(255,255,255,.12); }
+#status .spacer { flex: 1; }
+#status svg { width: 13px; height: 13px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+@media (max-width: 700px) { #status .wide { display: none; } #toolbar .brand span { display: none; } }
+
+/* toast */
+#toast { position: fixed; left: 50%; bottom: 34px; transform: translateX(-50%); background: var(--panel); border: 1px solid var(--line); color: var(--text); z-index: 50;
+  border-radius: 6px; padding: 7px 14px; font-size: 13px; max-width: 90%; opacity: 0; transition: opacity .25s; pointer-events: none; box-shadow: 0 6px 20px var(--shadow); }
+#toast.show { opacity: 1; }
+#toast.err { border-color: var(--warn); }
+
+/* ---------- floating windows (as in Web Unreal Speccy) ---------- */
+.fwin { position: fixed; left: 0; top: 0; z-index: 11; display: flex; flex-direction: column; max-width: calc(100vw - 4px); max-height: calc(100vh - 8px);
+  background: var(--bg); border: 1px solid var(--line); border-radius: 8px; box-shadow: 0 14px 44px var(--shadow); overflow: hidden; }
+.fwin[hidden] { display: none; }
+.fwin > header { flex: none; display: flex; align-items: center; gap: 6px; height: 32px; padding: 0 4px 0 12px; border-bottom: 1px solid var(--line); background: var(--panel); color: var(--dim);
+  cursor: move; touch-action: none; user-select: none; }
+.fwin.wact > header { color: var(--text); background: var(--panel2); }
+.fwin > header h2 { margin: 0; font-size: 13px; font-weight: 600; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.fwin > header .tabs { display: flex; gap: 2px; flex: 1; }
+.fwin > header .tabs button { border: 0; background: transparent; color: var(--dim); padding: 4px 10px; border-radius: 4px; font-size: 13px; }
+.fwin > header .tabs button:hover { color: var(--text); background: var(--btn-hover); }
+.fwin > header .tabs button.on { color: var(--text); box-shadow: inset 0 -2px 0 var(--focus); border-radius: 4px 4px 0 0; }
+.fwin > header [data-close] { width: 26px; height: 24px; padding: 0; border: 0; background: transparent; color: var(--dim); border-radius: 4px; font-size: 14px; flex: none; }
+.fwin > header [data-close]:hover { background: var(--warn); color: #fff; }
+.fwin .body { padding: 10px 12px; overflow-y: auto; min-height: 0; display: flex; flex-direction: column; gap: 10px; }
+.fwin .rz { position: absolute; z-index: 3; touch-action: none; }
+.fwin .rz.n { top: 0; left: 8px; right: 8px; height: 5px; cursor: ns-resize; }
+.fwin .rz.s { bottom: 0; left: 8px; right: 8px; height: 6px; cursor: ns-resize; }
+.fwin .rz.e { right: 0; top: 8px; bottom: 8px; width: 6px; cursor: ew-resize; }
+.fwin .rz.w { left: 0; top: 8px; bottom: 8px; width: 6px; cursor: ew-resize; }
+.fwin .rz.ne { top: 0; right: 0; width: 10px; height: 10px; cursor: nesw-resize; }
+.fwin .rz.sw { bottom: 0; left: 0; width: 10px; height: 10px; cursor: nesw-resize; }
+.fwin .rz.nw { top: 0; left: 0; width: 10px; height: 10px; cursor: nwse-resize; }
+.fwin .rz.se { bottom: 0; right: 0; width: 14px; height: 14px; cursor: nwse-resize;
+  background: linear-gradient(135deg, transparent 55%, var(--dim) 55%, var(--dim) 62%, transparent 62%, transparent 72%, var(--dim) 72%, var(--dim) 79%, transparent 79%); opacity: .6; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 9px 12px; }
+.card h3 { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--dim); margin: 0 0 8px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+.note { font-size: 12px; color: var(--dim); margin: 6px 0 0; }
+.optgrid { display: grid; grid-template-columns: 130px minmax(0, 1fr); gap: 7px 10px; align-items: center; }
+.optgrid label { color: var(--text); }
+.optgrid .span2 { grid-column: 1 / -1; }
+.rangebox { display: flex; align-items: center; gap: 8px; }
+.rangebox input { flex: 1; min-width: 0; accent-color: var(--accent); }
+.rangebox output { width: 36px; text-align: right; font: 12px ui-monospace, Consolas, monospace; color: var(--dim); }
+.chk { display: flex; gap: 8px; align-items: center; cursor: pointer; }
+.chk input { accent-color: var(--accent); width: 15px; height: 15px; margin: 0; }
+.chks { display: grid; grid-template-columns: 1fr 1fr; gap: 7px 12px; }
+.boards { display: flex; flex-direction: column; gap: 6px; }
+.board { display: grid; grid-template-columns: 20px 1fr; gap: 2px 8px; padding: 7px 9px; border: 1px solid var(--line); border-radius: 6px; cursor: pointer; background: var(--bg); }
+.board:hover { border-color: var(--focus); }
+.board.on { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+.board input { accent-color: var(--accent); margin: 2px 0 0; grid-row: span 2; }
+.board b { font-weight: 600; }
+.board span { color: var(--dim); font-size: 12px; font-family: ui-monospace, Consolas, monospace; }
+table.keys { border-collapse: collapse; width: 100%; font-size: 12px; }
+table.keys td { padding: 3px 4px; vertical-align: top; border-bottom: 1px solid color-mix(in srgb, var(--line) 50%, transparent); }
+table.keys tr:last-child td { border-bottom: 0; }
+table.keys td:first-child { white-space: nowrap; color: var(--text); width: 1%; padding-right: 14px; }
+table.keys td + td { color: var(--dim); }
+.appicon { width: 32px; height: 32px; image-rendering: pixelated; }
+.about h3 { font-size: 13px; color: var(--text); letter-spacing: .06em; }
+/* e-mail of author: picture (not text), painted with color of text around it */
+.mailimg { display: inline-block; width: 6.73em; height: 1.19em; vertical-align: -0.25em; background: currentColor;
+  -webkit-mask: url(data:image/png;base64,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) center / contain no-repeat; mask: url(data:image/png;base64,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) center / contain no-repeat; }
+#changeslink { color: inherit; }
+#offcard .offgrid { display: grid; grid-template-columns: 1fr; gap: 4px; margin: 4px 0; }
+#offcard .offbtns { display: flex; gap: 8px; margin-top: 6px; }
+#offstat { white-space: pre-line; } #offstat[hidden] { display: none; } #offstat.err { color: var(--warn); }
+.chwin { width: min(640px, calc(100vw - 8px)); height: min(520px, calc(100vh - 16px)); }
+.chwin pre { flex: none; margin: 0; font: 12px/1.45 var(--ed-font); white-space: pre; overflow-x: auto; color: var(--text); }
+.chwin.locked pre { user-select: none; -webkit-user-select: none; }
+#licenselink { color: inherit; }
+.optwin { width: min(460px, calc(100vw - 8px)); }
+.optwin .pane.gone { display: none; }
+.optwin .pane { display: flex; flex-direction: column; gap: 10px; }
+#askwin { position: fixed; inset: 0; z-index: 90; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,.35); }
+#askwin[hidden] { display: none; }
+#askwin .askbox { max-width: min(420px, calc(100vw - 24px)); background: var(--panel); color: var(--text); border: 1px solid var(--line); border-radius: 8px; box-shadow: 0 12px 32px var(--shadow); padding: 14px 16px 12px; }
+#askwin p { margin: 0 0 12px; line-height: 1.45; }
+#askwin .askbtns { display: flex; gap: 8px; justify-content: flex-end; }
+#askwin .btn.primary { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
+/* phones: bottom line kept off screen edge (protective glass, rounded corners); status bar scrolls sideways */
+@media (pointer: coarse) {
+  #app { padding-bottom: max(12px, env(safe-area-inset-bottom)); }
+  #status { overflow-x: auto; scrollbar-width: none; }
+  #status::-webkit-scrollbar { display: none; }
+  #status > * { flex-shrink: 0; }
+}
+.helpwin { width: min(480px, calc(100vw - 8px)); height: min(560px, calc(100vh - 16px)); }
+.helpwin h4 { margin: 4px 0 2px; font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--dim); }
+.helpwin p { margin: 0; }
+.helpwin pre.code { margin: 2px 0; padding: 6px 8px; background: var(--panel2); border: 1px solid var(--line); border-radius: 4px; font: 11.5px/1.4 ui-monospace, Consolas, monospace; overflow-x: auto; white-space: pre; }
+
+/* LED window: the controls are in the title bar */
+.ledwin { width: 600px; height: 340px; min-width: 200px; min-height: 40px; }
+.ledhead { gap: 2px !important; padding: 0 2px 0 6px !important; }
+.ledhead .hb { flex: none; width: 26px; height: 24px; padding: 0; border: 1px solid transparent; background: transparent; color: var(--dim); border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; }
+.fwin.wact .ledhead .hb { color: var(--text); }
+.ledhead .hb:hover:not(:disabled) { background: var(--btn-hover); color: var(--text); }
+.ledhead .hb:disabled { opacity: .35; cursor: default; }
+.ledhead .hb svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.ledhead .hb.on { background: var(--btn-hover); border-color: var(--line); color: var(--focus); }
+.ledhead .hb.txt { width: auto; min-width: 26px; padding: 0 4px; gap: 2px; font: 600 11px ui-monospace, Consolas, monospace; }
+#ledspeedv:empty { display: none; }
+.ledhead .hb.drop { width: auto; padding: 0 2px 0 4px; gap: 1px; }
+.ledhead .hb.drop svg.caret { width: 8px; height: 8px; stroke-width: 1.6; opacity: .8; }
+.ledhead .hb.txt.on { color: var(--focus); }
+#pausebtn .i-play { display: none; } #pausebtn.paused .i-play { display: block; } #pausebtn.paused .i-pause { display: none; }
+#pausebtn.paused { color: var(--ok); }
+.ledsize { flex: none; width: 62px; height: 22px !important; padding: 0 5px !important; font: 12px ui-monospace, Consolas, monospace !important; text-align: center; cursor: text; }
+.ledsize.bad { outline: 1px solid var(--warn); }
+.hsel { flex: none; height: 22px !important; font: 11px ui-monospace, Consolas, monospace !important; padding: 0 1px !important; width: 50px; }
+.ledhead .hsep { flex: none; width: 1px; height: 16px; background: var(--line); margin: 0 3px; }
+.ledhead .hgap { flex: 1 1 auto; min-width: 6px; align-self: stretch; }
+#ledview { flex: 1 1 auto; min-height: 0; background: #000; overflow: hidden; display: flex; position: relative; }
+#ledhud { z-index: 2; position: absolute; left: 6px; top: 4px; display: flex; gap: 8px; font: 11px ui-monospace, Consolas, monospace; pointer-events: none; text-shadow: 0 0 2px #000, 1px 1px 1px #000; }
+#ledfps { color: rgba(225,232,240,.6); }
+#lednet { color: rgba(255,82,82,.95); } #lednet:empty { display: none; }
+#ledcanvas { display: block; margin: auto; flex: none; image-rendering: pixelated; }
+#ledtip { position: fixed; z-index: 60; pointer-events: none; padding: 2px 6px; border-radius: 4px; background: rgba(20,22,26,.9); color: #e6e6e6; font: 11px ui-monospace, Consolas, monospace; white-space: nowrap; }
+#ledtip[hidden] { display: none; }
+.hpop { position: fixed; z-index: 70; background: var(--panel); border: 1px solid var(--line); border-radius: 6px; box-shadow: 0 8px 24px var(--shadow); padding: 8px 10px; width: 240px; }
+.hpop[hidden] { display: none; }
+.hpop.menu { width: auto; min-width: 130px; padding: 6px 10px; display: flex; flex-direction: column; gap: 6px; }
+.hpop.menu[hidden] { display: none; }
+.hpop.menu .mh { font-size: 10.5px; text-transform: uppercase; letter-spacing: .08em; color: var(--dim); margin-top: 2px; }
+.hpop.menu .mh:empty { height: 0; margin: 0; border-top: 1px solid var(--line); }
+#led3dm { width: 14px; padding: 0; margin-left: -3px; }
+.hpop.lmenu { width: 300px; padding: 4px 0; display: flex; flex-direction: column; }
+.hpop.lmenu[hidden] { display: none; }
+.lmenu .mi { display: flex; align-items: center; gap: 8px; width: 100%; min-height: 26px; padding: 3px 12px; border: 0; border-radius: 0; background: transparent; color: var(--text); font: 13px system-ui, sans-serif; text-align: left; cursor: pointer; }
+.lmenu .mi:hover, .lmenu .mi:focus-visible { background: var(--accent); color: var(--accent-fg); outline: none; }
+.lmenu .mn { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lmenu .mt { flex: none; font: 600 9px ui-monospace, Consolas, monospace; padding: 1px 3px; border: 1px solid currentColor; border-radius: 3px; opacity: .7; }
+.lmenu kbd { flex: none; font: 11px ui-monospace, Consolas, monospace; color: inherit; opacity: .7; background: none; border: 0; }
+.lmenu .mhead { margin-top: 4px; padding: 5px 12px 3px; border-top: 1px solid var(--line); font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--dim); }
+.lmenu #libfilter { margin: 2px 10px 4px; height: 24px; padding: 0 7px; background: var(--input-bg); color: var(--text); border: 1px solid var(--line); border-radius: 4px; font: 12.5px system-ui, sans-serif; outline: none; }
+.lmenu #libfilter:focus { border-color: var(--focus); }
+.lmenu .mlist { max-height: min(60vh, 420px); overflow-y: auto; }
+.lmenu .mnote { padding: 4px 12px 6px; color: var(--dim); font-size: 12px; }
+.serboard { display: inline-flex; gap: 4px; align-items: center; margin-left: 10px; }
+.serboard select { height: 22px; font-size: 11.5px; background: var(--input-bg); color: var(--text); border: 1px solid var(--line); border-radius: 3px; }
+.serboard .btn { height: 22px; padding: 0 8px; font-size: 11.5px; }
+#serbconn.on { background: #e8b400; color: #000; border-color: #e8b400; }
+.lmenu .mrad { display: flex; align-items: center; gap: 8px; min-height: 24px; padding: 2px 12px; font-size: 12.5px; cursor: pointer; }
+.lmenu .mrad input { margin: 0; accent-color: var(--accent); }
+#hexinfo { padding-top: 6px; line-height: 1.35; }
+#hexinfo b { color: var(--text); font-weight: 600; }
+#hexbtn.busy svg:first-child { animation: pulse 1s ease-in-out infinite; }
+@keyframes pulse { 50% { opacity: .35; } }
+button.ico.caretbtn { width: 14px; padding: 0; margin-left: -3px; }
+button.ico.caretbtn svg.caret { width: 8px; height: 8px; stroke-width: 1.6; opacity: .8; }
+.lmenu .mi[disabled] { opacity: .45; cursor: default; }
+.tsel { height: 26px; margin: 0 4px; padding: 0 4px; font: 12.5px system-ui, sans-serif; background: var(--input-bg); color: var(--text); border: 1px solid var(--line); border-radius: 4px; }
+.tsel:focus { outline: none; border-color: var(--focus); }
+.helpwin .body[hidden] { display: none; }
+.helpwin > header h2 { flex: none; }
+.helpwin .card.flash { box-shadow: 0 0 0 2px var(--focus); transition: box-shadow .3s; }
+.helplang { margin-left: 8px; font: 600 10px ui-monospace, Consolas, monospace; padding: 1px 5px; border: 1px solid var(--line); border-radius: 3px; background: transparent; color: var(--dim); cursor: pointer; }
+.helplang:hover { color: var(--text); border-color: var(--focus); }
+button.ico.drop { width: auto; padding: 0 3px 0 6px; gap: 1px; display: inline-flex; align-items: center; }
+button.ico.drop svg.caret { width: 8px; height: 8px; stroke-width: 1.6; opacity: .8; }
+.hpophead { display: flex; justify-content: space-between; font-size: 12px; color: var(--dim); margin-bottom: 4px; }
+.hpophead b { color: var(--text); font-family: ui-monospace, Consolas, monospace; }
+.hpop input[type=range] { width: 100%; margin: 0; accent-color: var(--accent); }
+.ticks { display: flex; justify-content: space-between; font: 9.5px ui-monospace, Consolas, monospace; color: var(--dim); padding: 0 4px; }
+.ticks span { cursor: pointer; width: 0; display: flex; justify-content: center; white-space: nowrap; }
+.ticks span:hover, .ticks span.on { color: var(--text); }
+/* Inputs window */
+.inwin { width: min(460px, calc(100vw - 8px)); max-height: min(560px, calc(100vh - 16px)); }
+.inwin .intro { margin: 0; line-height: 1.45; }
+table.pins { border-collapse: collapse; width: 100%; font-size: 12.5px; }
+table.pins th { text-align: left; font-weight: 600; font-size: 11px; color: var(--dim); text-transform: uppercase; letter-spacing: .05em; padding: 3px 6px; border-bottom: 1px solid var(--line); }
+table.pins td { padding: 4px 6px; border-bottom: 1px solid color-mix(in srgb, var(--line) 50%, transparent); vertical-align: middle; }
+table.pins td.pn { font: 600 12px ui-monospace, Consolas, monospace; white-space: nowrap; }
+table.pins td.md { color: var(--dim); font-size: 11.5px; white-space: nowrap; }
+table.pins .lvl { display: inline-flex; align-items: center; gap: 5px; font: 11.5px ui-monospace, Consolas, monospace; }
+table.pins .lvl i { width: 9px; height: 9px; border-radius: 50%; background: var(--btn-bg); border: 1px solid var(--line); }
+table.pins .lvl.hi i { background: var(--ok); border-color: var(--ok); }
+table.pins .ctl { display: flex; align-items: center; gap: 6px; }
+table.pins .ctl input[type=range] { flex: 1; min-width: 80px; accent-color: var(--accent); }
+table.pins .ctl output { width: 34px; text-align: right; font: 11px ui-monospace, Consolas, monospace; color: var(--dim); }
+table.pins .ctl select { height: 22px; font-size: 11.5px; }
+table.pins .ctl .chk { font-size: 11.5px; gap: 4px; }
+table.pins .ctl .chk input { width: 13px; height: 13px; }
+.pinbtn { font: 600 11px system-ui, sans-serif; padding: 1px 10px !important; height: 22px; user-select: none; touch-action: none; }
+.pinbtn.on { background: var(--accent) !important; color: var(--accent-fg) !important; border-color: var(--accent); }
+.pinbtn.latch { box-shadow: inset 0 0 0 2px var(--accent-fg); }
+
+/* bottom panel (as the VS Code panel) */
+#panel { flex: none; height: 220px; min-height: 80px; display: flex; flex-direction: column; background: var(--bg); border-top: 1px solid var(--line); position: relative; }
+#panel[hidden] { display: none; }
+#panelrz { position: absolute; left: 0; right: 0; top: -3px; height: 6px; cursor: ns-resize; z-index: 3; touch-action: none; }
+#panelrz:hover { background: var(--focus); opacity: .6; }
+.phead { flex: none; display: flex; align-items: center; height: 32px; padding: 0 6px 0 10px; user-select: none; }
+.ptabs { display: flex; gap: 4px; flex: 1; min-width: 0; overflow: hidden; }
+.ptabs button { border: 0; background: transparent; color: var(--dim); font-size: 11px; text-transform: uppercase; letter-spacing: .04em; padding: 6px 8px 5px; border-bottom: 1px solid transparent; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+.ptabs button:hover { color: var(--text); }
+.ptabs button.on { color: var(--text); border-bottom-color: var(--text); }
+.ptabs .badge { background: var(--btn-bg); color: var(--text); border-radius: 9px; padding: 0 6px; font-size: 10px; line-height: 16px; }
+.ptabs .badge:empty { display: none; }
+.ptabs .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--focus); }
+.ptabs .dot[hidden] { display: none; }
+.pacts { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--dim); }
+.pacts #pserial { display: inline-flex; align-items: center; gap: 10px; }
+.pacts #pserial[hidden] { display: none; }
+.pacts .chk { font-size: 12px; gap: 5px; }
+.pacts .chk input { width: 13px; height: 13px; }
+.pb { width: 26px; height: 24px; border: 0; background: transparent; color: var(--dim); border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; padding: 0; }
+.pb:hover { background: var(--btn-hover); color: var(--text); }
+.pb svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.pbody { flex: 1; min-height: 0; position: relative; }
+.ppane { position: absolute; inset: 0; overflow: auto; }
+.ppane[hidden] { display: none; }
+#output, #serialout { margin: 0; padding: 4px 14px 8px; font: 12.5px/1.45 var(--ed-font); color: var(--text); white-space: pre-wrap; word-break: break-word; user-select: text; }
+.serpane { display: flex; flex-direction: column; overflow: hidden; }
+#serialout { flex: 1; min-height: 0; overflow: auto; }
+.serin { flex: none; display: flex; gap: 6px; padding: 5px 10px 6px; border-top: 1px solid var(--line); }
+.serin input { flex: 1; min-width: 0; font-family: var(--ed-font); }
+.serin .btn { padding: 2px 12px; }
+#problems { padding: 2px 0; font-size: 13px; }
+.prob { display: flex; align-items: baseline; gap: 8px; padding: 2px 14px; cursor: pointer; white-space: nowrap; }
+.prob:hover { background: var(--ed-line); }
+.prob .pic { flex: none; width: 14px; text-align: center; }
+.prob.error .pic { color: var(--tk-invalid); } .prob.warning .pic { color: #cca700; } .prob.note .pic { color: var(--focus); }
+.prob.note { padding-left: 36px; color: var(--dim); }
+.prob .pmsg { overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.prob .ploc { color: var(--dim); font-size: 12px; flex: none; }
+.pnone { padding: 6px 14px; color: var(--dim); }
+#stprob { gap: 3px; }
+#stprob .ic { margin-left: 4px; font-size: 13px; }
+#stprob .ic:first-child { margin-left: 0; }
+#verifybtn svg { stroke-width: 2.4; }
+#verifybtn.busy svg { animation: spin 1s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+code { font-family: var(--ed-font); font-size: .95em; }
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="toolbar">
+    <div class="brand"><img src="icon.png" alt=""><span>FastLED</span></div>
+    <button class="ico drop" id="loadbtn" title="Load: local file (Ctrl+O) or library" aria-haspopup="true"><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v1"/><path d="M3 7v11a1 1 0 0 0 1 1h14.5a1 1 0 0 0 1-.8L21.8 12a1 1 0 0 0-1-1.2H7.4a1 1 0 0 0-1 .8L4 19"/></svg><svg class="caret" viewBox="0 0 8 8"><path d="M1.5 3l2.5 2.5L6.5 3"/></svg></button>
+    <button class="ico" id="getwh" title="Get W×H" disabled><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="1.5"/><path d="M4 9h16M9 4v16" stroke-dasharray="2 2"/><path d="M12.5 13.5l3 3M15.5 13.5l-3 3"/></svg></button>
+    <button class="ico" id="savebtn" title="Save project as .zip (Ctrl+S)" disabled><svg viewBox="0 0 24 24"><path d="M5 3h11l4 4v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 1-2z"/><path d="M8 3v5h7V3"/><rect x="7" y="13" width="10" height="6" rx="1"/></svg></button>
+    <button class="ico drop" id="hexbtn" title="Board binary: real build with avr-gcc as in Arduino IDE (.hex, .elf, with bootloader)" aria-haspopup="true" disabled><svg viewBox="0 0 24 24"><rect x="7" y="2.5" width="10" height="9" rx="1.2"/><path d="M9.5 2.5V1M14.5 2.5V1M7 5.5H5M7 8.5H5M17 5.5h2M17 8.5h2"/><path d="M12 13.5V21M8.5 17.5L12 21l3.5-3.5"/></svg><svg class="caret" viewBox="0 0 8 8"><path d="M1.5 3l2.5 2.5L6.5 3"/></svg></button>
+    <button class="ico" id="uploadbtn" title="Upload to board over USB (Ctrl+U)" disabled><svg viewBox="0 0 24 24"><path d="M3 12h10"/><path d="M9.5 8.5L13 12l-3.5 3.5"/><rect x="15" y="5" width="6.5" height="14" rx="1"/><path d="M17 8.5h2.5M17 11h2.5"/></svg></button><button class="ico caretbtn" id="uploadm" title="Upload: port, bootloader, USB drivers" aria-haspopup="true"><svg class="caret" viewBox="0 0 8 8"><path d="M1.5 3l2.5 2.5L6.5 3"/></svg></button>
+    <select id="boardsel" class="tsel" title="Board"><option value="nano">Nano</option><option value="mega">Mega 2560</option></select>
+    <div class="tgroup" id="rungroup">
+      <button class="ico" id="verifybtn" title="Compile only (F7, Ctrl+R)" disabled><svg viewBox="0 0 24 24"><path d="M4.5 12.5l5 5L19.5 7"/></svg></button>
+      <button class="ico" id="runbtn" title="Compile and start (F5)" disabled><svg class="i-run" viewBox="0 0 24 24"><path d="M7 4.5v15l12-7.5z" fill="currentColor" stroke-width="1.2"/></svg><svg class="i-stop" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="1.5" fill="currentColor" stroke-width="1.2"/></svg></button>
+      <button class="ico" id="pausebtn" disabled title="Pause (Space)"><svg class="i-pause" viewBox="0 0 24 24"><rect x="6.5" y="5" width="3.5" height="14" rx="1" fill="currentColor" stroke="none"/><rect x="14" y="5" width="3.5" height="14" rx="1" fill="currentColor" stroke="none"/></svg><svg class="i-play" viewBox="0 0 24 24"><path d="M7 4.5v15l12-7.5z" fill="currentColor" stroke-width="1.2"/></svg></button>
+      <button class="ico" id="resetbtn" title="Reset: start sketch again" disabled><svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg></button>
+      <button class="ico dbgb" id="stepover" title="Step over (F10)" hidden><svg viewBox="0 0 24 24"><path d="M4 13a8 8 0 0 1 15-3"/><path d="M19.5 5v5h-5"/><circle cx="12" cy="18" r="2" fill="currentColor"/></svg></button>
+      <button class="ico dbgb" id="stepin" title="Step into (F11)" hidden><svg viewBox="0 0 24 24"><path d="M12 3v10"/><path d="M8 9l4 4 4-4"/><circle cx="12" cy="19" r="2" fill="currentColor"/></svg></button>
+      <button class="ico dbgb" id="stepout" title="Step out (Shift+F11)" hidden><svg viewBox="0 0 24 24"><path d="M12 15V5"/><path d="M8 9l4-4 4 4"/><circle cx="12" cy="19" r="2" fill="currentColor"/></svg></button>
+      <button class="ico" id="catchbtn" title="Catch-up: off"><svg viewBox="0 0 24 24"><path d="M3 6.5v11l7-5.5zM11 6.5v11l7-5.5z" fill="currentColor" stroke-width="1.2"/><path d="M20.5 6v12"/></svg></button>
+    </div>
+    <div class="tgroup" id="ledgroup">
+      <button class="ico" id="ledbtn" title="LED matrix window (F6)"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><g fill="currentColor" stroke="none"><circle cx="8" cy="8" r="1.6"/><circle cx="12" cy="8" r="1.6"/><circle cx="16" cy="8" r="1.6"/><circle cx="8" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="16" cy="12" r="1.6"/><circle cx="8" cy="16" r="1.6"/><circle cx="12" cy="16" r="1.6"/><circle cx="16" cy="16" r="1.6"/></g></svg></button>
+      <button class="ico" id="ledrebuild" title="Rebuild sketch with WIDTH and HEIGHT of LED window size box"><svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 0 1 15.5-6.2L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15.5 6.2L3 16"/><path d="M3 21v-5h5"/><rect x="9" y="9" width="6" height="6" rx=".5"/></svg></button>
+      <button class="ico" id="realbtn" title="Real CPU timing: off"><svg viewBox="0 0 24 24"><rect x="5.5" y="5.5" width="13" height="13" rx="1.5"/><path d="M9 5.5V3M12 5.5V3M15 5.5V3M9 21v-2.5M12 21v-2.5M15 21v-2.5M5.5 9H3M5.5 12H3M5.5 15H3M21 9h-2.5M21 12h-2.5M21 15h-2.5"/><path d="M12 8.5V12l2.5 1.5"/></svg></button>
+      <button class="ico" id="ledrot" title="Rotate view 90° clockwise (now 0°)"><span class="badge" id="ledrotv"></span><svg viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/></svg></button>
+      <button class="ico" id="ledflip" title="Mirror horizontally"><svg viewBox="0 0 24 24"><path d="M12 3v18" stroke-dasharray="2 2"/><path d="M9 7L4 12l5 5z"/><path d="M15 7l5 5-5 5z"/></svg></button>
+      <button class="ico" id="ledinputs" title="Inputs"><svg viewBox="0 0 24 24"><rect x="3" y="8" width="18" height="8" rx="4"/><circle cx="16" cy="12" r="2.2" fill="currentColor"/><path d="M8 4v4M8 16v4"/></svg></button>
+    </div>
+    <button class="ico" id="panelbtn" title="Panel: Problems, Output, Serial monitor (Ctrl+J)"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 14h18"/><path d="M7 17h4" stroke-width="1.6"/></svg></button>
+    <button class="ico" id="optbtn" title="Options (Ctrl+,)"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
+    <div class="gsearch" title="Search in all files of project (Ctrl+Shift+F)">
+      <svg viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6"/><path d="M15 15l5 5"/></svg>
+      <input type="text" id="gsearch" placeholder="Search" spellcheck="false" autocomplete="off">
+      <button id="gscase" title="Match case">Aa</button><button id="gsword" title="Whole word"><u>ab</u></button><button id="gsregex" title="Regular expression">.*</button>
+    </div>
+    <div class="spacer"></div>
+    <div id="projname"></div>
+    <button class="ico" id="themebtn" title="Toggle light / dark theme"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 3.5a8.5 8.5 0 0 1 0 17z" fill="currentColor"/></svg></button>
+    <button class="ico" id="helpbtn" title="Help (F1)"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.3 9a2.8 2.8 0 0 1 5.4 1c0 1.9-2.7 2.5-2.7 4"/><circle cx="12" cy="17.4" r=".6" fill="currentColor"/></svg></button>
+  </div>
+  <div id="tabs" role="tablist"></div>
+  <div id="main">
+    <div id="editor" hidden></div>
+    <div id="welcome">
+      <div class="wbox">
+        <h1><img src="icon.png" alt="">Web FastLED</h1>
+        <p>Arduino + FastLED projects in browser: edit sketch, run it, watch LED matrix.</p>
+        <div class="acts">
+          <button id="wload"><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Open project (.zip with .ino / .h files)…</button>
+          <button id="wlib"><svg viewBox="0 0 24 24"><path d="M5 4h3v16H5zM10 4h3v16h-3zM15.5 5l2.9-.8 3.6 15-2.9.8z"/></svg>Open from library…</button>
+          <button id="wnew"><svg viewBox="0 0 24 24"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6M12 12v6M9 15h6"/></svg>New sketch (FastLED template)</button>
+        </div>
+        <p>Or drop .zip / .ino / .h file anywhere on page. <kbd>F1</kbd> — help.</p>
+      </div>
+    </div>
+    <div id="dropmark">Drop a project (.zip) or sketch files</div>
+  </div>
+  <div id="panel" hidden>
+    <div id="panelrz" title="Drag to resize"></div>
+    <div class="phead">
+      <div class="ptabs"><button data-p="problems">Problems <span class="badge" id="probcount"></span></button><button data-p="output">Output</button><button data-p="search">Search <span class="badge" id="searchcount"></span></button><button data-p="profile">Profile <span class="badge" id="profcount"></span></button><button data-p="memory">Memory <span class="dot warn" id="memdot" hidden></span></button><button data-p="debug">Debug <span class="dot" id="dbgdot" hidden></span></button><button data-p="serial">Serial Monitor <span class="dot" id="pserialdot" hidden></span></button></div>
+      <div class="pacts">
+        <span id="pserial" hidden><label class="chk" title="Scroll to newest output"><input type="checkbox" id="serscroll" checked>Autoscroll</label><span id="serbaud"></span>
+          <span class="serboard" title="Serial monitor of real board on USB port: opening resets board, as in Arduino IDE"><select id="serbbaud" title="Speed of board's Serial.begin()"></select><button class="btn" id="serbconn">Connect board</button></span></span>
+        <button class="pb" id="pclear" title="Clear"><svg viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3"/></svg></button>
+        <button class="pb" id="pclose" title="Close panel (Ctrl+J)">✕</button>
+      </div>
+    </div>
+    <div class="pbody">
+      <div class="ppane" data-p="problems"><div id="problems"></div></div>
+      <div class="ppane" data-p="output" hidden><pre id="output"></pre></div>
+      <div class="ppane" data-p="search" hidden><div id="searchres"></div></div>
+      <div class="ppane" data-p="memory" hidden><div id="memview"></div></div>
+      <div class="ppane" data-p="debug" hidden><div id="dbgview"></div></div>
+      <div class="ppane" data-p="profile" hidden><div class="profbar"><button class="btn" id="profbtn">Profile build: off</button><span class="note" id="profnote">Busy — time function works itself (with library calls), Waits — <code>delay()</code> and <code>FastLED.show()</code> pacing inside it, Total — with called sketch functions. Click row — go to function.</span></div><div id="proftable"></div></div>
+      <div class="ppane serpane" data-p="serial" hidden>
+        <pre id="serialout"></pre>
+        <div class="serin"><input type="text" id="serinput" placeholder="Message to sketch (Enter to send)" spellcheck="false">
+          <select id="sereol" title="Line ending"><option value="">No line ending</option><option value="\n" selected>New line</option><option value="\r">Carriage return</option><option value="\r\n">Both NL &amp; CR</option></select>
+          <button class="btn" id="sersend">Send</button></div>
+      </div>
+    </div>
+  </div>
+  <div id="status" class="empty">
+    <div class="si click" id="stboard" title="Board (Options)"><svg viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" rx="1"/><path d="M9 1v4M15 1v4M9 19v4M15 19v4M1 9h4M1 15h4M19 9h4M19 15h4"/></svg><span id="stboardname"></span></div>
+    <div class="si" id="strun"><span id="strunt">Stopped</span></div>
+    <div class="si click" id="stprob" title="Problems (Ctrl+Shift+M)"><span class="ic">⊗</span><span id="sterr">0</span><span class="ic">⚠</span><span id="stwarn">0</span></div>
+    <div class="si wide" id="stmsg"></div>
+    <div class="spacer"></div>
+    <div class="si" id="stpos"></div>
+    <div class="si click wide" id="sttab" title="Indentation (Options)"></div>
+    <div class="si wide" id="stenc" title="File encoding (kept when saving)"></div>
+    <div class="si wide" id="steol" title="Line endings (kept when saving)"></div>
+    <div class="si wide" id="stlang"></div>
+  </div>
+</div>
+<input type="file" id="fileinp" accept=".zip,.ino,.h,.hpp,.c,.cpp,.txt" multiple hidden>
+
+<!-- Options -->
+<div id="options" class="fwin optwin" hidden role="dialog" aria-label="Options">
+  <header class="fhead">
+    <div class="tabs"><button data-tab="board" class="on">Board</button><button data-tab="led">LED</button><button data-tab="editor">Editor</button><button data-tab="offline">Offline</button><button data-tab="about">About</button></div>
+    <button data-close title="Close (Esc)">✕</button>
+  </header>
+  <div class="body">
+    <div class="pane" data-pane="board">
+      <div class="card">
+        <h3>Board / CPU</h3>
+        <div class="boards" id="boards"></div>
+        <p class="note">Board sets pins (A0…, Serial1-3 on Mega), EEPROM size and defines (ARDUINO_AVR_NANO / ARDUINO_AVR_MEGA2560).</p>
+      </div>
+      <div class="card">
+        <h3>Build</h3>
+        <div class="optgrid">
+          <label for="opopt">Optimization</label>
+          <select id="opopt"></select>
+          <label class="chk span2" title="After rebuild of running sketch (new size, profile on / off) new build runs fast from start up to moment of old one, with same inputs, then goes on; off — it starts from beginning"><input type="checkbox" id="opcatch">Catch-up: continue from same moment after rebuild</label>
+          <label class="chk span2" title="FastLED.setMaxPowerInVoltsAndMilliamps / setMaxPowerInMilliWatts of sketch: when estimated current is over limit, FastLED dims whole frame (as on real strip). Off — these calls are dropped for build"><input type="checkbox" id="oppower">Power limit of sketch (setMaxPower…)</label>
+          <label class="chk span2" title="Headers of C++ standard library (libc++): &lt;vector&gt;, &lt;algorithm&gt; ... AVR has none of them; with it some sketch functions (float sqrt(float) ...) clash with its overloads"><input type="checkbox" id="opstdlib">C++ standard library</label>
+          <label class="chk span2" title="Sketch of .c files without setup(): on loading, pattern.c from server root is inserted into it — includes, sizes, leds[], XY(), setup(), loop(); what sketch has itself is commented in pattern"><input type="checkbox" id="opcpat" checked>.c sketches: add pattern.c</label>
+          <label class="chk span2" title="On loading .c sketch, LED_COLS / COLS become WIDTH, LED_ROWS / ROWS become HEIGHT"><input type="checkbox" id="opcnames" checked>.c sketches: ROWS / COLS → WIDTH / HEIGHT</label>
+        </div>
+        <p class="note">Sketch is compiled by clang (LLVM) in browser and runs as WebAssembly in real time. As with avr-gcc, -fpermissive conversions get cast and warning.
+          Unlike AVR: <code>int</code> is 32 bit, <code>double</code> is 64 bit, RAM / flash limits are not checked yet.</p>
+      </div>
+    </div>
+    <div class="pane gone" data-pane="led">
+      <div class="card">
+        <h3>Matrix wiring</h3>
+        <div class="optgrid">
+          <label for="ledtype">Layout</label>
+          <select id="ledtype"><option value="0">Zigzag (serpentine)</option><option value="1">Parallel</option></select>
+          <label for="ledangle">Start corner</label>
+          <select id="ledangle"><option value="0">Bottom left</option><option value="1">Top left</option><option value="2">Top right</option><option value="3">Bottom right</option></select>
+          <label for="leddir">Direction</label>
+          <select id="leddir"></select>
+          <label class="chk span2" title="On: loading project / file sets LED window to WIDTH × HEIGHT of sketch (or pattern.c). Off: window keeps its size, build gets it instead of sketch's (as size box does); Get W×H takes sketch's"><input type="checkbox" id="opsizeload">W×H from sketch on load</label>
+        </div>
+        <p class="note">How strip index maps to X / Y — as GyverMatrix MATRIX_TYPE, CONNECTION_ANGLE, STRIP_DIRECTION. Wiring is taken from sketch on load anyway.</p>
+      </div>
+      <div class="card">
+        <h3>3D</h3>
+        <div class="optgrid">
+          <label for="led3ds">Dot size</label>
+          <div class="rangebox" title="Double click: 100% (default, largest)"><input type="range" id="led3ds" min="0.3" max="1" step="0.05" value="1"><output id="led3dsv" style="width:64px">100%</output></div>
+          <label for="led3dh">Cylinder height</label>
+          <div class="rangebox" title="Double click: 100% (LED pitch same round and along axis)"><input type="range" id="led3dh" min="0.2" max="3" step="0.05" value="1"><output id="led3dhv" style="width:64px">100%</output></div>
+        </div>
+        <p class="note">Dot size — LEDs of 3D view (dots and solid), 100% is largest. Cylinder height — 100%: LED pitch is same round and along axis (matrix 24×24 is tall narrow tube); less — lower and wider, more — taller.</p>
+      </div>
+      <div class="card">
+        <h3>Display</h3>
+        <div class="optgrid">
+          <label for="oporder" title="Real CPU timing reads colors from data pin: bytes come in strip's own order">Strip color order</label>
+          <select id="oporder" title="Real CPU timing: order of color bytes strip expects on wire (WS2812 / WS2812B / SK6812: GRB, many WS2811: RGB)"><option value="auto">As sketch (addLeds)</option><option>GRB</option><option>RGB</option><option>BRG</option><option>BGR</option><option>RBG</option><option>GBR</option></select>
+          <label for="ledgam">Dim colors</label>
+          <div class="rangebox" title="Double click: +100% (default)"><input type="range" id="ledgam" min="0" max="3" step="0.05" value="2"><output id="ledgamv" style="width:64px">LED-like</output></div>
+          <label for="ledcon">Contrast</label>
+          <div class="rangebox" title="Double click: 0% (default)"><input type="range" id="ledcon" min="0" max="1" step="0.05" value="0"><output id="ledconv" style="width:64px">0%</output></div>
+        </div>
+        <p class="note"><b>Strip color order</b> is used by Real CPU timing: colors are read from data pin as strip reads them. <b>As sketch</b> (default): strip has order that sketch gives in <code>addLeds&lt;…, ORDER&gt;</code> (or its <code>#define COLOR_ORDER</code>), so colors come out as sketch means them. Fixed order (GRB for WS2812, WS2812B, SK6812; RGB for many WS2811) shows what that strip would show: wrong order in sketch swaps colors, as on real strip.<br>
+          LED gives light proportional to its value (PWM); monitor does not. LED-like converts, so dim colors look as on real LEDs; Raw (slider left) shows values as they are; right of LED-like dim colors get brighter still, up to +200%; default +100%, double click returns it.
+          Brightness is taken from brightest channel of LED, others keep their proportion, so lifted colors stay saturated.
+          <b>Contrast</b> darkens dark and middle tones, full brightness stays: 0% — no change (default, double click returns it), 100% — strongest; dim picture gets darker with it. Raw ignores both.</p>
+      </div>
+    </div>
+    <div class="pane gone" data-pane="editor">
+      <div class="card">
+        <h3>Appearance</h3>
+        <div class="optgrid">
+          <label for="optheme">Color theme</label>
+          <select id="optheme">
+            <option value="auto">Auto (system light / dark)</option>
+            <option value="dark-plus">Dark+ (default dark)</option>
+            <option value="light-plus">Light+ (default light)</option>
+            <option value="monokai">Monokai</option>
+            <option value="solarized-dark">Solarized Dark</option>
+            <option value="solarized-light">Solarized Light</option>
+            <option value="hc-dark">High Contrast Dark</option>
+            <option value="hc-light">High Contrast Light</option>
+          </select>
+          <label for="opfont">Font</label>
+          <select id="opfont">
+            <option value='Consolas, "Cascadia Mono", Menlo, "DejaVu Sans Mono", ui-monospace, monospace'>Consolas (VS Code)</option>
+            <option value='"Cascadia Code", "Cascadia Mono", Consolas, ui-monospace, monospace'>Cascadia Code</option>
+            <option value='"JetBrains Mono", Consolas, ui-monospace, monospace'>JetBrains Mono</option>
+            <option value='"Fira Code", "Fira Mono", Consolas, ui-monospace, monospace'>Fira Code</option>
+            <option value='"Courier New", Courier, monospace'>Courier New</option>
+            <option value='ui-monospace, monospace'>System monospace</option>
+          </select>
+          <label for="opsize">Font size</label>
+          <div class="rangebox"><input type="range" id="opsize" min="10" max="24" step="1" value="14"><output id="opsizev">14</output></div>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Editing</h3>
+        <div class="optgrid">
+          <label for="optab">Tab size</label>
+          <select id="optab"><option value="2">2 spaces</option><option value="4">4 spaces</option><option value="8">8 spaces</option></select>
+          <div class="span2 chks">
+            <label class="chk"><input type="checkbox" id="oplines" checked>Line numbers</label>
+            <label class="chk"><input type="checkbox" id="opwrap">Word wrap</label>
+            <label class="chk"><input type="checkbox" id="opact" checked>Highlight current line</label>
+            <label class="chk"><input type="checkbox" id="opws">Show whitespace</label>
+            <label class="chk"><input type="checkbox" id="opbr" checked>Auto-close brackets</label>
+            <label class="chk"><input type="checkbox" id="opauto" checked>Keep session</label>
+          </div>
+        </div>
+        <p class="note">Encoding (UTF-8 / Windows-1251) and line endings (CRLF / LF) of each file are kept on save. Keep session — open project is stored in browser and restored next time.</p>
+      </div>
+    </div>
+    <div class="pane gone" data-pane="offline">
+      <div class="card" id="offcard">
+        <h3>Offline mode</h3>
+        <p class="note">Site opened once: editor and emulator start without internet (also from iOS home screen). Make offline downloads checked parts in advance; compilers and library are otherwise kept only once used.</p>
+        <p class="note" id="offstat" hidden></p>
+        <div class="offgrid">
+          <label class="chk"><input type="checkbox" id="of_core" checked disabled> Editor and emulator (page, scripts)</label>
+          <label class="chk" title="rt/: clang 21 for WebAssembly and SDK (FastLED, Arduino core): Start / Verify of sketch"><input type="checkbox" id="of_clang" checked> Compiler of sketch (clang, about 26 MB)</label>
+          <label class="chk" title="rt/avr/: avr-gcc 7.3 and Arduino AVR core 1.8.6"><input type="checkbox" id="of_avr" checked> avr-gcc: board binary, upload, Real CPU timing (about 16 MB)</label>
+          <label class="chk" title="Projects of repo/index.json (Load → library) and pattern.c of .c sketches"><input type="checkbox" id="of_repo" checked> Library (repo/) and pattern.c</label>
+        </div>
+        <label class="chk" title="Site is checked at start (and later too, with option below): when it does not answer, red &quot;offline&quot; is shown in LED window, left of fps"><input type="checkbox" id="of_label" checked> Show 'offline'</label>
+        <label class="chk" title="Off: site is checked once, at start"><input type="checkbox" id="of_poll"> Check connection every 20 sec</label>
+        <div class="offbtns"><button class="btn" id="ofmake" title="Download what is checked into offline copy of this site">Make offline</button><button class="btn" id="ofclear" title="Drop downloaded files of offline copy: compilers, library (editor and emulator stay)">Clear files</button></div>
+      </div>
+    </div>
+    <div class="pane gone" data-pane="about">
+      <div class="card about">
+        <h3><img src="icon.png" alt="" class="appicon">WEB FASTLED</h3>
+        <p class="note" id="aboutver">v <span id="aboutv"></span> by ae485 (<span class="mailimg" role="img" aria-label="e-mail of author"></span>), <a href="#" id="changeslink">changes</a>.</p>
+        <p class="note">Arduino + FastLED environment and emulator.</p>
+      </div>
+      <div class="card">
+        <h3>Boards</h3>
+        <table class="keys" id="aboutboards"></table>
+      </div>
+      <div class="card">
+        <h3>Credits</h3>
+        <table class="keys credits">
+          <tr><td>Web FastLED</td><td>ae485 — editor, emulator, real build, debugger; MIT license (<a href="#" id="licenselink">LICENSE</a>)</td></tr>
+          <tr><td>FastLED 3.7.8</td><td>Daniel Garcia, Mark Kriegsman and contributors — MIT license</td></tr>
+          <tr><td>Arduino AVR core 1.8.6</td><td>Arduino and contributors, with SPI, Wire, SoftwareSerial, EEPROM libraries — LGPL 2.1</td></tr>
+          <tr><td>LLVM / Clang 21</td><td>LLVM project — Apache 2.0 with LLVM exception; YoWASP build for WebAssembly (whitequark) — ISC license</td></tr>
+          <tr><td>GCC 7.3.0, Binutils 2.26</td><td>Free Software Foundation; avr-gcc of Arduino toolchain (Atmel 3.6.1 patches), built for WebAssembly — GPL 3 (runtime library exception for libgcc)</td></tr>
+          <tr><td>avr-libc 2.0.0</td><td>avr-libc developers, with Arduino patch (malloc margin) — modified BSD license</td></tr>
+          <tr><td>Bootloaders</td><td>Optiboot (Peter Knight, Bill Westfield), ATmegaBOOT (Arduino), stk500v2 (Peter Fleury, Mark Sproul) of AVR core — GPL 2; go into “.hex with bootloader”</td></tr>
+          <tr><td>avr8js 0.21</td><td>Uri Shaked and contributors — AVR emulator of Real CPU timing, MIT license</td></tr>
+          <tr><td>CodeMirror 6</td><td>Marijn Haverbeke and contributors — editor, MIT license</td></tr>
+          <tr><td>Color themes</td><td>palettes of Visual Studio Code themes (Microsoft, Monokai, Solarized by Ethan Schoonover) — MIT license</td></tr>
+          <tr><td>Library samples</td><td>GyverMatrixOS (AlexGyver), Soulmate sketches — their authors</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LED matrix: every control is in the title bar -->
+<div id="ledwin" class="fwin ledwin" hidden role="dialog" aria-label="LED">
+  <header class="fhead ledhead">
+    <input type="text" id="ledsize" class="ledsize" spellcheck="false" autocomplete="off" title="Matrix size: 24x12, 24-12, 2412">
+    <span class="hsep"></span>
+    <button class="hb txt" id="ledspeed" title="Speed: 5…500 fps (double click: 1×)"><svg viewBox="0 0 24 24"><path d="M4 18a9 9 0 1 1 16 0"/><path d="M12 14l4-5"/><circle cx="12" cy="14" r="1.3" fill="currentColor"/></svg><span id="ledspeedv"></span></button>
+    <button class="hb" id="ledfit" title="Fit window to matrix (3D: to figure)"><svg viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
+    <button class="hb drop" id="ledfx" title="Effects" aria-haspopup="true"><svg viewBox="0 0 24 24"><path d="M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/></svg><svg class="caret" viewBox="0 0 8 8"><path d="M1.5 3l2.5 2.5L6.5 3"/></svg></button>
+    <button class="hb txt" id="led3d" title="3D: matrix wrapped on cylinder / sphere"><svg viewBox="0 0 24 24"><ellipse cx="12" cy="6" rx="7" ry="2.5"/><path d="M5 6v12c0 1.4 3.1 2.5 7 2.5s7-1.1 7-2.5V6"/></svg>3D</button>
+    <button class="hb drop" id="led3dm" title="3D: figure, mode, rotation" aria-haspopup="true"><svg class="caret" viewBox="0 0 8 8"><path d="M1.5 3l2.5 2.5L6.5 3"/></svg></button>
+    <span class="hgap"></span>
+    <button data-close title="Close (stops sketch)">✕</button>
+  </header>
+  <div id="ledview"><canvas id="ledcanvas"></canvas><div id="ledhud"><span id="lednet"></span><span id="ledfps"></span></div></div>
+  <div class="rz n" data-rz="n"></div><div class="rz s" data-rz="s"></div><div class="rz e" data-rz="e"></div><div class="rz w" data-rz="w"></div>
+  <div class="rz ne" data-rz="ne"></div><div class="rz nw" data-rz="nw"></div><div class="rz sw" data-rz="sw"></div><div class="rz se" data-rz="se"></div>
+</div>
+<div id="ledtip" hidden></div>
+<div class="hpop" id="speedpop" hidden>
+  <div class="hpophead"><span>Speed</span><b id="speedval">1×</b></div>
+  <input type="range" id="speedrange" min="0" max="12" step="1" value="5">
+  <div class="ticks" id="speedticks"></div>
+</div>
+<div class="hpop lmenu" id="uppop" hidden>
+  <div class="mnote" id="upinfo"></div>
+  <button class="mi" id="upgo"><span class="mn">Upload to board</span><kbd>Ctrl+U</kbd></button>
+  <div class="mhead">Port</div>
+  <button class="mi" id="upport"><span class="mn" id="upportn">Choose port…</span><span class="mt" id="upportc" hidden>Change</span></button>
+  <button class="mi" id="uprel" title="Close connection of this page (Serial monitor) and forget port: other programs (Arduino IDE) can use it"><span class="mn">Release port</span></button>
+  <div id="upcpu"></div>
+  <button class="mi" id="uphelp"><span class="mn">USB drivers, troubleshooting…</span></button>
+</div>
+<div class="hpop lmenu" id="hexpop" hidden>
+  <div class="mnote" id="hexinfo"></div>
+  <button class="mi" data-get="hex"><span class="mn">Download .hex</span><span class="mt">HEX</span></button>
+  <button class="mi" data-get="boot"><span class="mn" id="hexbootn">Download .hex with bootloader</span><span class="mt">HEX</span></button>
+  <button class="mi" data-get="elf"><span class="mn">Download .elf (with debug info)</span><span class="mt">ELF</span></button>
+  <button class="mi" data-get="eep"><span class="mn">Download .eep (EEPROM data)</span><span class="mt">EEP</span></button>
+  <button class="mi" data-get="zip"><span class="mn">Download all files</span><span class="mt">ZIP</span></button>
+  <button class="mi" data-get="build"><span class="mn">Build only: size report</span></button>
+</div>
+<div class="hpop lmenu" id="loadpop" hidden>
+  <button class="mi" id="ldlocal"><span class="mn">Local file…</span><kbd>Ctrl+O</kbd></button>
+  <div class="mhead">Library</div>
+  <input type="text" id="libfilter" placeholder="Filter" spellcheck="false" autocomplete="off" hidden>
+  <div id="liblist" class="mlist"></div>
+</div>
+<div class="hpop menu" id="pop3d" hidden>
+  <div class="mh">Figure</div>
+  <label class="chk"><input type="radio" name="sh3" value="cylinder" checked>Cylinder</label>
+  <label class="chk" title="Golden-angle points, as many as LEDs"><input type="radio" name="sh3" value="sphere">Sphere</label>
+  <label class="chk" title="Rows are parallels, columns are meridians"><input type="radio" name="sh3" value="globe">Globe</label>
+  <label class="chk" title="Columns round ring, rows round tube"><input type="radio" name="sh3" value="torus">Torus</label>
+  <label class="chk" title="Polar: rows are rings (row 0 at centre), columns are angle"><input type="radio" name="sh3" value="disc">Disc (polar)</label>
+  <label class="chk" title="Polar on hemisphere: row 0 at pole, last row at rim"><input type="radio" name="sh3" value="dome">Dome (polar)</label>
+  <div class="mh">Mode</div>
+  <label class="chk"><input type="radio" name="md3" value="dots" checked>Dots</label>
+  <label class="chk"><input type="radio" name="md3" value="solid">Solid (WebGL)</label>
+  <div class="mh"></div>
+  <label class="chk"><input type="checkbox" id="rot3" checked>Rotate</label>
+</div>
+<div class="hpop menu" id="fxpop" hidden>
+  <label class="chk"><input type="checkbox" id="ledgrid" checked>Grid</label>
+  <label class="chk"><input type="checkbox" id="ledcoords">Coordinates</label>
+  <label class="chk"><input type="checkbox" id="ledroute">Strip route</label>
+</div>
+
+<!-- Inputs: pins of the running sketch -->
+<div id="inwin" class="fwin inwin" hidden role="dialog" aria-label="Inputs">
+  <header class="fhead"><h2>Inputs</h2><button data-close title="Close (Esc)">✕</button></header>
+  <div class="body">
+    <p class="note intro">Pins used by running sketch, as if wires were connected to board.
+      <b>INPUT_PULLUP</b> — button to GND: press = <b>LOW</b> (GyverMatrix: D3 is mode button, <code>pinMode(dpin, INPUT_PULLUP)</code>).
+      <b>INPUT</b> — button to 5V: press = HIGH, released pin floats (random). <b>analogRead</b> pins get slider instead of noise.
+      Hold <b>Press</b>; Shift+click keeps it pressed.</p>
+    <table class="pins" id="pintable"></table>
+    <p class="note" id="pinnone">Start sketch: its pins appear here.</p>
+  </div>
+  <div class="rz se" data-rz="se"></div><div class="rz e" data-rz="e"></div><div class="rz s" data-rz="s"></div>
+</div>
+
+<!-- changes.txt: version history (read only, text cannot be selected or copied) -->
+<div id="chwin" class="fwin chwin" hidden role="dialog" aria-label="Changes">
+  <header class="fhead"><h2>Changes</h2><button data-close title="Close (Esc)">✕</button></header>
+  <div class="body"><pre id="chtext"></pre></div>
+</div>
+
+<!-- Help -->
+<div id="helpwin" class="fwin helpwin" hidden role="dialog" aria-label="Help">
+  <header class="fhead"><h2>Help</h2><button class="helplang" id="helplang" title="Русский">EN</button><span style="flex:1"></span><button data-close title="Close (Esc)">✕</button></header>
+  <div class="body" data-lang="en">
+    <div class="card" data-sec="keys">
+      <h3>Keys</h3>
+      <table class="keys">
+        <tr><td><kbd>Ctrl</kbd>+<kbd>O</kbd></td><td>Load project: local file</td></tr>
+        <tr><td><kbd>Ctrl</kbd>+<kbd>S</kbd></td><td>Save project (.zip)</td></tr>
+        <tr><td><kbd>F5</kbd></td><td>Compile and start / stop</td></tr>
+        <tr><td><kbd>F7</kbd>, <kbd>Ctrl</kbd>+<kbd>R</kbd></td><td>Compile only</td></tr>
+        <tr><td><kbd>Ctrl</kbd>+<kbd>U</kbd></td><td>Upload to board (USB)</td></tr>
+        <tr><td><kbd>F10</kbd> / <kbd>F11</kbd> / <kbd>Shift</kbd>+<kbd>F11</kbd></td><td>Debugger: step over / into / out; <kbd>F5</kbd> — continue</td></tr>
+        <tr><td><kbd>F6</kbd></td><td>LED window</td></tr>
+        <tr><td><kbd>Space</kbd></td><td>Pause / continue sketch (outside editor)</td></tr>
+        <tr><td><kbd>Ctrl</kbd>+<kbd>J</kbd></td><td>Panel: Problems / Output / Serial monitor</td></tr>
+        <tr><td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>M</kbd></td><td>Problems</td></tr>
+        <tr><td><kbd>Ctrl</kbd>+<kbd>,</kbd></td><td>Options</td></tr>
+        <tr><td><kbd>F1</kbd></td><td>Help</td></tr>
+        <tr><td><kbd>Alt</kbd>+<kbd>1</kbd>…<kbd>9</kbd></td><td>Go to tab 1…9</td></tr>
+        <tr><td><kbd>Ctrl</kbd>+<kbd>F</kbd> / <kbd>Ctrl</kbd>+<kbd>H</kbd></td><td>Find / replace in file</td></tr>
+        <tr><td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>F</kbd></td><td>Search in all files (box in toolbar)</td></tr>
+        <tr><td><kbd>Alt</kbd>+<kbd>G</kbd></td><td>Go to line</td></tr>
+        <tr><td><kbd>Ctrl</kbd>+<kbd>Z</kbd> / <kbd>Ctrl</kbd>+<kbd>Y</kbd></td><td>Undo / redo (each tab has own history)</td></tr>
+        <tr><td><kbd>Ctrl</kbd>+<kbd>/</kbd></td><td>Comment / uncomment lines</td></tr>
+        <tr><td><kbd>Ctrl</kbd>+<kbd>D</kbd></td><td>Select next occurrence</td></tr>
+        <tr><td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>[</kbd> / <kbd>]</kbd></td><td>Fold / unfold block</td></tr>
+        <tr><td><kbd>Alt</kbd>+<kbd>↑</kbd> / <kbd>↓</kbd></td><td>Move line up / down</td></tr>
+        <tr><td><kbd>Esc</kbd></td><td>Close top window</td></tr>
+      </table>
+    </div>
+    <div class="card" data-sec="project">
+      <h3>Project</h3>
+      <p class="note"><b>Get W×H</b> (toolbar, after Load) — takes <code>WIDTH</code> and <code>HEIGHT</code> from sketch into LED window (also <code>MATRIX_WIDTH</code>, <code>kMatrixWidth</code>…); if build runs with other size from size box, it is rebuilt with sketch's size.
+        On project load LED window keeps its size and build gets it instead of sketch's <code>WIDTH</code> / <code>HEIGHT</code> (Options → LED → <b>W×H from sketch on load</b> on: window takes sketch's size); wiring (<code>MATRIX_TYPE</code>, <code>CONNECTION_ANGLE</code>, <code>STRIP_DIRECTION</code>) are taken once; sketch without them gets wiring from its <code>XY()</code>: zigzag if odd rows are reversed there (<code>y &amp; 1</code>, <code>y % 2</code>), else parallel, from bottom left to right; later wiring is set in Options → LED.</p>
+      <p>Project is .zip with sketch: main <b>.ino</b> plus other .ino, .h, .c, .cpp files (Arduino IDE sketch folder packed into zip).
+        Each file opens in its own tab, main sketch first; tabs can be dragged; × on tab removes file from project (asks first; last file closes project). Changed file is marked with <span style="color:var(--tab-mod);font-weight:700">*</span> until project is saved.
+        Single .ino / .h files are added to open project.</p>
+      <p><b>Load</b> ▾ opens menu: <b>Local file…</b> (<kbd>Ctrl</kbd>+<kbd>O</kbd>, or drop file on page) and <b>Library</b> — projects of server folder <code>repo/</code> (next to index.html), listed in <code>repo/index.json</code>:</p>
+      <pre class="code">{ "items": [
+  { "file": "GyverMatrix.zip", "name": "GyverMatrix 24×12", "board": "mega" },
+  { "file": "soulmate/fire.c", "name": "Fire (Soulmate)" }
+] }</pre>
+      <p class="note"><code>file</code> — path inside repo/: .zip project, .c sketch or .ino; <code>name</code> — text of menu (file name if omitted); <code>board</code> (nano / mega) is optional and is selected on load.
+        Plain list <code>["a.zip", "b.c"]</code> works too. Library item always opens as new project. With 10 and more items menu gets filter box.</p>
+      <p class="note">Save writes whole project back as .zip with same file names, encodings and line endings. Files that are not sketch sources stay in archive untouched.</p>
+    </div>
+    <div class="card" data-sec="compile">
+      <h3>Compile and run</h3>
+      <p><b>✓</b> (<kbd>F7</kbd>) only compiles; <b>Start</b> (<kbd>F5</kbd>) compiles sketch and runs it; <b>Pause</b> (<kbd>Space</kbd>) stops sketch clock; <b>Reset</b> starts same build again from <code>setup()</code>; <b>Catch-up</b> (⏭, also in Options → Build, off by default) — after rebuild of running sketch (new size, profile) it continues from same moment, see “LED window”; off — it starts from beginning. Compiler is clang (LLVM) in browser:
+        first time it is downloaded (about 26 MB), then comes from browser cache. Sketch, FastLED 3.7.8 and Arduino core run as WebAssembly in real time:
+        <code>millis()</code> and <code>delay()</code> are real (or scaled by speed).</p>
+      <p class="note">Conversions that g++ allows with <code>-fpermissive</code> get cast and warning in Problems. Unlike AVR: <code>int</code> is 32 bit, <code>double</code> is 64 bit, RAM / flash limits are not checked (Real CPU timing has exact AVR, see below).</p>
+      <p class="note"><b>Power limit</b>: sketch that calls <code>FastLED.setMaxPowerInVoltsAndMilliamps()</code> is dimmed by FastLED as a whole when estimated current is over limit, as on real strip
+        (e.g. 5 V, 1000 mA: white lines on many LEDs come out grey); Output says so after build. Options → Build → <b>Power limit of sketch</b> is off by default: these calls are dropped for build; turn it on to see what real strip does.</p>
+    </div>
+    <div class="card" data-sec="real">
+      <h3>Speed and Real CPU timing</h3>
+      <p>Sketch runs in one of two modes, switched by <b>Real CPU timing</b> button (chip with clock, next to LED window button; yellow when on, off by default).</p>
+      <p><b>Off</b>: sketch is compiled by clang into WebAssembly and runs as fast as page can; <code>FastLED.show()</code> waits so that frames come every 20 ms of sketch time — 50 fps at 1×.
+        <b>Speed</b> (dial icon in LED window): 0.1×…10× = 5…500 fps (double click — 1×). Sketch clock (<code>millis()</code>, <code>micros()</code>, <code>delay()</code>) runs at same speed,
+        so effects that count frames and effects that count time keep their proportions. 3D view, size rebuild, profile build and catch-up work in this mode.</p>
+      <p><b>On</b>: sketch is built with avr-gcc as for real board (see “Board binary”) and its .hex runs on emulated ATmega328P (Nano) or ATmega2560 (Mega) at 16 MHz, instruction by instruction:
+        every delay, interrupt and <code>FastLED.show()</code> takes exactly as long as on board; <code>int</code> is 16 bit, RAM is 2 KB (Nano) or 8 KB (Mega), as on board. LED colors are read from data pin by pulse widths, as strip reads them (color order of strip: Options → LED → Display, GRB for WS2812B);
+        Serial monitor talks to USART0 (Serial; Mega Serial1…3 run too, their output is not shown), Inputs drive pins and ADC (Mega: A0…A15); Memory and Profile tabs of panel show RAM and CPU time of board.
+        Speed is 1×, 3D view, size rebuild, profile build and catch-up are off; size box only lays out LEDs read from pin.
+        If computer cannot keep up with 16 MHz, board clock runs slower than real time; status bar then shows % of real speed.</p>
+      <table class="keys">
+        <tr><td></td><td><b>Off</b></td><td><b>On</b></td></tr>
+        <tr><td>Program</td><td>clang → WebAssembly</td><td>avr-gcc → .hex, same as for board</td></tr>
+        <tr><td>Timing</td><td>50 fps × speed</td><td>exact, 16 MHz cycles</td></tr>
+        <tr><td><code>int</code>, RAM</td><td>32 bit, no limit</td><td>16 bit, 2 KB (Nano) / 8 KB (Mega)</td></tr>
+        <tr><td>Speed, 3D, size rebuild</td><td>yes</td><td>no</td></tr>
+        <tr><td>Memory tab, profile</td><td>profile build (slower)</td><td>RAM / stack of board, CPU time (free)</td></tr>
+        <tr><td>Boards</td><td>Nano, Mega</td><td>Nano, Mega</td></tr>
+      </table>
+      <p class="note">Turning it on or off while sketch runs starts it again in new mode. fps in corner of LED window is frames per second (<code>FastLED.show()</code> calls; in Real CPU timing — frames read from pin).</p>
+    </div>
+    <div class="card" data-sec="debug">
+      <h3>Debugger (Real CPU timing)</h3>
+      <p><b>Breakpoint</b>: click line number (or just left of it): red dot appears left of number; click again removes it. With Real CPU timing on, board stops before that line runs:
+        arrow and highlight show line, status bar says where, panel opens <b>Debug</b> tab — call stack (click goes to place), registers r0…r31, X / Y / Z, SP, PC, SREG (capital letter = flag set), cycles,
+        RAM as hex (address box, links to variables and stack; changed since previous stop in yellow), list of breakpoints (× removes; line without code of its own moves to next one, “no code” — it never stops there).</p>
+      <p>Then: <b>Step over</b> (<kbd>F10</kbd>) — next line, calls are run through; <b>Step into</b> (<kbd>F11</kbd>) — into called function of sketch (library code is run through);
+        <b>Step out</b> (<kbd>Shift</kbd>+<kbd>F11</kbd>) — until function returns; <b>Continue</b> (<kbd>F5</kbd>, <kbd>Space</kbd> or Pause button) — runs to next breakpoint. Pause while running stops board at once, as breakpoint does.
+        Interrupts (millis timer, Serial) keep running inside steps; their code is passed over. Board time stands while stopped.</p>
+      <p class="note">Build is optimized as in IDE (-Os, LTO): small functions are put into callers, lines are reordered, some lines have no code — steps can jump a little, as in any debugger of optimized code.
+        Line that only calls function which optimizer put into caller (<code>case 1: VUSpectrum();</code>) stops at start of that copy; mark stays on breakpoint line. Breakpoint stops only when line really runs: in mode switch, when that mode comes.
+        Variables by name come later; for now RAM view shows them (globals from address 0x100).</p>
+    </div>
+    <div class="card" data-sec="binary">
+      <h3>Board binary (real build)</h3>
+      <p>Button with chip and arrow (next to Save) builds sketch for real board with <b>avr-gcc 7.3.0</b>, same compiler, flags and steps as Arduino IDE 2
+        (Arduino AVR core 1.8.6, FastLED 3.7.8, link-time optimization). Result is byte for byte what IDE gives:
+        <code>.hex</code>, <code>.hex</code> with bootloader, <code>.elf</code> (with debug info), <code>.eep</code>, or all of them in .zip; <b>Build only</b> shows size report as IDE does.
+        Compiler runs in browser: first time it is downloaded (about 16 MB), then comes from browser cache; first build of session takes some seconds more.</p>
+      <p class="note">Whole project is built as saved (its encoding and line ends), with sizes from sketch itself: LED window size box does not apply. Libraries are found by <code>#include</code>, as in IDE:
+        FastLED, SPI, Wire, SoftwareSerial, EEPROM. Errors are in Problems, log in Output. .c sketch (no .ino) is built as in emulator: its .c files are sketch, COLS / ROWS become WIDTH / HEIGHT, pattern.c gives <code>setup()</code> / <code>loop()</code> (Options → Build).
+        “With bootloader” file uses bootloader chosen in Upload menu.</p>
+    </div>
+    <div class="card" data-sec="upload">
+      <h3>Upload to board (USB)</h3>
+      <p><b>Upload</b> (arrow into board, next to board binary button; <kbd>Ctrl</kbd>+<kbd>U</kbd>) makes real build and writes it to board over USB, as Arduino IDE does (avrdude): through bootloader,
+        STK500v1 for Nano, STK500v2 for Mega 2560; device signature is checked, every page is read back and compared.
+        Needs Web Serial: Chrome, Edge, Opera or new Firefox on computer.</p>
+      <p><b>▾</b> next to it opens menu: <b>Upload to board</b>; <b>Port</b> — <b>Choose port…</b> when none is chosen yet, else its name and <b>Change</b> (browser asks which port; choice is remembered);
+        <b>Release port</b> — closes what page holds on port (Serial monitor) and forgets it, so other programs (Arduino IDE) can take it;
+        <b>Bootloader</b> of Nano (as Processor menu of IDE): <b>ATmega328P</b> — Optiboot, 115200 baud, Nano since 2018 and most new ones; <b>Old Bootloader</b> — 57600 baud, older ones and many clones.
+        Upload tries chosen one first, then other; when other one answers, it becomes chosen.</p>
+      <p><b>Serial monitor of board</b>: in Serial Monitor panel choose speed (as in sketch's <code>Serial.begin()</code>) and <b>Connect board</b>; opening port resets board, as in IDE.
+        While connected, input line sends to board. Upload closes monitor and opens it again after.</p>
+      <p class="note">Port can be held by one program only: close serial monitor of Arduino IDE (or other terminal) first, or Release port here before using IDE.</p>
+    </div>
+    <div class="card" data-sec="usb">
+      <h3>USB drivers</h3>
+      <p>Browser talks to board through serial port of operating system, so USB-serial chip of board needs its driver, same as for Arduino IDE (Web Serial does not replace it).
+        Chip is written on board near USB socket; after choosing port, its name is shown in Upload menu (CH340, CH9102, FT232R…).</p>
+      <table class="keys">
+        <tr><td><b>CH340 / CH341</b><br><span class="note">most Nano clones</span></td><td>Windows: <a href="https://www.wch-ic.com/downloads/CH341SER_EXE.html" target="_blank" rel="noopener">CH341SER.EXE</a> (WCH); Windows 10 / 11 often install it themselves.<br>
+          macOS: <a href="https://www.wch-ic.com/downloads/CH34XSER_MAC_ZIP.html" target="_blank" rel="noopener">CH34XSER_MAC</a> (macOS 11 and later: allow driver extension in System Settings).<br>Linux: in kernel (ch341).</td></tr>
+        <tr><td><b>CH9102 / CH343</b><br><span class="note">many boards with USB-C</span></td><td>Windows: <a href="https://www.wch-ic.com/downloads/CH343SER_ZIP.html" target="_blank" rel="noopener">CH343SER</a> (WCH; CH340 driver does not serve it).<br>
+          macOS: same <a href="https://www.wch-ic.com/downloads/CH34XSER_MAC_ZIP.html" target="_blank" rel="noopener">CH34XSER_MAC</a>.<br>Linux: usually works as USB CDC (cdc_acm) of kernel, else WCH driver ch343ser_linux.</td></tr>
+        <tr><td><b>FT232R / FT231X</b><br><span class="note">original Nano (old), some clones</span></td><td>Windows: comes by Windows Update, else <a href="https://ftdichip.com/drivers/vcp-drivers/" target="_blank" rel="noopener">FTDI VCP drivers</a>.<br>macOS, Linux: built in.</td></tr>
+        <tr><td><b>CP2102</b></td><td><a href="https://www.silabs.com/developers/usb-to-uart-bridge-vcp-drivers" target="_blank" rel="noopener">Silicon Labs VCP drivers</a> (Windows, macOS); Linux: built in.</td></tr>
+        <tr><td><b>ATmega16U2</b><br><span class="note">original Mega 2560, Uno</span></td><td>Windows 10 / 11, macOS, Linux: built in (USB CDC); Windows 7 / 8: driver of Arduino IDE.</td></tr>
+      </table>
+      <p class="note">Linux: user must be in <code>dialout</code> group (<code>sudo usermod -aG dialout $USER</code>, then log in again); on Ubuntu package <code>brltty</code> grabs CH340 ports — remove it (<code>sudo apt remove brltty</code>).
+        If port is missing in browser's list: other cable (many are charge-only), other USB socket, check Device Manager (Windows) for unknown device.
+        Upload with no answer: right board (Nano / Mega) and bootloader, nothing else holds port, try Old Bootloader / ATmega328P.</p>
+    </div>
+    <div class="card" data-sec="order">
+      <h3>File order on compile</h3>
+      <p>As in Arduino IDE, all <b>.ino</b> files of sketch folder become one C++ file:</p>
+      <p>1. <code>#include &lt;Arduino.h&gt;</code> is put first.<br>
+        2. Main .ino (named as project, or one with <code>setup()</code> and <code>loop()</code>) goes first, then other .ino files in alphabetical order, case ignored (real build: as IDE, upper case first). Tab order does not matter.<br>
+        3. Prototypes of all functions are inserted before first function definition, so function may be called before it is defined, from any .ino.<br>
+        4. <code>#line</code> marks keep file names and line numbers in errors.</p>
+      <p class="note">So global variables and types of one .ino are visible in .ino files that come after it, not before. .h files are not compiled by themselves: they are included where <code>#include</code> says. .c / .cpp files of sketch folder (and src/) are compiled separately, each must include what it needs (<code>Arduino.h</code>, <code>FastLED.h</code>).
+        Prototypes are not made for functions with default arguments and for templates — declare them yourself.</p>
+    </div>
+    <div class="card" data-sec="led">
+      <h3>LED window</h3>
+      <p>Controls are in title bar: <b>size</b> (24x12, 24-12, 2412) — Enter or leaving box rebuilds sketch with these <code>WIDTH</code> and <code>HEIGHT</code> (only for this build, code is not changed; with catch-up on running sketch continues from same moment, new size is shown once new build has caught up;
+        <code>#define NUM_LEDS 256</code> given as number equal to old WIDTH × HEIGHT follows new size),
+        <b>speed</b> (see “Speed and Real CPU timing”), <b>fit</b> window to matrix, <b>effects</b> ▾ menu (grid, coordinates under cursor, strip route — line from <code>leds[0]</code> along indexes, green dot at start). Closing window stops sketch.</p>
+      <p><b>3D</b> wraps matrix (as window shows it, after rotate / mirror) on figure; ▾ next to it: figure, mode, rotation.
+        <b>Cylinder</b> — matrix is its side: columns go round, rows go down, so running text runs round cylinder. <b>Sphere</b> — as many points as LEDs, spread by golden angle; each point shows LED under its longitude (x) and latitude (y, top row at north pole).
+        <b>Globe</b> — latitude / longitude grid: rows are parallels, columns meridians, LEDs crowd to poles (as on real LED spheres, maps like Earth fit it best).
+        <b>Torus</b> — columns go round ring, rows round tube (middle row on outer side); text runs round it.
+        <b>Disc</b> (polar) — rows are rings from centre outwards, columns are angle clockwise from top: round panels, fire, tunnels, Lotus.
+        <b>Dome</b> (polar) — same on hemisphere facing you, row 0 at pole.
+        <b>Dots</b> — one dot per LED, back side dimmer (dot size and cylinder height: Options → LED → 3D); <b>Solid</b> (WebGL) — lit figure with LEDs as round dots on dark surface.
+        Drag rotates (fling keeps it spinning), wheel / pinch / right+left drag zooms, double click — normal size and front view; <b>fit</b> makes window square around figure at its present size. <b>Rotate</b> on — figure turns by itself when left alone; off — it stays as left.</p>
+      <p>In toolbar, next to LED window button, in its own group: <b>rebuild</b> with size of size box (same as Enter in it), <b>Real CPU timing</b> (chip with clock: switch, yellow when on), <b>rotate</b> view by 90° clockwise (action: each click adds 90°, angle other than 0° is shown by small number on button), <b>mirror</b> horizontally (switch, highlighted when on), <b>inputs</b> window (blue while open; green dot — sketch reads pins: buttons, pots).</p>
+      <p class="note">Catch-up (continue from same moment): new build runs fast (no waiting, no frames) from start up to time of old one, replaying inputs (buttons, sliders, Serial input) and same noise of floating pins,
+        so time-driven things (mode switching by <code>millis()</code>) come to same place; arrays sized by WIDTH / HEIGHT are filled again.</p>
+      <p class="note">LEDs grow and shrink with window, down to 1 screen pixel per LED; window is never narrower than its title bar. fps in corner — <code>FastLED.show()</code> calls per second.
+        Wiring (zigzag / parallel, start corner, direction) and colors are in Options → LED.</p>
+    </div>
+    <div class="card" data-sec="csketch">
+      <h3>.c sketches</h3>
+      <p>Project (or single file) of <b>.c</b> files and without .ino is sketch too, in style of Soulmate / soulmatelights editor: often only <code>draw()</code> and globals, sizes as <code>LED_COLS</code> / <code>LED_ROWS</code> or <code>COLS</code> / <code>ROWS</code>.
+        .c files are compiled as C++, like .ino (joined alphabetically, prototypes added).</p>
+      <p>On loading, sketch text itself is changed, so editor shows what is compiled (changed files get * mark, Save keeps changes):<br>
+        1. <code>LED_COLS</code>, <code>COLS</code> → <code>WIDTH</code>; <code>LED_ROWS</code>, <code>ROWS</code> → <code>HEIGHT</code> (Options → Build, on by default). Defines that become <code>#define WIDTH (WIDTH)</code> are commented.<br>
+        2. If sketch has no <code>setup()</code>, <b>pattern.c</b> from server root is inserted (Options → Build, on by default): its includes, defines and globals go to top of file
+        (between <code>// ===== pattern.c</code> marks), its functions (<code>XY()</code>, <code>setup()</code>, <code>loop()</code> calling <code>draw()</code> and <code>FastLED.show()</code>) to end. What sketch has itself is commented in pattern
+        (<code>#define NUM_LEDS (N_LEDS)</code> of sketch takes place of pattern's one, sketch's line is commented).</p>
+      <p class="note">If sketch still has no <code>setup()</code> at build (option was off on loading), pattern.c is added for build only, errors in it are shown as pattern.c:line; it is read from server again on each build.
+        Its size (16×16) is what Get W×H finds when sketch has no sizes of its own; size box overrides it as usual.</p>
+    </div>
+    <div class="card" data-sec="panel">
+      <h3>Panel</h3>
+      <p><b>Problems</b> — errors and warnings, click opens the place; they are also underlined in editor. <b>Output</b> — compiler log.
+        <b>Search</b> — results of search box in toolbar: all files of project, as you type (Aa — match case, ab — whole word, .* — regular expression); click selects match in its file.
+        <b>Serial Monitor</b> — <code>Serial.print</code> of sketch; line below sends text to <code>Serial.read()</code>; speed and <b>Connect board</b> — monitor of real board (see “Upload to board”). <kbd>Ctrl</kbd>+<kbd>J</kbd> shows / hides panel.</p>
+      <p><b>Profile</b> — Real CPU timing off: with profile build on, each function of .ino files gets timer: calls per second, Busy (time of function itself, with library calls), Waits (<code>delay()</code>, <code>FastLED.show()</code> pacing inside it),
+        Total (with called sketch functions), function that calls <code>FastLED.show()</code> is marked ▶; turning it on while sketch runs rebuilds (with catch-up on, continues from same moment); sketch runs slower with it.
+        Real CPU timing on: share of board CPU time per function (sketch, FastLED, core, interrupts by name), always on, does not slow sketch.</p>
+      <p><b>Memory</b> (Real CPU timing) — RAM of board as bar and table: variables (.data, .bss), heap, stack, free RAM between heap and stack; Now and Max / min since start
+        (free RAM is filled with pattern at reset, growing stack and heap overwrite it). Red dot on tab: little reserve left (under 100 B) or stack ran into variables. Flash use of build is shown too.</p>
+    </div>
+    <div class="card" data-sec="inputs">
+      <h3>Inputs</h3>
+      <p>Pins used by running sketch, as if wires were connected to board. Pin in <code>INPUT_PULLUP</code> mode is button to GND (press = LOW) —
+        D3 of GyverMatrix is its mode button. <code>INPUT</code> is button to 5V (press = HIGH; released, pin floats). Pins read by <code>analogRead()</code> get slider
+        (or noise, as unconnected). Outputs show level or PWM, FastLED pin — number of LEDs. Hold <b>Press</b>; <kbd>Shift</kbd>+click keeps it pressed.</p>
+    </div>
+    <div class="card" data-sec="offline">
+      <h3>Offline</h3>
+      <p>Site opened once (over https) starts without internet: page and scripts are kept in browser, also on iPhone / iPad home screen.
+        Compilers and library are kept once used; <b>Options → Offline → Make offline</b> downloads checked ones in advance (clang about 26 MB, avr-gcc about 16 MB),
+        <b>Clear files</b> drops them. When site does not answer, red <b>offline</b> is shown in LED window, left of fps. New build on server: page reloads into it by itself.</p>
+    </div>
+  </div>
+  <div class="body" data-lang="ru" lang="ru" hidden>
+    <div class="card" data-sec="keys">
+      <h3>Клавиши</h3>
+      <table class="keys">
+        <tr><td><kbd>Ctrl</kbd>+<kbd>O</kbd></td><td>Загрузить проект: локальный файл</td></tr>
+        <tr><td><kbd>Ctrl</kbd>+<kbd>S</kbd></td><td>Сохранить проект (.zip)</td></tr>
+        <tr><td><kbd>F5</kbd></td><td>Компиляция и запуск / остановка</td></tr>
+        <tr><td><kbd>F7</kbd>, <kbd>Ctrl</kbd>+<kbd>R</kbd></td><td>Только компиляция</td></tr>
+        <tr><td><kbd>Ctrl</kbd>+<kbd>U</kbd></td><td>Залить в плату (USB)</td></tr>
+        <tr><td><kbd>F10</kbd> / <kbd>F11</kbd> / <kbd>Shift</kbd>+<kbd>F11</kbd></td><td>Отладчик: шаг с обходом / с заходом / выход; <kbd>F5</kbd> — продолжить</td></tr>
+        <tr><td><kbd>F6</kbd></td><td>Окно LED</td></tr>
+        <tr><td><kbd>Space</kbd></td><td>Пауза / продолжить скетч (вне редактора)</td></tr>
+        <tr><td><kbd>Ctrl</kbd>+<kbd>J</kbd></td><td>Панель: Problems / Output / Serial monitor</td></tr>
+        <tr><td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>M</kbd></td><td>Problems</td></tr>
+        <tr><td><kbd>Ctrl</kbd>+<kbd>,</kbd></td><td>Options</td></tr>
+        <tr><td><kbd>F1</kbd></td><td>Справка</td></tr>
+        <tr><td><kbd>Alt</kbd>+<kbd>1</kbd>…<kbd>9</kbd></td><td>Вкладка 1…9</td></tr>
+        <tr><td><kbd>Ctrl</kbd>+<kbd>F</kbd> / <kbd>Ctrl</kbd>+<kbd>H</kbd></td><td>Найти / заменить в файле</td></tr>
+        <tr><td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>F</kbd></td><td>Поиск по всем файлам (поле в панели инструментов)</td></tr>
+        <tr><td><kbd>Alt</kbd>+<kbd>G</kbd></td><td>Перейти к строке</td></tr>
+        <tr><td><kbd>Ctrl</kbd>+<kbd>Z</kbd> / <kbd>Ctrl</kbd>+<kbd>Y</kbd></td><td>Отменить / повторить (у каждой вкладки своя история)</td></tr>
+        <tr><td><kbd>Ctrl</kbd>+<kbd>/</kbd></td><td>Закомментировать / раскомментировать строки</td></tr>
+        <tr><td><kbd>Ctrl</kbd>+<kbd>D</kbd></td><td>Выделить следующее вхождение</td></tr>
+        <tr><td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>[</kbd> / <kbd>]</kbd></td><td>Свернуть / развернуть блок</td></tr>
+        <tr><td><kbd>Alt</kbd>+<kbd>↑</kbd> / <kbd>↓</kbd></td><td>Переместить строку вверх / вниз</td></tr>
+        <tr><td><kbd>Esc</kbd></td><td>Закрыть верхнее окно</td></tr>
+      </table>
+    </div>
+    <div class="card" data-sec="project">
+      <h3>Проект</h3>
+      <p class="note"><b>Get W×H</b> (панель инструментов, после Load) — берёт <code>WIDTH</code> и <code>HEIGHT</code> из скетча в окно LED (также <code>MATRIX_WIDTH</code>, <code>kMatrixWidth</code>…); если сборка работает с другим размером из поля размера, она пересобирается с размером скетча.
+        При загрузке проекта окно LED сохраняет свой размер, и сборка получает его вместо <code>WIDTH</code> / <code>HEIGHT</code> скетча (Options → LED → <b>W×H from sketch on load</b> включено: окно берёт размер скетча); схема подключения (<code>MATRIX_TYPE</code>, <code>CONNECTION_ANGLE</code>, <code>STRIP_DIRECTION</code>) берётся один раз; скетч без них получает схему из своей <code>XY()</code>: зигзаг, если там нечётные строки перевёрнуты (<code>y &amp; 1</code>, <code>y % 2</code>), иначе параллельная, от левого нижнего угла вправо; дальше схема задаётся в Options → LED.</p>
+      <p>Проект — .zip со скетчем: главный <b>.ino</b> и другие файлы .ino, .h, .c, .cpp (папка скетча Arduino IDE, упакованная в zip).
+        Каждый файл открывается в своей вкладке, главный — первым; вкладки можно перетаскивать; × на вкладке удаляет файл из проекта (с подтверждением; последний файл закрывает проект). Изменённый файл помечен <span style="color:var(--tab-mod);font-weight:700">*</span>, пока проект не сохранён.
+        Отдельные файлы .ino / .h добавляются в открытый проект.</p>
+      <p><b>Load</b> ▾ открывает меню: <b>Local file…</b> (<kbd>Ctrl</kbd>+<kbd>O</kbd> или перетащить файл на страницу) и <b>Library</b> — проекты папки <code>repo/</code> на сервере (рядом с index.html), перечисленные в <code>repo/index.json</code>:</p>
+      <pre class="code">{ "items": [
+  { "file": "GyverMatrix.zip", "name": "GyverMatrix 24×12", "board": "mega" },
+  { "file": "soulmate/fire.c", "name": "Fire (Soulmate)" }
+] }</pre>
+      <p class="note"><code>file</code> — путь внутри repo/: проект .zip, скетч .c или .ino; <code>name</code> — текст в меню (если нет — имя файла); <code>board</code> (nano / mega) необязателен и выбирается при загрузке.
+        Простой список <code>["a.zip", "b.c"]</code> тоже работает. Пункт библиотеки всегда открывается как новый проект. При 10 и более пунктах в меню появляется поле фильтра.</p>
+      <p class="note">Save записывает весь проект обратно в .zip с теми же именами файлов, кодировками и концами строк. Файлы, которые не являются исходниками скетча, остаются в архиве нетронутыми.</p>
+    </div>
+    <div class="card" data-sec="compile">
+      <h3>Компиляция и запуск</h3>
+      <p><b>✓</b> (<kbd>F7</kbd>) только компилирует; <b>Start</b> (<kbd>F5</kbd>) компилирует и запускает скетч; <b>Pause</b> (<kbd>Space</kbd>) останавливает часы скетча; <b>Reset</b> запускает ту же сборку заново с <code>setup()</code>; <b>Catch-up</b> (⏭, также в Options → Build, по умолчанию выключен) — после пересборки работающего скетча (новый размер, профиль) он продолжает с того же момента, см. «Окно LED»; выключен — начинает сначала. Компилятор — clang (LLVM) в браузере:
+        в первый раз он скачивается (около 26 МБ), потом берётся из кэша браузера. Скетч, FastLED 3.7.8 и ядро Arduino работают как WebAssembly в реальном времени:
+        <code>millis()</code> и <code>delay()</code> настоящие (или масштабируются скоростью).</p>
+      <p class="note">Преобразования, которые g++ разрешает с <code>-fpermissive</code>, получают приведение типа и предупреждение в Problems. В отличие от AVR: <code>int</code> 32 бита, <code>double</code> 64 бита, пределы RAM / флеша не проверяются (в Real CPU timing — точный AVR, см. ниже).</p>
+      <p class="note"><b>Ограничение мощности</b>: скетч, который вызывает <code>FastLED.setMaxPowerInVoltsAndMilliamps()</code>, FastLED притемняет целиком, когда оценка тока выше предела, как на настоящей ленте
+        (например, 5 В, 1000 мА: белые линии на многих светодиодах выходят серыми); Output сообщает об этом после сборки. Options → Build → <b>Power limit of sketch</b> по умолчанию выключено: эти вызовы убираются из сборки; включите, чтобы увидеть, что сделает настоящая лента.</p>
+    </div>
+    <div class="card" data-sec="real">
+      <h3>Скорость и Real CPU timing</h3>
+      <p>Скетч работает в одном из двух режимов, переключаемых кнопкой <b>Real CPU timing</b> (чип с часами рядом с кнопкой окна LED; жёлтая — включено, по умолчанию выключено).</p>
+      <p><b>Выключено</b>: скетч компилируется clang в WebAssembly и работает так быстро, как может страница; <code>FastLED.show()</code> ждёт, чтобы кадры шли каждые 20 мс времени скетча — 50 fps при 1×.
+        <b>Скорость</b> (значок спидометра в окне LED): 0.1×…10× = 5…500 fps (двойной клик — 1×). Часы скетча (<code>millis()</code>, <code>micros()</code>, <code>delay()</code>) идут с той же скоростью,
+        поэтому эффекты, считающие кадры, и эффекты, считающие время, сохраняют пропорции. 3D, пересборка под размер, профиль-сборка и catch-up работают в этом режиме.</p>
+      <p><b>Включено</b>: скетч собирается avr-gcc, как для настоящей платы (см. «Прошивка для платы»), и его .hex исполняется на эмулированном ATmega328P (Nano) или ATmega2560 (Mega) на 16 МГц, команда за командой:
+        каждая задержка, прерывание и <code>FastLED.show()</code> длятся ровно столько, сколько на плате; <code>int</code> 16 бит, RAM 2 КБ (Nano) или 8 КБ (Mega), как на плате. Цвета светодиодов читаются с пина данных по длительности импульсов, как их читает лента (порядок цветов ленты: Options → LED → Display, GRB для WS2812B);
+        Serial monitor работает с USART0 (Serial; Serial1…3 у Mega тоже работают, их вывод не показывается), Inputs управляют пинами и АЦП (Mega: A0…A15); вкладки Memory и Profile панели показывают RAM и время процессора платы.
+        Скорость 1×, 3D, пересборка под размер, профиль-сборка и catch-up отключены; поле размера только раскладывает светодиоды, считанные с пина.
+        Если компьютер не успевает за 16 МГц, часы платы идут медленнее реального времени; строка состояния тогда показывает % от реальной скорости.</p>
+      <table class="keys">
+        <tr><td></td><td><b>Выключено</b></td><td><b>Включено</b></td></tr>
+        <tr><td>Программа</td><td>clang → WebAssembly</td><td>avr-gcc → .hex, как для платы</td></tr>
+        <tr><td>Тайминги</td><td>50 fps × скорость</td><td>точные, такты 16 МГц</td></tr>
+        <tr><td><code>int</code>, RAM</td><td>32 бита, без предела</td><td>16 бит, 2 КБ (Nano) / 8 КБ (Mega)</td></tr>
+        <tr><td>Скорость, 3D, пересборка под размер</td><td>да</td><td>нет</td></tr>
+        <tr><td>Вкладка Memory, профиль</td><td>профиль-сборка (медленнее)</td><td>RAM / стек платы, время процессора (бесплатно)</td></tr>
+        <tr><td>Платы</td><td>Nano, Mega</td><td>Nano, Mega</td></tr>
+      </table>
+      <p class="note">Включение или выключение во время работы скетча перезапускает его в новом режиме. fps в углу окна LED — кадры в секунду (вызовы <code>FastLED.show()</code>; в Real CPU timing — кадры, считанные с пина).</p>
+    </div>
+    <div class="card" data-sec="debug">
+      <h3>Отладчик (Real CPU timing)</h3>
+      <p><b>Точка останова</b>: клик по номеру строки (или чуть левее): слева от номера появляется красная точка; повторный клик убирает. При включённом Real CPU timing плата останавливается перед выполнением этой строки:
+        стрелка и подсветка показывают строку, строка состояния — где, в панели открывается вкладка <b>Debug</b> — стек вызовов (клик переходит к месту), регистры r0…r31, X / Y / Z, SP, PC, SREG (заглавная буква = флаг установлен), такты,
+        RAM в hex (поле адреса, ссылки на переменные и стек; изменившееся с прошлой остановки — жёлтым), список точек останова (× убирает; строка без своего кода переносится на следующую, «no code» — там остановки не будет).</p>
+      <p>Дальше: <b>Step over</b> (<kbd>F10</kbd>) — следующая строка, вызовы выполняются целиком; <b>Step into</b> (<kbd>F11</kbd>) — внутрь вызываемой функции скетча (код библиотек выполняется целиком);
+        <b>Step out</b> (<kbd>Shift</kbd>+<kbd>F11</kbd>) — до возврата из функции; <b>Continue</b> (<kbd>F5</kbd>, <kbd>Space</kbd> или кнопка паузы) — до следующей точки останова. Пауза во время работы сразу останавливает плату, как точка останова.
+        Прерывания (таймер millis, Serial) внутри шагов продолжают работать, их код проходится без остановки. Пока плата стоит, её время не идёт.</p>
+      <p class="note">Сборка оптимизирована, как в IDE (-Os, LTO): мелкие функции встраиваются в вызывающие, строки переставляются, у некоторых строк нет своего кода — шаги могут немного прыгать, как в любом отладчике оптимизированного кода.
+        Строка, которая только вызывает функцию, встроенную оптимизатором в вызывающую (<code>case 1: VUSpectrum();</code>), останавливается на начале этой копии; отметка остаётся на строке точки. Точка срабатывает, только когда строка действительно выполняется: в переключателе режимов — когда дойдёт до этого режима.
+        Переменные по именам будут позже; пока их видно в окне RAM (глобальные — с адреса 0x100).</p>
+    </div>
+    <div class="card" data-sec="binary">
+      <h3>Прошивка для платы (настоящая сборка)</h3>
+      <p>Кнопка с чипом и стрелкой (рядом с Save) собирает скетч для настоящей платы <b>avr-gcc 7.3.0</b> — тем же компилятором, с теми же флагами и шагами, что Arduino IDE 2
+        (Arduino AVR core 1.8.6, FastLED 3.7.8, оптимизация при компоновке). Результат байт в байт совпадает с IDE:
+        <code>.hex</code>, <code>.hex</code> с загрузчиком, <code>.elf</code> (с отладочной информацией), <code>.eep</code> или все сразу в .zip; <b>Build only</b> показывает отчёт о размере, как IDE.
+        Компилятор работает в браузере: в первый раз скачивается (около 16 МБ), потом берётся из кэша браузера; первая сборка за сеанс идёт на несколько секунд дольше.</p>
+      <p class="note">Проект собирается в том виде, в каком сохраняется (его кодировка и концы строк), с размерами из самого скетча: поле размера окна LED не применяется. Библиотеки находятся по <code>#include</code>, как в IDE:
+        FastLED, SPI, Wire, SoftwareSerial, EEPROM. Ошибки — в Problems, лог — в Output. Скетч .c (без .ino) собирается как в эмуляторе: его файлы .c и есть скетч, COLS / ROWS становятся WIDTH / HEIGHT, pattern.c даёт <code>setup()</code> / <code>loop()</code> (Options → Build).
+        Файл «с загрузчиком» использует загрузчик, выбранный в меню Upload.</p>
+    </div>
+    <div class="card" data-sec="upload">
+      <h3>Заливка в плату (USB)</h3>
+      <p><b>Upload</b> (стрелка в плату, рядом с кнопкой прошивки; <kbd>Ctrl</kbd>+<kbd>U</kbd>) делает настоящую сборку и записывает её в плату по USB, как Arduino IDE (avrdude): через загрузчик,
+        STK500v1 для Nano, STK500v2 для Mega 2560; проверяется сигнатура чипа, каждая страница читается обратно и сравнивается.
+        Нужен Web Serial: Chrome, Edge, Opera или новый Firefox на компьютере.</p>
+      <p><b>▾</b> рядом открывает меню: <b>Upload to board</b>; <b>Port</b> — <b>Choose port…</b>, пока порт не выбран, иначе его имя и <b>Change</b> (браузер спрашивает порт; выбор запоминается);
+        <b>Release port</b> — закрывает то, что страница держит на порту (Serial monitor), и забывает его, чтобы порт могли взять другие программы (Arduino IDE);
+        <b>Bootloader</b> для Nano (как меню Processor в IDE): <b>ATmega328P</b> — Optiboot, 115200 бод, Nano с 2018 года и большинство новых; <b>Old Bootloader</b> — 57600 бод, старые и многие клоны.
+        Заливка сначала пробует выбранный, потом другой; если ответил другой, он становится выбранным.</p>
+      <p><b>Монитор порта платы</b>: в панели Serial Monitor выберите скорость (как в <code>Serial.begin()</code> скетча) и нажмите <b>Connect board</b>; открытие порта перезагружает плату, как в IDE.
+        Пока плата подключена, строка ввода отправляет текст на неё. Заливка закрывает монитор и потом открывает снова.</p>
+      <p class="note">Порт может держать только одна программа: сначала закройте монитор порта Arduino IDE (или другой терминал), или нажмите здесь Release port перед работой в IDE.</p>
+    </div>
+    <div class="card" data-sec="usb">
+      <h3>Драйверы USB</h3>
+      <p>Браузер работает с платой через последовательный порт операционной системы, поэтому USB-UART чипу платы нужен его драйвер, как и для Arduino IDE (Web Serial его не заменяет).
+        Чип подписан на плате рядом с USB-разъёмом; после выбора порта его имя видно в меню Upload (CH340, CH9102, FT232R…).</p>
+      <table class="keys">
+        <tr><td><b>CH340 / CH341</b><br><span class="note">большинство клонов Nano</span></td><td>Windows: <a href="https://www.wch-ic.com/downloads/CH341SER_EXE.html" target="_blank" rel="noopener">CH341SER.EXE</a> (WCH); Windows 10 / 11 часто ставят его сами.<br>
+          macOS: <a href="https://www.wch-ic.com/downloads/CH34XSER_MAC_ZIP.html" target="_blank" rel="noopener">CH34XSER_MAC</a> (macOS 11 и новее: разрешить расширение драйвера в Системных настройках).<br>Linux: в ядре (ch341).</td></tr>
+        <tr><td><b>CH9102 / CH343</b><br><span class="note">многие платы с USB-C</span></td><td>Windows: <a href="https://www.wch-ic.com/downloads/CH343SER_ZIP.html" target="_blank" rel="noopener">CH343SER</a> (WCH; драйвер CH340 его не обслуживает).<br>
+          macOS: тот же <a href="https://www.wch-ic.com/downloads/CH34XSER_MAC_ZIP.html" target="_blank" rel="noopener">CH34XSER_MAC</a>.<br>Linux: обычно работает как USB CDC (cdc_acm) ядра, иначе драйвер WCH ch343ser_linux.</td></tr>
+        <tr><td><b>FT232R / FT231X</b><br><span class="note">оригинальная Nano (старая), некоторые клоны</span></td><td>Windows: приходит через Windows Update, иначе <a href="https://ftdichip.com/drivers/vcp-drivers/" target="_blank" rel="noopener">FTDI VCP drivers</a>.<br>macOS, Linux: встроен.</td></tr>
+        <tr><td><b>CP2102</b></td><td><a href="https://www.silabs.com/developers/usb-to-uart-bridge-vcp-drivers" target="_blank" rel="noopener">Silicon Labs VCP drivers</a> (Windows, macOS); Linux: встроен.</td></tr>
+        <tr><td><b>ATmega16U2</b><br><span class="note">оригинальные Mega 2560, Uno</span></td><td>Windows 10 / 11, macOS, Linux: встроен (USB CDC); Windows 7 / 8: драйвер из Arduino IDE.</td></tr>
+      </table>
+      <p class="note">Linux: пользователь должен быть в группе <code>dialout</code> (<code>sudo usermod -aG dialout $USER</code>, потом войти заново); в Ubuntu пакет <code>brltty</code> захватывает порты CH340 — удалите его (<code>sudo apt remove brltty</code>).
+        Если порта нет в списке браузера: другой кабель (многие только для зарядки), другой USB-разъём, проверьте Диспетчер устройств (Windows) на неизвестное устройство.
+        Если загрузчик не отвечает: правильная плата (Nano / Mega) и загрузчик, порт не занят другой программой, попробуйте Old Bootloader / ATmega328P.</p>
+    </div>
+    <div class="card" data-sec="order">
+      <h3>Порядок файлов при компиляции</h3>
+      <p>Как в Arduino IDE, все файлы <b>.ino</b> папки скетча становятся одним файлом C++:</p>
+      <p>1. Первым ставится <code>#include &lt;Arduino.h&gt;</code>.<br>
+        2. Главный .ino (названный как проект или тот, где <code>setup()</code> и <code>loop()</code>) идёт первым, затем остальные .ino по алфавиту без учёта регистра (в настоящей сборке — как в IDE, заглавные первыми). Порядок вкладок не важен.<br>
+        3. Прототипы всех функций вставляются перед первым определением функции, поэтому функцию можно вызывать до её определения из любого .ino.<br>
+        4. Метки <code>#line</code> сохраняют имена файлов и номера строк в ошибках.</p>
+      <p class="note">Поэтому глобальные переменные и типы одного .ino видны в .ino, идущих после него, но не до. Файлы .h сами не компилируются: они включаются там, где стоит <code>#include</code>. Файлы .c / .cpp папки скетча (и src/) компилируются отдельно, каждый должен подключать то, что ему нужно (<code>Arduino.h</code>, <code>FastLED.h</code>).
+        Прототипы не создаются для функций с аргументами по умолчанию и для шаблонов — объявите их сами.</p>
+    </div>
+    <div class="card" data-sec="led">
+      <h3>Окно LED</h3>
+      <p>Управление в заголовке окна: <b>размер</b> (24x12, 24-12, 2412) — Enter или выход из поля пересобирает скетч с этими <code>WIDTH</code> и <code>HEIGHT</code> (только для этой сборки, код не меняется; при включённом catch-up работающий скетч продолжает с того же момента, новый размер показывается, когда новая сборка догонит;
+        <code>#define NUM_LEDS 256</code>, заданный числом, равным старому WIDTH × HEIGHT, следует за новым размером),
+        <b>скорость</b> (см. «Скорость и Real CPU timing»), <b>fit</b> — окно по матрице, меню <b>эффектов</b> ▾ (сетка, координаты под курсором, маршрут ленты — линия от <code>leds[0]</code> по индексам, зелёная точка в начале). Закрытие окна останавливает скетч.</p>
+      <p><b>3D</b> натягивает матрицу (как её показывает окно, после поворота / зеркала) на фигуру; ▾ рядом: фигура, режим, вращение.
+        <b>Cylinder</b> — матрица — его бок: столбцы идут по кругу, строки вниз, поэтому бегущая строка бежит вокруг цилиндра. <b>Sphere</b> — столько точек, сколько светодиодов, разложенных по золотому углу; каждая точка показывает светодиод под своей долготой (x) и широтой (y, верхняя строка на северном полюсе).
+        <b>Globe</b> — сетка широт / долгот: строки — параллели, столбцы — меридианы, светодиоды сгущаются к полюсам (как на настоящих LED-сферах, карты вроде Земли ложатся лучше всего).
+        <b>Torus</b> — столбцы идут вокруг кольца, строки вокруг трубки (средняя строка снаружи); текст бежит вокруг.
+        <b>Disc</b> (полярный) — строки — кольца от центра наружу, столбцы — угол по часовой стрелке от верха: круглые панели, огонь, туннели, Lotus.
+        <b>Dome</b> (полярный) — то же на полусфере, обращённой к вам, строка 0 на полюсе.
+        <b>Dots</b> — точка на светодиод, задняя сторона тусклее (размер точки и высота цилиндра: Options → LED → 3D); <b>Solid</b> (WebGL) — освещённая фигура со светодиодами-кружками на тёмной поверхности.
+        Перетаскивание вращает (бросок продолжает вращение), колесо / щипок / правая+левая кнопки — масштаб, двойной клик — обычный размер и вид спереди; <b>fit</b> делает окно квадратным вокруг фигуры текущего размера. <b>Rotate</b> включено — фигура сама вращается, когда её не трогают; выключено — остаётся как оставили.</p>
+      <p>В панели инструментов рядом с кнопкой окна LED, в своей группе: <b>пересборка</b> с размером из поля (то же, что Enter в нём), <b>Real CPU timing</b> (чип с часами: переключатель, жёлтый, когда включён), <b>поворот</b> вида на 90° по часовой (действие: каждый клик добавляет 90°, угол кроме 0° показан маленьким числом на кнопке), <b>зеркало</b> по горизонтали (переключатель, подсвечен, когда включён), окно <b>inputs</b> (синее, пока открыто; зелёная точка — скетч читает пины: кнопки, потенциометры).</p>
+      <p class="note">Catch-up (продолжить с того же момента): новая сборка быстро идёт (без ожиданий и кадров) от начала до времени старой, повторяя входы (кнопки, ползунки, ввод Serial) и тот же шум висящих пинов,
+        поэтому то, что идёт по времени (смена режимов по <code>millis()</code>), приходит в то же место; массивы по WIDTH / HEIGHT заполняются заново.</p>
+      <p class="note">Светодиоды растут и уменьшаются вместе с окном, до 1 пикселя экрана на светодиод; окно не бывает уже своего заголовка. fps в углу — вызовы <code>FastLED.show()</code> в секунду.
+        Схема подключения (зигзаг / параллельная, начальный угол, направление) и цвета — в Options → LED.</p>
+    </div>
+    <div class="card" data-sec="csketch">
+      <h3>Скетчи .c</h3>
+      <p>Проект (или один файл) из файлов <b>.c</b> без .ino — тоже скетч, в стиле Soulmate / редактора soulmatelights: часто только <code>draw()</code> и глобальные переменные, размеры как <code>LED_COLS</code> / <code>LED_ROWS</code> или <code>COLS</code> / <code>ROWS</code>.
+        Файлы .c компилируются как C++, как .ino (склеиваются по алфавиту, добавляются прототипы).</p>
+      <p>При загрузке сам текст скетча меняется, чтобы редактор показывал то, что компилируется (изменённые файлы получают *, Save сохраняет изменения):<br>
+        1. <code>LED_COLS</code>, <code>COLS</code> → <code>WIDTH</code>; <code>LED_ROWS</code>, <code>ROWS</code> → <code>HEIGHT</code> (Options → Build, включено по умолчанию). Define, ставшие <code>#define WIDTH (WIDTH)</code>, комментируются.<br>
+        2. Если в скетче нет <code>setup()</code>, вставляется <b>pattern.c</b> из корня сервера (Options → Build, включено по умолчанию): его include, define и глобальные переменные идут в начало файла
+        (между метками <code>// ===== pattern.c</code>), его функции (<code>XY()</code>, <code>setup()</code>, <code>loop()</code>, вызывающая <code>draw()</code> и <code>FastLED.show()</code>) — в конец. То, что есть в самом скетче, комментируется в pattern
+        (<code>#define NUM_LEDS (N_LEDS)</code> скетча встаёт на место такого же в pattern, строка скетча комментируется).</p>
+      <p class="note">Если при сборке в скетче всё ещё нет <code>setup()</code> (опция была выключена при загрузке), pattern.c добавляется только в сборку, ошибки в нём показываются как pattern.c:строка; он читается с сервера заново при каждой сборке.
+        Его размер (16×16) находит Get W×H, когда у скетча нет своих размеров; поле размера, как обычно, его переопределяет.</p>
+    </div>
+    <div class="card" data-sec="panel">
+      <h3>Панель</h3>
+      <p><b>Problems</b> — ошибки и предупреждения, клик открывает место; они также подчёркнуты в редакторе. <b>Output</b> — лог компилятора.
+        <b>Search</b> — результаты поля поиска в панели инструментов: все файлы проекта, по мере ввода (Aa — учитывать регистр, ab — слово целиком, .* — регулярное выражение); клик выделяет совпадение в его файле.
+        <b>Serial Monitor</b> — <code>Serial.print</code> скетча; строка внизу отправляет текст в <code>Serial.read()</code>; скорость и <b>Connect board</b> — монитор настоящей платы (см. «Заливка в плату»). <kbd>Ctrl</kbd>+<kbd>J</kbd> показывает / скрывает панель.</p>
+      <p><b>Profile</b> — при выключенном Real CPU timing: с профиль-сборкой каждая функция файлов .ino получает таймер: вызовы в секунду, Busy (время самой функции с вызовами библиотек), Waits (<code>delay()</code>, ожидание кадра в <code>FastLED.show()</code> внутри неё),
+        Total (с вызванными функциями скетча), функция, вызывающая <code>FastLED.show()</code>, отмечена ▶; включение во время работы скетча пересобирает его (при включённом catch-up — с того же момента); скетч с ней работает медленнее.
+        При включённом Real CPU timing: доля процессорного времени платы по функциям (скетч, FastLED, ядро, прерывания по именам), всегда включено, скетч не замедляет.</p>
+      <p><b>Memory</b> (Real CPU timing) — RAM платы полосой и таблицей: переменные (.data, .bss), куча, стек, свободная RAM между кучей и стеком; «сейчас» и максимум / минимум с начала
+        (свободная RAM при сбросе заполняется узором, растущие стек и куча его затирают). Красная точка на вкладке: мало запаса (меньше 100 Б) или стек наехал на переменные. Показан и расход флеша сборки.</p>
+    </div>
+    <div class="card" data-sec="inputs">
+      <h3>Inputs</h3>
+      <p>Пины, которые использует работающий скетч, как если бы к плате были подключены провода. Пин в режиме <code>INPUT_PULLUP</code> — кнопка на GND (нажата = LOW) —
+        D3 в GyverMatrix — кнопка режимов. <code>INPUT</code> — кнопка на 5V (нажата = HIGH; отпущена — пин висит). Пины, читаемые <code>analogRead()</code>, получают ползунок
+        (или шум, как неподключённые). Выходы показывают уровень или ШИМ, пин FastLED — число светодиодов. Удерживайте <b>Press</b>; <kbd>Shift</kbd>+клик оставляет её нажатой.</p>
+    </div>
+    <div class="card" data-sec="offline">
+      <h3>Офлайн</h3>
+      <p>Сайт, открытый хотя бы раз (по https), запускается без интернета: страница и скрипты хранятся в браузере, в том числе на экране «Домой» iPhone / iPad.
+        Компиляторы и библиотека сохраняются, когда ими воспользовались; <b>Options → Offline → Make offline</b> заранее скачивает отмеченное (clang около 26 МБ, avr-gcc около 16 МБ),
+        <b>Clear files</b> удаляет. Если сайт не отвечает, в окне LED слева от fps горит красное <b>offline</b>. Новая сборка на сервере: страница сама перезагружается в неё.</p>
+    </div>
+  </div>
+  <div class="rz se" data-rz="se"></div><div class="rz e" data-rz="e"></div><div class="rz s" data-rz="s"></div>
+</div>
+
+<div id="askwin" hidden role="alertdialog" aria-modal="true"><div class="askbox"><p id="askmsg"></p><div class="askbtns"><button class="btn primary" id="askok">OK</button><button class="btn" id="askno">Cancel</button></div></div></div>
+<div id="toast"></div>
+<script src="js/unzip.js?v=20261028193402"></script>
+<script src="js/editor.js?v=20261028193402"></script>
+<script src="js/led3d.js?v=20261028193402"></script>
+<script src="js/app.js?v=20261028193402"></script>
+</body>
+</html>
