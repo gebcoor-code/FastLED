@@ -72,6 +72,9 @@ avr-libc 2.0.0 (with Arduino patch: malloc margin)
   avr-libc developers. Modified BSD license.
   https://github.com/avrdudes/avr-libc
 
+REST API kit (web/js/rest.js, web/js/rest-builder.js)
+  Web Unreal Speccy authors. MIT license.
+
 avr8js 0.21
   Uri Shaked and contributors. MIT license.
   https://github.com/wokwi/avr8js

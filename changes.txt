@@ -602,3 +602,16 @@ Web FastLED — version history
 
 @ compiler: rt/llvm.core.wasm.gz comes as four parts of 5.5 MB
   (llvm.core.wasm.p1.gz … p4.gz) instead of two of 11 MB
+
+
+        version 0.31.0                  8 nov 2026
+
++ REST API: link to page with parameters opens it as set —
+  index.html?project=GyverMatrixOS_v1.12_24x12.zip&w=24&h=12&3d=1&shape=
+  cylinder&run=1 (or same after #: open page takes it without reload);
+  keys: project (library file or name, or path / URL of .zip, .ino, .c),
+  board, w, h (size=24x12), 3d, shape, solid, spin, speed, real, run;
+  what link sets is for this visit only (visitor's settings and session
+  stay); errors go to Output, rest of link still applies
++ Options -> REST API: link builder (key on / off, value, Current — what
+  is open now, Copy, Open)

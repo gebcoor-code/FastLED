@@ -1,11 +1,13 @@
 // Web FastLED — UI: projects (zip), editor tabs, themes, options, LED matrix window.
 (function () {
   'use strict';
-  const VERSION = '0.30.2';
-  const BUILD = '20261028193402';
+  const VERSION = '0.31.0';
+  const BUILD = '20261108131927';
   const $ = (id) => document.getElementById(id);
   const load = (k) => { try { return localStorage.getItem('wfl.' + k); } catch (e) { return null; } };
-  const store = (k, v) => { try { localStorage.setItem('wfl.' + k, v); } catch (e) {} };
+  // REST API link (?project=…&w=…): what it sets is for this visit only — these keys are not stored then
+  const linkHold = new Set();
+  const store = (k, v) => { if (linkHold.has(k)) return; try { localStorage.setItem('wfl.' + k, v); } catch (e) {} };
   const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
   let toastT = 0;
@@ -372,17 +374,22 @@
       if (!r.ok) throw new Error(r.status === 404 ? 'not found (404)' : 'HTTP ' + r.status);
       buf = new Uint8Array(await r.arrayBuffer());
     } catch (e) { toast(base + ': ' + e.message, true); return; }
-    const b = BOARDS.find((x) => x.id === it.board);
-    if (it.ext === 'zip') {
+    await openBytes(base, buf, it.board, it.file);
+  }
+  // project from bytes of .zip / .ino / .c (library, link); board: nano / mega or ''; src: name for links (Options -> REST API)
+  async function openBytes(base, buf, boardId, src) {
+    const b = BOARDS.find((x) => x.id === boardId);
+    if (/\.zip$/i.test(base)) {
       const was = project;
       await loadFiles([new File([buf], base)]);
-      if (b && project !== was) setBoard(b);
-      return;
+      if (project !== was) { if (b) setBoard(b); project.src = src; }
+      return project !== was;
     }
     const x = mkFile(base, buf);
-    if (x.kind === 'bin') { toast(base + ': not text file', true); return; }
+    if (x.kind === 'bin') throw new Error('not text file');
     if (b) setBoard(b);
-    project = null; openProject(base.replace(/\.[^.]*$/, ''), [x]);
+    project = null; openProject(base.replace(/\.[^.]*$/, ''), [x]); project.src = src;
+    return true;
   }
   function loadMenu(anchor) {
     const pop = $('loadpop');
@@ -561,7 +568,7 @@
   function saveSessionSoon() { clearTimeout(sessT); sessT = setTimeout(saveSession, 700); }
   function saveSession() {
     clearTimeout(sessT);
-    if (!edOpts.keep) return;
+    if (!edOpts.keep || linkHold.has('session')) return; // project of link: visitor's own session stays
     if (!project) { DB.del('session').catch(() => {}); return; }
     const s = {
       v: 1, name: project.name, active: project.active && project.active.path, ordered: true,
@@ -1141,7 +1148,7 @@
     if (cOpts.pattern) await loadPattern();
     if (project !== pr) return;
     let sk;
-    try { sk = await import('./sketch.js?v=20261028193402'); } catch (e) { outLine('sketch.js cannot be loaded: ' + e.message); return; }
+    try { sk = await import('./sketch.js?v=20261108131927'); } catch (e) { outLine('sketch.js cannot be loaded: ' + e.message); return; }
     const cf = pr.files.filter((f) => f.ext === 'c' && f.kind === 'src' && !f.path.slice(pr.prefix.length).includes('/'));
     if (!cf.length) return;
     const codes = {};
@@ -1191,7 +1198,7 @@
   function ensureCompiler() {
     if (compiler) return compiler;
     compilerState = 'loading'; compilerPct = 0;
-    try { compiler = new Worker('js/compiler.js?v=20261028193402', { type: 'module' }); }
+    try { compiler = new Worker('js/compiler.js?v=20261108131927', { type: 'module' }); }
     catch (e) { compilerState = 'fail'; outLine('Cannot start compiler: ' + e.message); return null; }
     compiler.onmessage = (e) => {
       const m = e.data;
@@ -1283,7 +1290,7 @@
   function ensureAvr() {
     if (avr) return avr;
     avrState = 'loading'; avrPct = 0;
-    try { avr = new Worker('js/avr-worker.js?v=20261028193402', { type: 'module' }); }
+    try { avr = new Worker('js/avr-worker.js?v=20261108131927', { type: 'module' }); }
     catch (e) { avrState = 'fail'; outLine('Cannot start avr-gcc: ' + e.message); return null; }
     avr.onmessage = (e) => {
       const m = e.data;
@@ -1413,7 +1420,7 @@
     building = false; buildUI();
     if (!r) return null;
     if (lastBuild && lastBuild.real && lastBuild.key === r.key) return lastBuild;
-    if (!dbgMod) dbgMod = await import('./avr-dwarf.js?v=20261028193402');
+    if (!dbgMod) dbgMod = await import('./avr-dwarf.js?v=20261108131927');
     return (lastBuild = { key: r.key, real: true, hex: r.hex, elf: r.elf, funcs: r.funcs, lines: r.lines, board: board.id, prof: null, size: r.size });
   }
   // ---------------------------------------------------------------- USB (Web Serial): upload through bootloader as avrdude does,
@@ -1446,7 +1453,7 @@
     usbPort = p; store('usbport', portKey(p)); hexUI();
     return p;
   }
-  async function usbMod() { if (!upMod) upMod = await import('./avr-upload.js?v=20261028193402'); return upMod; }
+  async function usbMod() { if (!upMod) upMod = await import('./avr-upload.js?v=20261108131927'); return upMod; }
   const BOOT_BAUD = { atmega328: 115200, atmega328old: 57600, atmega2560: 115200 };
   async function upload() {
     if (!project || upBusy || avrBusy) return;
@@ -2385,11 +2392,121 @@ void loop() {
     } catch (e) {}
   }
 
-  buildBoards(); bindOptions(); bindLed(); bindHelp(); bindPanel(); bindSearch(); bind(); bindOffline(); bindNet();
+  // ---------------------------------------------------------------- REST API: page started in given state by its link
+  //   index.html?project=GyverMatrixOS_v1.12_24x12.zip&w=24&h=12&3d=1&shape=cylinder&run=1   (or same after #)
+  // One list of keys (LINK) for parser, link builder (Options -> REST API) and Help. What link sets is for this visit only:
+  // LED settings, board and Real CPU timing are not stored, visitor's own session (open project) is neither restored nor
+  // overwritten when link brings project
+  const SHAPES = ['cylinder', 'sphere', 'globe', 'torus', 'disc', 'dome'];
+  const SHAPE_ALIAS = { cyl: 'cylinder', tube: 'cylinder', ball: 'sphere', ring: 'torus', donut: 'torus', polar: 'disc', hemisphere: 'dome' };
+  const BOARD_ALIAS = { nano: 'nano', atmega328p: 'nano', atmega328: 'nano', '328': 'nano', '328p': 'nano', mega: 'mega', mega2560: 'mega', atmega2560: 'mega', '2560': 'mega' };
+  const LINK = {
+    keys: { project: { alias: ['p', 'file', 'sketch'] }, board: { alias: ['mcu'] }, w: { alias: ['width'] }, h: { alias: ['height'] }, '3d': { alias: ['view3d'] },
+      shape: { alias: ['figure'] }, solid: {}, spin: { alias: ['rotate3d'] }, speed: {}, real: { alias: ['realcpu'] }, run: { alias: ['autorun', 'start'] } },
+    put(o, k, v) { // size=24x12 → w, h (any form of size box)
+      if (k !== 'size') return false;
+      const z = parseSize(v); if (z) { o.w = String(z[0]); o.h = String(z[1]); } else o.size = v;
+      return true;
+    },
+  };
+  const linkErr = (t) => { outLine(t); toast(t, true); };
+  function linkNum(v, lo, hi, what) {
+    const n = Math.round(+v);
+    if (!isFinite(n) || n < lo || n > hi) throw new Error(`${what} ${lo}…${hi}`);
+    return n;
+  }
+  // project= : library item (file of repo/index.json, with or without extension, or its name) or path / URL of .zip / .ino / .c
+  async function linkProject(v) {
+    if (!libItems) await libLoadList();
+    const n = (x) => String(x).toLowerCase().replace(/[\s_×x-]/g, '');
+    const it = (libItems || []).find((i) => i.file.toLowerCase() === v.toLowerCase() || i.file.replace(/\.[^.]*$/, '').toLowerCase() === v.toLowerCase() || n(i.name) === n(v));
+    if (it) {
+      const buf = await RestLink.fetchFile(REPO + it.file.split('/').map(encodeURIComponent).join('/'));
+      return openBytes(it.file.replace(/^.*\//, ''), buf, it.board, it.file);
+    }
+    if (!/\.(zip|ino|c)$/i.test(v.replace(/[?#].*$/, ''))) throw new Error('not in library (repo/index.json) and not .zip / .ino / .c file');
+    const buf = await RestLink.fetchFile(v);
+    return openBytes(RestLink.urlName(RestLink.resolve(v)), buf, '', v);
+  }
+  async function linkApply(link) {
+    const err = { error: linkErr }, L = RestLink;
+    const ledKeys = ['w', 'h', '3d', 'shape', 'solid', 'spin'];
+    if (ledKeys.some((k) => link[k] !== undefined)) linkHold.add('led');
+    if (link.board !== undefined) linkHold.add('board');
+    if (link.real !== undefined) linkHold.add('realcpu');
+    if (link.size !== undefined) linkErr('Link: size: ' + link.size + ': not size (24x12)');
+    await L.apply(link, 'before', [
+      { key: 'real', run: (v) => setReal(L.yes(v), true) },
+    ], err);
+    await L.apply(link, 'media', [
+      { key: 'project', run: async (v) => { linkHold.add('session'); await linkProject(v); } },
+    ], err);
+    await L.apply(link, 'after', [
+      { key: 'board', run: (v) => { const id = L.pick(v, BOARD_ALIAS, BOARDS.map((b) => b.id)); if (!id) throw new Error('unknown board (nano, mega)'); setBoard(BOARDS.find((b) => b.id === id)); } },
+      { key: ['w', 'h'], run: () => {
+        const w = link.w !== undefined ? linkNum(link.w, 1, 256, 'width') : led.w, h = link.h !== undefined ? linkNum(link.h, 1, 256, 'height') : led.h;
+        setLed({ w, h }); pendingSize = null; sizeOverride = null; if (project) ledSizeSync(); fitWin(); // build gets this size
+      } },
+      { key: 'shape', run: (v) => { const sh = L.pick(v, SHAPE_ALIAS, SHAPES); if (!sh) throw new Error('unknown shape (' + SHAPES.join(', ') + ')'); setLed({ shape3: sh, v3d: link['3d'] === undefined ? true : led.v3d }); } },
+      { key: '3d', run: (v) => setLed({ v3d: L.yes(v) }) },
+      { key: 'solid', run: (v) => setLed({ mode3: L.yes(v) ? 'solid' : 'dots' }) },
+      { key: 'spin', run: (v) => setLed({ rot3: L.yes(v) }) },
+      { key: ['3d', 'shape', 'solid', 'spin'], run: () => { if (ui3dRef) ui3dRef(); } },
+      { key: 'speed', run: (v) => { const x = +String(v).replace(/x$/i, ''); if (!(x > 0)) throw new Error('speed 0.1…10'); setSpeed(SPEEDS.reduce((a, b) => (Math.abs(b - x) < Math.abs(a - x) ? b : a))); } },
+    ], err);
+    await L.apply(link, 'run', [
+      { key: 'run', run: async (v) => { if (!L.yes(v)) return; if (!project) throw new Error('no project'); if (!running) await start(); } },
+    ], err);
+  }
+  // link builder: Options -> REST API
+  let linkBuilder = null;
+  function bindRest() {
+    const host = $('restbox');
+    $('options').querySelector('.tabs button[data-tab="rest"]').addEventListener('click', async () => {
+      if (!libItems) await libLoadList();
+      if (linkBuilder) { linkBuilder.update(); return; }
+      linkBuilder = RestBuilder.create(host, {
+        rows: [
+          { key: 'project', type: 'file', placeholder: 'library file, or path / URL of .zip, .ino, .c', title: 'project of library (repo/index.json) or file on site; another site needs CORS',
+            list: () => (libItems || []).map((i) => [i.file, i.name]), on: true },
+          { key: 'board', type: 'select', options: BOARDS.map((b) => [b.id, b.name]), title: 'board (library item brings its own)' },
+          { key: 'w', type: 'text', placeholder: '1…256', title: 'width of matrix: build gets it instead of sketch\'s WIDTH' },
+          { key: 'h', type: 'text', placeholder: '1…256', title: 'height of matrix: build gets it instead of sketch\'s HEIGHT' },
+          { key: '3d', type: 'flag', title: '3D view on' },
+          { key: 'shape', type: 'select', options: SHAPES.map((x) => [x, x[0].toUpperCase() + x.slice(1)]), title: 'figure of 3D view (turns 3D on)' },
+          { key: 'solid', type: 'flag', title: '3D: solid (WebGL) instead of dots' },
+          { key: 'spin', type: 'select', options: [['0', 'off'], ['1', 'on']], title: '3D: rotation when idle' },
+          { key: 'speed', type: 'select', options: SPEEDS.map((x) => [String(x), fmtX(x)]), title: 'sketch speed (without Real CPU timing)' },
+          { key: 'real', type: 'select', options: [['1', 'on'], ['0', 'off']], title: 'Real CPU timing (real build on emulated AVR)' },
+          { key: 'run', type: 'flag', title: 'start sketch after loading' },
+        ],
+        extra: (q, val, on) => {
+          const n = [];
+          if (on('real') && val('real') === '1' && (on('w') || on('h') || on('3d') || on('shape') || on('speed'))) n.push('real=1: sketch runs as it is — size, 3D and speed do not apply');
+          if (on('run') && !on('project')) n.push('run= starts project visitor has open');
+          return n.join('; ');
+        },
+        current: () => ({
+          project: project && project.src ? project.src : false, board: board.id, w: String(led.w), h: String(led.h), '3d': !!led.v3d,
+          shape: led.v3d ? led.shape3 || 'cylinder' : false, solid: !!led.v3d && led.mode3 === 'solid', spin: led.v3d && led.rot3 === false ? '0' : false,
+          speed: simSpeed !== 1 ? String(simSpeed) : false, real: realOn ? '1' : false, run: running,
+        }),
+      });
+      $('restnote').textContent = project && !project.src ? 'Open project came from this computer: link can carry only projects of library or site' : '';
+    });
+  }
+
+  buildBoards(); bindOptions(); bindLed(); bindHelp(); bindPanel(); bindSearch(); bind(); bindOffline(); bindNet(); bindRest();
   $('profbtn').onclick = () => setProfile(!profOn); profUI(null);
   applyTheme(); applyEdOpts(); projectUI();
   requestAnimationFrame(frame);
-  restoreSession();
+  const link0 = RestLink.parse(LINK);
+  (async () => {
+    if (link0.project === undefined) await restoreSession();
+    if (Object.keys(link0).length) await linkApply(link0);
+  })();
+  // index.html#project=…: open page takes link without reload
+  window.addEventListener('hashchange', () => { if (location.hash.includes('=')) { const l = RestLink.parse(LINK, location.href.replace(/\?[^#]*/, '')); if (Object.keys(l).length) linkApply(l); } });
   checkUpdate();
   swStart(); // offline copy (sw.js)
 })();

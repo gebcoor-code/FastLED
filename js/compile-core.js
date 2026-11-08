@@ -1,6 +1,6 @@
 // Web FastLED: compile Arduino project (sketch .ino + .h/.c/.cpp) with YoWASP clang into wasm module.
 // ES module shared by compiler worker (compiler.js) and node tests.
-import { BOARDS, compileFlags, linkFlags, preprocessSketch, parseDiagnostics, permissiveFixes, PROF_C, cNames, mergePattern, findFunctions, blankCode } from './sketch.js?v=20261028193402';
+import { BOARDS, compileFlags, linkFlags, preprocessSketch, parseDiagnostics, permissiveFixes, PROF_C, cNames, mergePattern, findFunctions, blankCode } from './sketch.js?v=20261108131927';
 const blankForSearch = (t) => blankCode(t); // comments / strings blanked, offsets kept
 
 // same in LLVM IR (for -O1 / -O2 / -Os): fptoui → fptosi to i64 + trunc

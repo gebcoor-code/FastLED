@@ -2,7 +2,7 @@
 // compiles projects on request.
 //   → { type: 'init' }                                   ← { type: 'progress', done, total } / { type: 'ready', ms } / { type: 'fail', error }
 //   → { type: 'compile', id, files, main, board, opt }   ← { type: 'log', id, line } / { type: 'result', id, ok, wasm, log, diagnostics, fixes, ms }
-import { compileProject } from './compile-core.js?v=20261028193402';
+import { compileProject } from './compile-core.js?v=20261108131927';
 
 const RT = new URL('../rt/', import.meta.url);
 let clang = null, sdk = null, initP = null;
