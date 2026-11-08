@@ -3,6 +3,8 @@
 Web IDE and emulator for Arduino + FastLED sketches — Arduino Nano (ATmega328P) and Arduino Mega 2560 (ATmega2560).
 Everything runs in browser: editor, compilers, emulator, upload to board. No install, no server-side code.
 
+https://gebcoor-code.github.io/FastLED/
+
 ## Features
 
 - **Editor** (CodeMirror 6): C / C++ highlighting, find / replace, search in all files of project, folding, multi-cursor,
