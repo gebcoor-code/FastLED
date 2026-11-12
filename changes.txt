@@ -628,3 +628,48 @@ Web FastLED — version history
   browser only)
 @ Options -> REST API: project is chosen from list (library, browser
   storage); values of what is open now are filled in when tab opens
+
+
+        version 0.32.1                  12 nov 2026
+
+@ Load menu: Library and Browser storage lists are folded under ›
+  (Open from library… of start screen opens Library list)
+
+
+        version 0.32.2                  12 nov 2026
+
+! Options -> REST API: open project was not filled in after page reload
+  (restored session) or when opened as local file of same name as library
+  / browser storage project
+@ Options -> REST API: project list is own drop-down (Library, Browser
+  storage), no taller than Options window
+@ Load menu is half of window high at most, scrolls inside
+
+
+        version 0.32.3                  12 nov 2026
+
+@ all scripts of js/ are one js/js.zip, page unpacks it itself (unzip
+  code is inside index.html): server needs only index.html, sw.js and
+  js/js.zip, old js/*.js can be deleted
+
+
+        version 0.33.0                  12 nov 2026
+
++ tab strip: + after tabs adds new file (.ino, .h, .c, .cpp, .txt);
+  double click on tab or F2 renames file in place (new name goes into
+  archive on Save)
++ Options -> FastLED: library in use (3.7.8, built in) with version
+  choice, where it is used, check for updates (latest release on GitHub)
+
+
+        version 0.34.0                  12 nov 2026
+
++ FastLED 3.10.9 for emulator: Options -> FastLED -> Version (3.7.8 built
+  in stays default); library comes as rt/fastled-3.10.9.tar.gz (about
+  5 MB, loaded on first build with it), patched for Web FastLED (frames
+  go to LED window, time of emulated board); all projects of library run
+  with it; compiling takes about twice as long. Board binary, upload and
+  Real CPU timing stay on 3.7.8 for now (with 3.10.9 chosen they say so)
++ REST API: fastled=3.10.9
+@ Options -> REST API: defaults of keys not checked are spin off, speed
+  1x, real off, shape globe

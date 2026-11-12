@@ -25,8 +25,8 @@ Everything runs in browser: editor, compilers, emulator, upload to board. No ins
   STK500v2 (Mega 2560); Serial monitor of real board.
 - **Offline**: site opened once starts without internet (service worker); Options → Offline downloads compilers
   and library in advance.
-- **FastLED** 3.7.8 built in (last version before big rework of library); Options → FastLED shows version in use and
-  checks GitHub for newer release.
+- **FastLED** 3.7.8 built in (last version before big rework of library) or 3.10.9 for emulator; Options → FastLED
+  chooses version and checks GitHub for newer release.
 - **REST API**: link opens page with project, matrix size, 3D view set and sketch running —
   `index.html?project=GyverMatrixOS_v1.12_24x12.zip&w=24&h=12&3d=1&shape=cylinder&run=1`; Options → REST API builds it.
 

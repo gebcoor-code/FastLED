@@ -2,7 +2,7 @@
 <html lang="en" data-theme="dark-plus">
 <head>
 <meta charset="utf-8">
-<meta name="build" content="20261112084515">
+<meta name="build" content="20261112124133">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="icon" href="icon.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -236,6 +236,9 @@ select option { background: var(--panel); color: var(--text); }
 #tabs { flex: none; display: flex; height: 35px; background: var(--panel); overflow-x: auto; overflow-y: hidden; scrollbar-width: thin; user-select: none; }
 #tabs::-webkit-scrollbar { height: 3px; }
 #tabs:empty { display: none; }
+#tabs .tabnew { flex: none; width: 32px; background: transparent; border: none; color: var(--dim); font-size: 18px; cursor: pointer; }
+#tabs .tabnew:hover { color: var(--text); background: var(--panel2); }
+#tabs .tab .nm[contenteditable] { outline: 1px solid var(--focus); background: var(--bg); padding: 0 3px; border-radius: 2px; cursor: text; }
 .tab { flex: none; display: flex; align-items: center; gap: 6px; height: 35px; padding: 0 14px 0 10px; background: var(--tab-bg); color: var(--tab-fg);
   border-right: 1px solid var(--tab-border); cursor: pointer; font-size: 13px; white-space: nowrap; position: relative; }
 .tab:hover { color: var(--tab-act-fg); }
@@ -353,7 +356,16 @@ table.keys td + td { color: var(--dim); }
 .mailimg { display: inline-block; width: 6.73em; height: 1.19em; vertical-align: -0.25em; background: currentColor;
   -webkit-mask: url(data:image/png;base64,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) center / contain no-repeat; mask: url(data:image/png;base64,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) center / contain no-repeat; }
 #changeslink { color: inherit; }
-/* REST API link builder (js/rest-builder.js) */
+/* REST API link builder (js/rest-builder.js); project: own list, as tall as Options window allows */
+.pdrop { position: relative; flex: 1; min-width: 0; }
+.pdrop > button { width: 100%; display: flex; align-items: center; gap: 6px; background: var(--bg); color: var(--text); border: 1px solid var(--line); border-radius: 4px; padding: 3px 6px; font: inherit; font-size: 12px; text-align: left; cursor: pointer; }
+.pdrop > button span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pdrop > button::after { content: '▾'; color: var(--dim); }
+.pdrop .pdlist { position: absolute; left: 0; right: 0; top: calc(100% + 2px); z-index: 5; overflow-y: auto; background: var(--panel); border: 1px solid var(--line); border-radius: 4px; box-shadow: 0 8px 20px var(--shadow); }
+.pdrop .pdlist[hidden] { display: none; }
+.pdrop .pdlist div { padding: 4px 8px; font-size: 12px; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pdrop .pdlist div:hover, .pdrop .pdlist div.on { background: var(--accent); color: var(--accent-fg); }
+.pdrop .pdlist .pdh { cursor: default; color: var(--dim); font-size: 11px; text-transform: uppercase; letter-spacing: .06em; background: none !important; }
 .rb-rows { display: grid; grid-template-columns: 1fr; gap: 3px; }
 .rb-row { display: flex; gap: 8px; align-items: center; min-height: 26px; cursor: pointer; }
 .rb-key { width: 64px; flex: none; color: var(--dim); font: 12px var(--ed-font); }
@@ -364,6 +376,10 @@ table.keys td + td { color: var(--dim); }
 .rb-bar { display: flex; gap: 6px; justify-content: flex-end; }
 .rb-bar button { background: var(--panel); color: var(--text); border: 1px solid var(--line); border-radius: 5px; padding: 4px 12px; cursor: pointer; }
 .rb-bar button:hover { border-color: var(--focus); }
+#options .tabs { overflow-x: auto; scrollbar-width: none; } #options .tabs button { white-space: nowrap; flex: none; padding: 4px 8px; }
+#flcard .flrow { display: flex; align-items: center; gap: 10px; margin: 6px 0; flex-wrap: wrap; }
+#flcard select { background: var(--bg); color: var(--text); border: 1px solid var(--line); border-radius: 4px; padding: 3px 6px; font: inherit; }
+#flcard a { color: var(--focus); }
 #offcard .offgrid { display: grid; grid-template-columns: 1fr; gap: 4px; margin: 4px 0; }
 #offcard .offbtns { display: flex; gap: 8px; margin-top: 6px; }
 #offstat { white-space: pre-line; } #offstat[hidden] { display: none; } #offstat.err { color: var(--warn); }
@@ -371,7 +387,7 @@ table.keys td + td { color: var(--dim); }
 .chwin pre { flex: none; margin: 0; font: 12px/1.45 var(--ed-font); white-space: pre; overflow-x: auto; color: var(--text); }
 .chwin.locked pre { user-select: none; -webkit-user-select: none; }
 #licenselink { color: inherit; }
-.optwin { width: min(460px, calc(100vw - 8px)); }
+.optwin { width: min(540px, calc(100vw - 8px)); }
 .optwin .pane.gone { display: none; }
 .optwin .pane { display: flex; flex-direction: column; gap: 10px; }
 #askwin { position: fixed; inset: 0; z-index: 90; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,.35); }
@@ -381,15 +397,15 @@ table.keys td + td { color: var(--dim); }
 #askwin .askbtns { display: flex; gap: 8px; justify-content: flex-end; }
 #askwin .btn.primary { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
 /* Save window (modal, as askwin) */
-#savewin { position: fixed; inset: 0; z-index: 90; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,.35); }
-#savewin[hidden] { display: none; }
-#savewin .askbox { width: min(440px, calc(100vw - 24px)); background: var(--panel); color: var(--text); border: 1px solid var(--line); border-radius: 8px; box-shadow: 0 12px 32px var(--shadow); padding: 14px 16px 12px; }
-#savewin h3 { margin: 0 0 10px; font-size: 14px; }
-#savewin .svname { display: flex; gap: 8px; align-items: center; }
-#savewin .svname input { flex: 1; min-width: 0; background: var(--bg); color: var(--text); border: 1px solid var(--line); border-radius: 4px; padding: 4px 6px; font: inherit; }
-#savewin .note { min-height: 1.2em; margin: 6px 0 10px; }
-#savewin .askbtns { display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; }
-#savewin .btn.primary { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
+#savewin, #namewin { position: fixed; inset: 0; z-index: 90; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,.35); }
+#savewin[hidden], #namewin[hidden] { display: none; }
+#savewin .askbox , #namewin .askbox { width: min(440px, calc(100vw - 24px)); background: var(--panel); color: var(--text); border: 1px solid var(--line); border-radius: 8px; box-shadow: 0 12px 32px var(--shadow); padding: 14px 16px 12px; }
+#savewin h3 , #namewin h3 { margin: 0 0 10px; font-size: 14px; }
+#savewin .svname , #namewin .svname { display: flex; gap: 8px; align-items: center; }
+#savewin .svname input , #namewin .svname input { flex: 1; min-width: 0; background: var(--bg); color: var(--text); border: 1px solid var(--line); border-radius: 4px; padding: 4px 6px; font: inherit; }
+#savewin .note , #namewin .note { min-height: 1.2em; margin: 6px 0 10px; }
+#savewin .askbtns , #namewin .askbtns { display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; }
+#savewin .btn.primary , #namewin .btn.primary { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
 /* browser storage window */
 .stwin { width: min(560px, calc(100vw - 8px)); height: min(460px, calc(100vh - 16px)); }
 .stdrop { border: 2px dashed var(--line); border-radius: 8px; padding: 18px 12px; text-align: center; color: var(--dim); cursor: pointer; flex: none; }
@@ -459,7 +475,15 @@ table.keys td + td { color: var(--dim); }
 .lmenu .mhead { margin-top: 4px; padding: 5px 12px 3px; border-top: 1px solid var(--line); font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--dim); }
 .lmenu #libfilter { margin: 2px 10px 4px; height: 24px; padding: 0 7px; background: var(--input-bg); color: var(--text); border: 1px solid var(--line); border-radius: 4px; font: 12.5px system-ui, sans-serif; outline: none; }
 .lmenu #libfilter:focus { border-color: var(--focus); }
-.lmenu .mlist { max-height: min(60vh, 420px); overflow-y: auto; }
+.lmenu .mlist { max-height: none; }
+/* Load menu: half of window at most, scrolls inside */
+#loadpop { max-height: 50vh; overflow-y: auto; overscroll-behavior: contain; }
+/* Library / Browser storage: lists folded under › */
+.lmenu .mfold { border-top: 1px solid var(--line); margin-top: 2px; }
+.lmenu .mfold .mc { margin-left: auto; color: var(--dim); transition: transform .12s; font-size: 15px; line-height: 1; }
+.lmenu .mfold[aria-expanded="true"] .mc { transform: rotate(90deg); }
+.lmenu .mfoldbody { padding-left: 10px; }
+.lmenu .mfoldbody[hidden] { display: none; }
 .lmenu .mnote { padding: 4px 12px 6px; color: var(--dim); font-size: 12px; }
 .serboard { display: inline-flex; gap: 4px; align-items: center; margin-left: 10px; }
 .serboard select { height: 22px; font-size: 11.5px; background: var(--input-bg); color: var(--text); border: 1px solid var(--line); border-radius: 3px; }
@@ -564,8 +588,8 @@ code { font-family: var(--ed-font); font-size: .95em; }
   <div id="toolbar">
     <div class="brand"><img src="icon.png" alt=""><span>FastLED</span></div>
     <button class="ico drop" id="loadbtn" title="Load: local file (Ctrl+O), library or browser storage" aria-haspopup="true"><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v1"/><path d="M3 7v11a1 1 0 0 0 1 1h14.5a1 1 0 0 0 1-.8L21.8 12a1 1 0 0 0-1-1.2H7.4a1 1 0 0 0-1 .8L4 19"/></svg><svg class="caret" viewBox="0 0 8 8"><path d="M1.5 3l2.5 2.5L6.5 3"/></svg></button>
-    <button class="ico" id="getwh" title="Get W×H" disabled><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="1.5"/><path d="M4 9h16M9 4v16" stroke-dasharray="2 2"/><path d="M12.5 13.5l3 3M15.5 13.5l-3 3"/></svg></button>
     <button class="ico" id="savebtn" title="Save project: download .zip or browser storage (Ctrl+S)" disabled><svg viewBox="0 0 24 24"><path d="M5 3h11l4 4v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 1-2z"/><path d="M8 3v5h7V3"/><rect x="7" y="13" width="10" height="6" rx="1"/></svg></button>
+    <button class="ico" id="getwh" title="Get W×H" disabled><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="1.5"/><path d="M4 9h16M9 4v16" stroke-dasharray="2 2"/><path d="M12.5 13.5l3 3M15.5 13.5l-3 3"/></svg></button>
     <button class="ico drop" id="hexbtn" title="Board binary: real build with avr-gcc as in Arduino IDE (.hex, .elf, with bootloader)" aria-haspopup="true" disabled><svg viewBox="0 0 24 24"><rect x="7" y="2.5" width="10" height="9" rx="1.2"/><path d="M9.5 2.5V1M14.5 2.5V1M7 5.5H5M7 8.5H5M17 5.5h2M17 8.5h2"/><path d="M12 13.5V21M8.5 17.5L12 21l3.5-3.5"/></svg><svg class="caret" viewBox="0 0 8 8"><path d="M1.5 3l2.5 2.5L6.5 3"/></svg></button>
     <button class="ico" id="uploadbtn" title="Upload to board over USB (Ctrl+U)" disabled><svg viewBox="0 0 24 24"><path d="M3 12h10"/><path d="M9.5 8.5L13 12l-3.5 3.5"/><rect x="15" y="5" width="6.5" height="14" rx="1"/><path d="M17 8.5h2.5M17 11h2.5"/></svg></button><button class="ico caretbtn" id="uploadm" title="Upload: port, bootloader, USB drivers" aria-haspopup="true"><svg class="caret" viewBox="0 0 8 8"><path d="M1.5 3l2.5 2.5L6.5 3"/></svg></button>
     <select id="boardsel" class="tsel" title="Board"><option value="nano">Nano</option><option value="mega">Mega 2560</option></select>
@@ -660,7 +684,7 @@ code { font-family: var(--ed-font); font-size: .95em; }
 <!-- Options -->
 <div id="options" class="fwin optwin" hidden role="dialog" aria-label="Options">
   <header class="fhead">
-    <div class="tabs"><button data-tab="board" class="on">Board</button><button data-tab="led">LED</button><button data-tab="editor">Editor</button><button data-tab="rest">REST API</button><button data-tab="offline">Offline</button><button data-tab="about">About</button></div>
+    <div class="tabs"><button data-tab="board" class="on">Board</button><button data-tab="led">LED</button><button data-tab="editor">Editor</button><button data-tab="fastled">FastLED</button><button data-tab="rest">REST API</button><button data-tab="offline">Offline</button><button data-tab="about">About</button></div>
     <button data-close title="Close (Esc)">✕</button>
   </header>
   <div class="body">
@@ -770,6 +794,17 @@ code { font-family: var(--ed-font); font-size: .95em; }
         <p class="note">Encoding (UTF-8 / Windows-1251) and line endings (CRLF / LF) of each file are kept on save. Keep session — open project is stored in browser and restored next time.</p>
       </div>
     </div>
+    <div class="pane gone" data-pane="fastled">
+      <div class="card" id="flcard">
+        <h3>FastLED library</h3>
+        <div class="flrow"><label for="flver">Version</label><select id="flver" title="FastLED that sketches are built with"><option value="3.7.8">3.7.8 — built in, all builds</option></select></div>
+        <p class="note" id="flinfo2"></p>
+        <p class="note" id="flinfo">FastLED 3.7.8 (Daniel Garcia, Mark Kriegsman and contributors, MIT license) is built into compilers of this site: emulator (rt/wfl-sdk.tar.gz, own stub platform: frames go to LED window) and board binary / Real CPU timing (rt/avr/avr-sdk.tar.gz, AVR code as in Arduino IDE). 3.7.8 is last version before big rework of library (3.9, 3.10); all projects of library are made for it.</p>
+        <p class="note">Settings of sketch build that touch FastLED: Options → Board → <b>Power limit of sketch</b> (setMaxPower… calls), LED → Display → strip color order (Real CPU timing).</p>
+        <div class="flrow"><button class="btn" id="flcheck" title="Ask GitHub for latest release of FastLED">Check for updates</button><span class="note" id="flupd"></span></div>
+        <p class="note"><a href="https://github.com/FastLED/FastLED" target="_blank" rel="noopener">github.com/FastLED/FastLED</a> · <a href="https://github.com/FastLED/FastLED/releases" target="_blank" rel="noopener">releases</a> · <a href="https://fastled.io/docs/" target="_blank" rel="noopener">documentation</a></p>
+      </div>
+    </div>
     <div class="pane gone" data-pane="rest">
       <div class="card" id="restcard">
         <h3>Link to this page</h3>
@@ -867,12 +902,16 @@ code { font-family: var(--ed-font); font-size: .95em; }
 </div>
 <div class="hpop lmenu" id="loadpop" hidden>
   <button class="mi" id="ldlocal"><span class="mn">Local file…</span><kbd>Ctrl+O</kbd></button>
-  <div class="mhead">Library</div>
-  <input type="text" id="libfilter" placeholder="Filter" spellcheck="false" autocomplete="off" hidden>
-  <div id="liblist" class="mlist"></div>
-  <div class="mhead">Browser storage</div>
-  <div id="stlist" class="mlist"></div>
-  <button class="mi" id="stmanage"><span class="mn">Manage…</span></button>
+  <button class="mi mfold" id="libfold" aria-expanded="false"><span class="mn">Library</span><span class="mc">›</span></button>
+  <div class="mfoldbody" id="libbody" hidden>
+    <input type="text" id="libfilter" placeholder="Filter" spellcheck="false" autocomplete="off" hidden>
+    <div id="liblist" class="mlist"></div>
+  </div>
+  <button class="mi mfold" id="stfold" aria-expanded="false"><span class="mn">Browser storage</span><span class="mc">›</span></button>
+  <div class="mfoldbody" id="stbody" hidden>
+    <div id="stlist" class="mlist"></div>
+    <button class="mi" id="stmanage"><span class="mn">Manage…</span></button>
+  </div>
 </div>
 <div class="hpop menu" id="pop3d" hidden>
   <div class="mh">Figure</div>
@@ -958,21 +997,21 @@ code { font-family: var(--ed-font); font-size: .95em; }
     </div>
     <div class="card" data-sec="project">
       <h3>Project</h3>
-      <p class="note"><b>Get W×H</b> (toolbar, after Load) — takes <code>WIDTH</code> and <code>HEIGHT</code> from sketch into LED window (also <code>MATRIX_WIDTH</code>, <code>kMatrixWidth</code>…); if build runs with other size from size box, it is rebuilt with sketch's size.
+      <p class="note"><b>Get W×H</b> (toolbar, after Save) — takes <code>WIDTH</code> and <code>HEIGHT</code> from sketch into LED window (also <code>MATRIX_WIDTH</code>, <code>kMatrixWidth</code>…); if build runs with other size from size box, it is rebuilt with sketch's size.
         On project load LED window keeps its size and build gets it instead of sketch's <code>WIDTH</code> / <code>HEIGHT</code> (Options → LED → <b>W×H from sketch on load</b> on: window takes sketch's size); wiring (<code>MATRIX_TYPE</code>, <code>CONNECTION_ANGLE</code>, <code>STRIP_DIRECTION</code>) are taken once; sketch without them gets wiring from its <code>XY()</code>: zigzag if odd rows are reversed there (<code>y &amp; 1</code>, <code>y % 2</code>), else parallel, from bottom left to right; later wiring is set in Options → LED.</p>
       <p>Project is .zip with sketch: main <b>.ino</b> plus other .ino, .h, .c, .cpp files (Arduino IDE sketch folder packed into zip).
-        Each file opens in its own tab, main sketch first; tabs can be dragged; × on tab removes file from project (asks first; last file closes project). Changed file is marked with <span style="color:var(--tab-mod);font-weight:700">*</span> until project is saved.
+        Each file opens in its own tab, main sketch first; tabs can be dragged; × on tab removes file from project (asks first; last file closes project); <b>+</b> after tabs adds new file (.ino, .h, .c, .cpp, .txt); double click on tab or <kbd>F2</kbd> renames file (Enter takes name, Esc cancels). Changed file is marked with <span style="color:var(--tab-mod);font-weight:700">*</span> until project is saved.
         Single .ino / .h files are added to open project.</p>
-      <p><b>Load</b> ▾ opens menu: <b>Local file…</b> (<kbd>Ctrl</kbd>+<kbd>O</kbd>, or drop file on page) and <b>Library</b> — projects of server folder <code>repo/</code> (next to index.html), listed in <code>repo/index.json</code>:</p>
+      <p><b>Load</b> ▾ opens menu: <b>Local file…</b> (<kbd>Ctrl</kbd>+<kbd>O</kbd>, or drop file on page) and <b>Library</b> (list opens by ›) — projects of server folder <code>repo/</code> (next to index.html), listed in <code>repo/index.json</code>:</p>
       <pre class="code">{ "items": [
   { "file": "GyverMatrix.zip", "name": "GyverMatrix 24×12", "board": "mega" },
   { "file": "soulmate/fire.c", "name": "Fire (Soulmate)" }
 ] }</pre>
       <p class="note"><code>file</code> — path inside repo/: .zip project, .c sketch or .ino; <code>name</code> — text of menu (file name if omitted); <code>board</code> (nano / mega) is optional and is selected on load.
         Plain list <code>["a.zip", "b.c"]</code> works too. Library item always opens as new project. With 10 and more items menu gets filter box.</p>
-      <p><b>Browser storage</b> (last part of Load menu): projects kept in this browser, newest first; <b>Manage…</b> opens window — drop .zip / .ino / .c there (or click to choose) to add, Open, ⤓ download, ✕ delete, <b>Clear all</b>.
+      <p><b>Browser storage</b> (last part of Load menu, list opens by ›): projects kept in this browser, newest first; <b>Manage…</b> opens window — drop .zip / .ino / .c there (or click to choose) to add, Open, ⤓ download, ✕ delete, <b>Clear all</b>.
         Storage belongs to this browser on this computer: clearing site data of browser removes it.</p>
-      <p class="note"><b>Save</b> (<kbd>Ctrl</kbd>+<kbd>S</kbd>) opens window: name, <b>Download .zip</b> or <b>Browser storage</b> (stored project of same name is replaced); last choice is default for <kbd>Enter</kbd>.
+      <p class="note"><b>Save</b> (<kbd>Ctrl</kbd>+<kbd>S</kbd>) opens window: name, <b>Download as .zip</b> or <b>to Browser Storage</b> (stored project of same name is replaced); last choice is default for <kbd>Enter</kbd>.
         Project goes as .zip with same file names, encodings and line endings; files that are not sketch sources stay in archive untouched.</p>
     </div>
     <div class="card" data-sec="compile">
@@ -1131,6 +1170,7 @@ code { font-family: var(--ed-font); font-size: .95em; }
         <tr><td>spin=0</td><td>3D: no rotation when idle</td></tr>
         <tr><td>speed=</td><td>sketch speed 0.1…10 (×)</td></tr>
         <tr><td>real=1</td><td>Real CPU timing on (real=0 — off); sketch runs as it is: size, 3D, speed do not apply</td></tr>
+        <tr><td>fastled=</td><td>FastLED version for emulator: 3.7.8 (built in) or other one of Options → FastLED, e.g. 3.10.9</td></tr>
         <tr><td>run=1</td><td>start sketch after loading</td></tr>
       </table>
       <p>Error (no such project, file not found) is shown in Output; rest of link still applies.</p>
@@ -1172,21 +1212,21 @@ code { font-family: var(--ed-font); font-size: .95em; }
     </div>
     <div class="card" data-sec="project">
       <h3>Проект</h3>
-      <p class="note"><b>Get W×H</b> (панель инструментов, после Load) — берёт <code>WIDTH</code> и <code>HEIGHT</code> из скетча в окно LED (также <code>MATRIX_WIDTH</code>, <code>kMatrixWidth</code>…); если сборка работает с другим размером из поля размера, она пересобирается с размером скетча.
+      <p class="note"><b>Get W×H</b> (панель инструментов, после Save) — берёт <code>WIDTH</code> и <code>HEIGHT</code> из скетча в окно LED (также <code>MATRIX_WIDTH</code>, <code>kMatrixWidth</code>…); если сборка работает с другим размером из поля размера, она пересобирается с размером скетча.
         При загрузке проекта окно LED сохраняет свой размер, и сборка получает его вместо <code>WIDTH</code> / <code>HEIGHT</code> скетча (Options → LED → <b>W×H from sketch on load</b> включено: окно берёт размер скетча); схема подключения (<code>MATRIX_TYPE</code>, <code>CONNECTION_ANGLE</code>, <code>STRIP_DIRECTION</code>) берётся один раз; скетч без них получает схему из своей <code>XY()</code>: зигзаг, если там нечётные строки перевёрнуты (<code>y &amp; 1</code>, <code>y % 2</code>), иначе параллельная, от левого нижнего угла вправо; дальше схема задаётся в Options → LED.</p>
       <p>Проект — .zip со скетчем: главный <b>.ino</b> и другие файлы .ino, .h, .c, .cpp (папка скетча Arduino IDE, упакованная в zip).
-        Каждый файл открывается в своей вкладке, главный — первым; вкладки можно перетаскивать; × на вкладке удаляет файл из проекта (с подтверждением; последний файл закрывает проект). Изменённый файл помечен <span style="color:var(--tab-mod);font-weight:700">*</span>, пока проект не сохранён.
+        Каждый файл открывается в своей вкладке, главный — первым; вкладки можно перетаскивать; × на вкладке удаляет файл из проекта (с подтверждением; последний файл закрывает проект); <b>+</b> после вкладок добавляет новый файл (.ino, .h, .c, .cpp, .txt); двойной щелчок по вкладке или <kbd>F2</kbd> переименовывает файл (Enter — принять, Esc — отмена). Изменённый файл помечен <span style="color:var(--tab-mod);font-weight:700">*</span>, пока проект не сохранён.
         Отдельные файлы .ino / .h добавляются в открытый проект.</p>
-      <p><b>Load</b> ▾ открывает меню: <b>Local file…</b> (<kbd>Ctrl</kbd>+<kbd>O</kbd> или перетащить файл на страницу) и <b>Library</b> — проекты папки <code>repo/</code> на сервере (рядом с index.html), перечисленные в <code>repo/index.json</code>:</p>
+      <p><b>Load</b> ▾ открывает меню: <b>Local file…</b> (<kbd>Ctrl</kbd>+<kbd>O</kbd> или перетащить файл на страницу) и <b>Library</b> (список раскрывается по ›) — проекты папки <code>repo/</code> на сервере (рядом с index.html), перечисленные в <code>repo/index.json</code>:</p>
       <pre class="code">{ "items": [
   { "file": "GyverMatrix.zip", "name": "GyverMatrix 24×12", "board": "mega" },
   { "file": "soulmate/fire.c", "name": "Fire (Soulmate)" }
 ] }</pre>
       <p class="note"><code>file</code> — путь внутри repo/: проект .zip, скетч .c или .ino; <code>name</code> — текст в меню (если нет — имя файла); <code>board</code> (nano / mega) необязателен и выбирается при загрузке.
         Простой список <code>["a.zip", "b.c"]</code> тоже работает. Пункт библиотеки всегда открывается как новый проект. При 10 и более пунктах в меню появляется поле фильтра.</p>
-      <p><b>Browser storage</b> (последний раздел меню Load): проекты, сохранённые в этом браузере, новые сверху; <b>Manage…</b> открывает окно — перетащите туда .zip / .ino / .c (или щёлкните, чтобы выбрать) для добавления; Open, ⤓ скачать, ✕ удалить, <b>Clear all</b>.
+      <p><b>Browser storage</b> (последний раздел меню Load, список раскрывается по ›): проекты, сохранённые в этом браузере, новые сверху; <b>Manage…</b> открывает окно — перетащите туда .zip / .ino / .c (или щёлкните, чтобы выбрать) для добавления; Open, ⤓ скачать, ✕ удалить, <b>Clear all</b>.
         Хранилище принадлежит этому браузеру на этом компьютере: очистка данных сайта в браузере удаляет его.</p>
-      <p class="note"><b>Save</b> (<kbd>Ctrl</kbd>+<kbd>S</kbd>) открывает окно: имя, <b>Download .zip</b> или <b>Browser storage</b> (проект с тем же именем в хранилище заменяется); последний выбор — по умолчанию для <kbd>Enter</kbd>.
+      <p class="note"><b>Save</b> (<kbd>Ctrl</kbd>+<kbd>S</kbd>) открывает окно: имя, <b>Download as .zip</b> или <b>to Browser Storage</b> (проект с тем же именем в хранилище заменяется); последний выбор — по умолчанию для <kbd>Enter</kbd>.
         Проект сохраняется как .zip с теми же именами файлов, кодировками и концами строк; файлы, которые не являются исходниками скетча, остаются в архиве нетронутыми.</p>
     </div>
     <div class="card" data-sec="compile">
@@ -1345,6 +1385,7 @@ code { font-family: var(--ed-font); font-size: .95em; }
         <tr><td>spin=0</td><td>3D: без вращения в покое</td></tr>
         <tr><td>speed=</td><td>скорость скетча 0.1…10 (×)</td></tr>
         <tr><td>real=1</td><td>Real CPU timing (real=0 — выключен); скетч идёт как есть: размер, 3D, скорость не действуют</td></tr>
+        <tr><td>fastled=</td><td>версия FastLED для эмулятора: 3.7.8 (встроенная) или другая из Options → FastLED, например 3.10.9</td></tr>
         <tr><td>run=1</td><td>запустить скетч после загрузки</td></tr>
       </table>
       <p>Ошибка (нет такого проекта, файл не найден) выводится в Output; остальная часть ссылки всё равно применяется.</p>
@@ -1364,15 +1405,135 @@ code { font-family: var(--ed-font); font-size: .95em; }
   <h3>Save project</h3>
   <label class="svname">Name <input type="text" id="svname" spellcheck="false" autocomplete="off"></label>
   <p class="note" id="svnote"></p>
-  <div class="askbtns"><button class="btn" id="svdown" title="Project as .zip into Downloads">Download .zip</button><button class="btn" id="svstore" title="Copy kept in this browser (Load → Browser storage)">Browser storage</button><button class="btn" id="svno">Cancel</button></div>
+  <div class="askbtns"><button class="btn" id="svdown" title="Project as .zip into Downloads">Download as .zip</button><button class="btn" id="svstore" title="Copy kept in this browser (Load → Browser storage)">to Browser Storage</button><button class="btn" id="svno">Cancel</button></div>
+</div></div>
+<!-- name of new file -->
+<div id="namewin" class="modal" hidden role="dialog" aria-modal="true" aria-labelledby="nmtitle"><div class="askbox">
+  <h3 id="nmtitle">New file</h3>
+  <label class="svname">Name <input type="text" id="nmname" spellcheck="false" autocomplete="off"></label>
+  <p class="note" id="nmnote"></p>
+  <div class="askbtns"><button class="btn primary" id="nmok">OK</button><button class="btn" id="nmno">Cancel</button></div>
 </div></div>
 <div id="askwin" hidden role="alertdialog" aria-modal="true"><div class="askbox"><p id="askmsg"></p><div class="askbtns"><button class="btn primary" id="askok">OK</button><button class="btn" id="askno">Cancel</button></div></div></div>
 <div id="toast"></div>
-<script src="js/unzip.js?v=20261112084515"></script>
-<script src="js/editor.js?v=20261112084515"></script>
-<script src="js/led3d.js?v=20261112084515"></script>
-<script src="js/rest.js?v=20261112084515"></script>
-<script src="js/rest-builder.js?v=20261112084515"></script>
-<script src="js/app.js?v=20261112084515"></script>
+<script>
+// Minimal ZIP reader / writer (stored + deflate) using browser's (De)CompressionStream.
+(function (root) {
+  'use strict';
+
+  function u16(b, o) { return b[o] | (b[o + 1] << 8); }
+  function u32(b, o) { return (b[o] | (b[o + 1] << 8) | (b[o + 2] << 16) | (b[o + 3] << 24)) >>> 0; }
+
+  function isZip(b) { return b.length >= 4 && b[0] === 0x50 && b[1] === 0x4B && (b[2] === 3 || b[2] === 5) ; }
+
+  // returns [{name, size, method, offset, csize}]
+  function list(b) {
+    let eocd = -1;
+    for (let i = b.length - 22; i >= Math.max(0, b.length - 22 - 65535); i--) {
+      if (u32(b, i) === 0x06054B50) { eocd = i; break; }
+    }
+    if (eocd < 0) throw new Error('ZIP: central directory not found');
+    const count = u16(b, eocd + 10);
+    let p = u32(b, eocd + 16);
+    const out = [];
+    for (let n = 0; n < count; n++) {
+      if (u32(b, p) !== 0x02014B50) throw new Error('ZIP: corrupted directory');
+      const flags = u16(b, p + 8), method = u16(b, p + 10);
+      const csize = u32(b, p + 20), size = u32(b, p + 24);
+      const nlen = u16(b, p + 28), xlen = u16(b, p + 30), clen = u16(b, p + 32);
+      const offset = u32(b, p + 42);
+      const raw = b.subarray(p + 46, p + 46 + nlen);
+      let name;
+      try { name = new TextDecoder((flags & 0x800) ? 'utf-8' : 'ibm866').decode(raw); }
+      catch (e) { name = String.fromCharCode.apply(null, raw); }
+      if (!name.endsWith('/')) out.push({ name, size, csize, method, offset, encrypted: !!(flags & 1) });
+      p += 46 + nlen + xlen + clen;
+    }
+    return out;
+  }
+
+  async function extract(b, e) {
+    if (e.encrypted) throw new Error('ZIP: encrypted archive');
+    if (u32(b, e.offset) !== 0x04034B50) throw new Error('ZIP: corrupted file header');
+    const start = e.offset + 30 + u16(b, e.offset + 26) + u16(b, e.offset + 28);
+    const data = b.subarray(start, start + e.csize);
+    if (e.method === 0) return data.slice();
+    if (e.method !== 8) throw new Error('ZIP: unsupported compression method ' + e.method);
+    if (typeof DecompressionStream === 'undefined') throw new Error('This browser cannot unpack ZIP');
+    const ds = new DecompressionStream('deflate-raw');
+    const res = new Response(new Blob([data]).stream().pipeThrough(ds));
+    return new Uint8Array(await res.arrayBuffer());
+  }
+
+  let crcT = null;
+  function crc32(d) {
+    if (!crcT) { crcT = new Uint32Array(256); for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; crcT[n] = c; } }
+    let c = 0xFFFFFFFF; for (let i = 0; i < d.length; i++) c = crcT[(c ^ d[i]) & 255] ^ (c >>> 8);
+    return (c ^ 0xFFFFFFFF) >>> 0;
+  }
+  // files: [{ name, data: Uint8Array }] → ZIP (deflate when browser can, stored otherwise)
+  async function create(files) {
+    const parts = [], cen = []; let off = 0;
+    const p16 = (a, o, v) => { a[o] = v & 255; a[o + 1] = (v >> 8) & 255; };
+    const p32 = (a, o, v) => { p16(a, o, v & 0xFFFF); p16(a, o + 2, v >>> 16); };
+    for (const f of files) {
+      const name = new TextEncoder().encode(f.name), crc = crc32(f.data);
+      let body = f.data, method = 0;
+      if (typeof CompressionStream !== 'undefined') {
+        const z = new Uint8Array(await new Response(new Blob([f.data]).stream().pipeThrough(new CompressionStream('deflate-raw'))).arrayBuffer());
+        if (z.length < f.data.length) { body = z; method = 8; }
+      }
+      const h = new Uint8Array(30 + name.length);
+      p32(h, 0, 0x04034B50); p16(h, 4, 20); p16(h, 6, 0x800); p16(h, 8, method); p16(h, 12, 0x21);
+      p32(h, 14, crc); p32(h, 18, body.length); p32(h, 22, f.data.length); p16(h, 26, name.length); h.set(name, 30);
+      const c = new Uint8Array(46 + name.length);
+      p32(c, 0, 0x02014B50); p16(c, 4, 20); p16(c, 6, 20); p16(c, 8, 0x800); p16(c, 10, method); p16(c, 14, 0x21);
+      p32(c, 16, crc); p32(c, 20, body.length); p32(c, 24, f.data.length); p16(c, 28, name.length); p32(c, 42, off); c.set(name, 46);
+      parts.push(h, body); cen.push(c); off += h.length + body.length;
+    }
+    const csz = cen.reduce((n, c) => n + c.length, 0), e = new Uint8Array(22);
+    p32(e, 0, 0x06054B50); p16(e, 8, files.length); p16(e, 10, files.length); p32(e, 12, csz); p32(e, 16, off);
+    return new Blob([...parts, ...cen, e], { type: 'application/zip' });
+  }
+
+  const api = { isZip, list, extract, create, crc32 };
+  if (typeof module !== 'undefined' && module.exports) module.exports = api;
+  else root.FLZip = api;
+})(typeof self !== 'undefined' ? self : this);
+
+</script>
+<script>
+// scripts: js/js.zip (server package) unpacked here — classic scripts and module workers get blob: URLs, their imports of each
+// other, worker names and import.meta.url are pointed at those / at real folder; no js/js.zip (development copy): js/*.js
+(async function () {
+  var m = document.querySelector('meta[name="build"]'), v = m ? m.content : 'dev';
+  var CLASSIC = ['editor.js', 'led3d.js', 'rest.js', 'rest-builder.js', 'app.js'];
+  var add = function (src) { return new Promise(function (res, rej) { var s = document.createElement('script'); s.src = src; s.onload = res; s.onerror = function () { rej(new Error(src)); }; document.body.appendChild(s); }); };
+  var files = null;
+  try {
+    var r = await fetch('js/js.zip?v=' + v);
+    if (r.ok) {
+      var b = new Uint8Array(await r.arrayBuffer());
+      if (FLZip.isZip(b)) { files = {}; for (var e of FLZip.list(b)) files[e.name.replace(/^.*\//, '')] = new TextDecoder().decode(await FLZip.extract(b, e)); }
+    }
+  } catch (err) { files = null; }
+  try {
+    if (!files) { for (var n of CLASSIC) await add('js/' + n + (v === 'dev' ? '' : '?v=' + v)); return; }
+    var base = new URL('js/', location.href).href, up = new URL('../', base).href, urls = {};
+    var url = function (n) {
+      if (urls[n]) return urls[n];
+      if (!(n in files)) return base + n;
+      urls[n] = base + n; // cycle guard
+      var t = files[n]
+        .replace(/(\bfrom\s*|\bimport\s*\(\s*)(['"])\.\/([\w-]+\.js)(\?[^'"]*)?\2/g, function (x, a, q, d) { return a + q + url(d) + q; })
+        .replace(/(\bimport\s*\(\s*)(['"])\.\.\//g, function (x, a, q) { return a + q + up; })
+        .replace(/(['"])js\/([\w-]+\.js)(\?[^'"]*)?\1/g, function (x, q, d) { return d in files ? q + url(d) + q : x; })
+        .replace(/import\.meta\.url/g, JSON.stringify(base + n));
+      return (urls[n] = URL.createObjectURL(new Blob([t], { type: 'text/javascript' })));
+    };
+    for (var c of CLASSIC) await add(url(c));
+  } catch (err) { document.body.insertAdjacentHTML('beforeend', '<p style="position:fixed;left:8px;bottom:30px;color:#f48771">Cannot load scripts: ' + String(err.message || err) + '</p>'); }
+})();
+</script>
 </body>
 </html>
