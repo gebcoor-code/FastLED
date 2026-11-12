@@ -35,6 +35,7 @@
     { "file": "snowfall.c", "name": "Snowfall" },                             
     { "file": "something.c", "name": "Something" },                                 
     { "file": "spiraltunnel.c", "name": "Spirale Tunnel" },                                     
+    { "file": "spiraltunnel-dizzy5.c", "name": "Spirale Tunnel from Dizzy5" },                                         
     { "file": "spiraltunnel-memopt.c", "name": "Spirale Tunnel mem opt" }                                 
   ]
 }
