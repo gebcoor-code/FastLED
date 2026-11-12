@@ -688,3 +688,15 @@ Web FastLED — version history
 @ library projects GyverMatrixOS and Matrix 10x10: BRIGHTNESS renamed to
   LED_BRIGHTNESS (clashed with FastLED 3.10), so FastLED 3.10.9 is used
   as it is, without patch
+
+
+        version 0.36.0                  12 nov 2026
+
++ sketch fixes FastLED version for itself: line // @fastled 3.7.8 (or
+  last, builtin) in any source of sketch; wins over Options -> FastLED,
+  link with fastled= wins over it; Options -> FastLED tells when open
+  project asks for version. Matrix 10x10 asks for 3.7.8 (with 3.10.9 it
+  does not fit Nano)
+! __builtin_avr_cli(), sei(), sleep(), wdr() in sketch crashed avr-gcc of
+  real build: built as same instruction in inline asm; in emulator they
+  do nothing (as cli() / sei())

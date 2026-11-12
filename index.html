@@ -2,7 +2,7 @@
 <html lang="en" data-theme="dark-plus">
 <head>
 <meta charset="utf-8">
-<meta name="build" content="20261112150445">
+<meta name="build" content="20261112162237">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="icon" href="icon.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -797,7 +797,9 @@ code { font-family: var(--ed-font); font-size: .95em; }
     <div class="pane gone" data-pane="fastled">
       <div class="card" id="flcard">
         <h3>FastLED library</h3>
-        <div class="flrow"><label for="flver">Version</label><select id="flver" title="FastLED that sketches are built with"><option value="3.7.8">3.7.8 — built in, all builds</option></select></div>
+        <div class="flrow"><label for="flver">Version</label><select id="flver" title="FastLED that sketches are built with"><option value="3.7.8">3.7.8 — built in</option></select></div>
+        <p class="note">Project can fix its version: line <code>// @fastled 3.7.8</code> (or <code>last</code> — newest on site, <code>builtin</code>) in any source of sketch. It works for every project, wherever it is opened from, and wins over choice here; link with <code>fastled=</code> wins over it.</p>
+        <p class="note" id="flmark"></p>
         <p class="note" id="flinfo2"></p>
         <p class="note" id="flinfo">FastLED 3.7.8 (Daniel Garcia, Mark Kriegsman and contributors, MIT license) is built into compilers of this site: emulator (rt/wfl-sdk.tar.gz, own stub platform: frames go to LED window) and board binary / Real CPU timing (rt/avr/avr-sdk.tar.gz, AVR code as in Arduino IDE). 3.7.8 is last version before big rework of library (3.9, 3.10); all projects of library are made for it.</p>
         <p class="note">Settings of sketch build that touch FastLED: Options → Board → <b>Power limit of sketch</b> (setMaxPower… calls), LED → Display → strip color order (Real CPU timing).</p>
