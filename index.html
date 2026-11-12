@@ -2,7 +2,7 @@
 <html lang="en" data-theme="dark-plus">
 <head>
 <meta charset="utf-8">
-<meta name="build" content="20261112162237">
+<meta name="build" content="20261112194335">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="icon" href="icon.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -259,6 +259,19 @@ select option { background: var(--panel); color: var(--text); }
 #toolbar .tgroup .ico { height: 26px; }
 .ico .badge { position: absolute; right: 1px; bottom: 0; font: 600 7.5px/1 ui-monospace, Consolas, monospace; color: var(--focus); pointer-events: none; }
 .ico .badge:empty { display: none; }
+.ledhead .hb { position: relative; }
+.hb .badge { position: absolute; right: 0; bottom: -1px; font: 600 7.5px/1 ui-monospace, Consolas, monospace; color: var(--focus); pointer-events: none; }
+.hb .badge:empty { display: none; }
+#devpop .mi .mt { opacity: .7; } #devpop .mi:disabled { opacity: .45; cursor: default; }
+.devopt { display: grid; grid-template-columns: 138px minmax(0, 1fr); gap: 10px; align-items: start; }
+.devnav { display: flex; flex-direction: column; gap: 2px; border-right: 1px solid var(--line); padding-right: 8px; position: sticky; top: 0; }
+.devnav button { text-align: left; padding: 5px 8px; border: 1px solid transparent; border-radius: 5px; background: transparent; color: var(--text); font: inherit; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+.devnav button:hover { background: var(--btn-hover); }
+.devnav button.on { background: var(--btn-hover); border-color: var(--line); color: var(--focus); }
+.devnav button svg { width: 16px; height: 16px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.devnav .devoff { opacity: .55; }
+.devnav .note { margin: 6px 2px 0; font-size: 11px; }
+.devsub.gone { display: none; }
 #toolbar .tgroup .ico.on, #toolbar .tgroup .ico.open { color: var(--focus); }
 /* inputs: blue while its window is open; green dot — sketch reads pins (buttons, pots) */
 #ledinputs.has::after { content: ''; position: absolute; right: 4px; top: 4px; width: 5px; height: 5px; border-radius: 50%; background: var(--ok); pointer-events: none; }
@@ -387,7 +400,7 @@ table.keys td + td { color: var(--dim); }
 .chwin pre { flex: none; margin: 0; font: 12px/1.45 var(--ed-font); white-space: pre; overflow-x: auto; color: var(--text); }
 .chwin.locked pre { user-select: none; -webkit-user-select: none; }
 #licenselink { color: inherit; }
-.optwin { width: min(540px, calc(100vw - 8px)); }
+.optwin { width: min(640px, calc(100vw - 8px)); }
 .optwin .pane.gone { display: none; }
 .optwin .pane { display: flex; flex-direction: column; gap: 10px; }
 #askwin { position: fixed; inset: 0; z-index: 90; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,.35); }
@@ -514,6 +527,12 @@ button.ico.drop svg.caret { width: 8px; height: 8px; stroke-width: 1.6; opacity:
 .ticks span { cursor: pointer; width: 0; display: flex; justify-content: center; white-space: nowrap; }
 .ticks span:hover, .ticks span.on { color: var(--text); }
 /* Inputs window */
+.oledwin { width: 420px; height: 260px; min-width: 180px; min-height: 80px; }
+.oledwin .fhead h2 { font: 600 12px ui-monospace, Consolas, monospace; }
+.oledwin .fhead .oinfo { color: var(--dim); font-size: 11px; margin-left: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#oledview { flex: 1 1 auto; min-height: 0; background: #000; display: flex; overflow: hidden; position: relative; }
+.ohud { position: absolute; right: 6px; top: 2px; font: 11px ui-monospace, Consolas, monospace; color: rgba(225,232,240,.6); pointer-events: none; text-shadow: 0 0 2px #000, 1px 1px 1px #000; }
+#oledcanvas { display: block; margin: auto; image-rendering: pixelated; }
 .inwin { width: min(460px, calc(100vw - 8px)); max-height: min(560px, calc(100vh - 16px)); }
 .inwin .intro { margin: 0; line-height: 1.45; }
 table.pins { border-collapse: collapse; width: 100%; font-size: 12.5px; }
@@ -589,7 +608,7 @@ code { font-family: var(--ed-font); font-size: .95em; }
     <div class="brand"><img src="icon.png" alt=""><span>FastLED</span></div>
     <button class="ico drop" id="loadbtn" title="Load: local file (Ctrl+O), library or browser storage" aria-haspopup="true"><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v1"/><path d="M3 7v11a1 1 0 0 0 1 1h14.5a1 1 0 0 0 1-.8L21.8 12a1 1 0 0 0-1-1.2H7.4a1 1 0 0 0-1 .8L4 19"/></svg><svg class="caret" viewBox="0 0 8 8"><path d="M1.5 3l2.5 2.5L6.5 3"/></svg></button>
     <button class="ico" id="savebtn" title="Save project: download .zip or browser storage (Ctrl+S)" disabled><svg viewBox="0 0 24 24"><path d="M5 3h11l4 4v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 1-2z"/><path d="M8 3v5h7V3"/><rect x="7" y="13" width="10" height="6" rx="1"/></svg></button>
-    <button class="ico" id="getwh" title="Get W×H" disabled><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="1.5"/><path d="M4 9h16M9 4v16" stroke-dasharray="2 2"/><path d="M12.5 13.5l3 3M15.5 13.5l-3 3"/></svg></button>
+    <button class="ico" id="closebtn" title="Close project (Ctrl+Shift+W)" disabled><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v3"/><path d="M3 7v10a2 2 0 0 0 2 2h7"/><path d="M15.5 15.5l5 5M20.5 15.5l-5 5"/></svg></button>
     <button class="ico drop" id="hexbtn" title="Board binary: real build with avr-gcc as in Arduino IDE (.hex, .elf, with bootloader)" aria-haspopup="true" disabled><svg viewBox="0 0 24 24"><rect x="7" y="2.5" width="10" height="9" rx="1.2"/><path d="M9.5 2.5V1M14.5 2.5V1M7 5.5H5M7 8.5H5M17 5.5h2M17 8.5h2"/><path d="M12 13.5V21M8.5 17.5L12 21l3.5-3.5"/></svg><svg class="caret" viewBox="0 0 8 8"><path d="M1.5 3l2.5 2.5L6.5 3"/></svg></button>
     <button class="ico" id="uploadbtn" title="Upload to board over USB (Ctrl+U)" disabled><svg viewBox="0 0 24 24"><path d="M3 12h10"/><path d="M9.5 8.5L13 12l-3.5 3.5"/><rect x="15" y="5" width="6.5" height="14" rx="1"/><path d="M17 8.5h2.5M17 11h2.5"/></svg></button><button class="ico caretbtn" id="uploadm" title="Upload: port, bootloader, USB drivers" aria-haspopup="true"><svg class="caret" viewBox="0 0 8 8"><path d="M1.5 3l2.5 2.5L6.5 3"/></svg></button>
     <select id="boardsel" class="tsel" title="Board"><option value="nano">Nano</option><option value="mega">Mega 2560</option></select>
@@ -602,13 +621,12 @@ code { font-family: var(--ed-font); font-size: .95em; }
       <button class="ico dbgb" id="stepin" title="Step into (F11)" hidden><svg viewBox="0 0 24 24"><path d="M12 3v10"/><path d="M8 9l4 4 4-4"/><circle cx="12" cy="19" r="2" fill="currentColor"/></svg></button>
       <button class="ico dbgb" id="stepout" title="Step out (Shift+F11)" hidden><svg viewBox="0 0 24 24"><path d="M12 15V5"/><path d="M8 9l4-4 4 4"/><circle cx="12" cy="19" r="2" fill="currentColor"/></svg></button>
       <button class="ico" id="catchbtn" title="Catch-up: off"><svg viewBox="0 0 24 24"><path d="M3 6.5v11l7-5.5zM11 6.5v11l7-5.5z" fill="currentColor" stroke-width="1.2"/><path d="M20.5 6v12"/></svg></button>
-    </div>
-    <div class="tgroup" id="ledgroup">
-      <button class="ico" id="ledbtn" title="LED matrix window (F6)"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><g fill="currentColor" stroke="none"><circle cx="8" cy="8" r="1.6"/><circle cx="12" cy="8" r="1.6"/><circle cx="16" cy="8" r="1.6"/><circle cx="8" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="16" cy="12" r="1.6"/><circle cx="8" cy="16" r="1.6"/><circle cx="12" cy="16" r="1.6"/><circle cx="16" cy="16" r="1.6"/></g></svg></button>
-      <button class="ico" id="ledrebuild" title="Rebuild sketch with WIDTH and HEIGHT of LED window size box"><svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 0 1 15.5-6.2L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15.5 6.2L3 16"/><path d="M3 21v-5h5"/><rect x="9" y="9" width="6" height="6" rx=".5"/></svg></button>
       <button class="ico" id="realbtn" title="Real CPU timing: off"><svg viewBox="0 0 24 24"><rect x="5.5" y="5.5" width="13" height="13" rx="1.5"/><path d="M9 5.5V3M12 5.5V3M15 5.5V3M9 21v-2.5M12 21v-2.5M15 21v-2.5M5.5 9H3M5.5 12H3M5.5 15H3M21 9h-2.5M21 12h-2.5M21 15h-2.5"/><path d="M12 8.5V12l2.5 1.5"/></svg></button>
-      <button class="ico" id="ledrot" title="Rotate view 90° clockwise (now 0°)"><span class="badge" id="ledrotv"></span><svg viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/></svg></button>
-      <button class="ico" id="ledflip" title="Mirror horizontally"><svg viewBox="0 0 24 24"><path d="M12 3v18" stroke-dasharray="2 2"/><path d="M9 7L4 12l5 5z"/><path d="M15 7l5 5-5 5z"/></svg></button>
+    </div>
+    <div class="tgroup" id="devgroup">
+      <button class="ico drop" id="devadd" title="Devices: add LED matrix, inputs… (connected to board)" aria-haspopup="true"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><svg class="caret" viewBox="0 0 8 8"><path d="M1.5 3l2.5 2.5L6.5 3"/></svg></button>
+      <button class="ico" id="ledbtn" title="LED matrix window (F6)"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><g fill="currentColor" stroke="none"><circle cx="8" cy="8" r="1.6"/><circle cx="12" cy="8" r="1.6"/><circle cx="16" cy="8" r="1.6"/><circle cx="8" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="16" cy="12" r="1.6"/><circle cx="8" cy="16" r="1.6"/><circle cx="12" cy="16" r="1.6"/><circle cx="16" cy="16" r="1.6"/></g></svg></button>
+      <button class="ico" id="oledbtn" title="OLED display window" hidden><svg viewBox="0 0 24 24"><rect x="2.5" y="5" width="19" height="14" rx="1.5"/><rect x="5" y="7.5" width="14" height="9" fill="currentColor" stroke="none" opacity=".35"/><path d="M7 10h5M7 13h8"/></svg></button>
       <button class="ico" id="ledinputs" title="Inputs"><svg viewBox="0 0 24 24"><rect x="3" y="8" width="18" height="8" rx="4"/><circle cx="16" cy="12" r="2.2" fill="currentColor"/><path d="M8 4v4M8 16v4"/></svg></button>
     </div>
     <button class="ico" id="panelbtn" title="Panel: Problems, Output, Serial monitor (Ctrl+J)"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 14h18"/><path d="M7 17h4" stroke-width="1.6"/></svg></button>
@@ -684,7 +702,7 @@ code { font-family: var(--ed-font); font-size: .95em; }
 <!-- Options -->
 <div id="options" class="fwin optwin" hidden role="dialog" aria-label="Options">
   <header class="fhead">
-    <div class="tabs"><button data-tab="board" class="on">Board</button><button data-tab="led">LED</button><button data-tab="editor">Editor</button><button data-tab="fastled">FastLED</button><button data-tab="rest">REST API</button><button data-tab="offline">Offline</button><button data-tab="about">About</button></div>
+    <div class="tabs"><button data-tab="board" class="on">Board</button><button data-tab="led">Devices</button><button data-tab="editor">Editor</button><button data-tab="fastled">FastLED</button><button data-tab="rest">REST API</button><button data-tab="offline">Offline</button><button data-tab="about">About</button></div>
     <button data-close title="Close (Esc)">✕</button>
   </header>
   <div class="body">
@@ -710,6 +728,10 @@ code { font-family: var(--ed-font); font-size: .95em; }
       </div>
     </div>
     <div class="pane gone" data-pane="led">
+      <div class="devopt">
+        <div class="devnav" id="devnav"></div>
+        <div>
+          <div class="devsub" data-sub="led">
       <div class="card">
         <h3>Matrix wiring</h3>
         <div class="optgrid">
@@ -747,6 +769,42 @@ code { font-family: var(--ed-font); font-size: .95em; }
           LED gives light proportional to its value (PWM); monitor does not. LED-like converts, so dim colors look as on real LEDs; Raw (slider left) shows values as they are; right of LED-like dim colors get brighter still, up to +200%; default +100%, double click returns it.
           Brightness is taken from brightest channel of LED, others keep their proportion, so lifted colors stay saturated.
           <b>Contrast</b> darkens dark and middle tones, full brightness stays: 0% — no change (default, double click returns it), 100% — strongest; dim picture gets darker with it. Raw ignores both.</p>
+      </div>
+          </div>
+          <div class="devsub gone" data-sub="inputs">
+            <div class="card">
+              <h3>Inputs</h3>
+              <p class="note">Buttons and pots on pins of board. Nothing to set: rows appear by themselves for pins running sketch uses —
+                <code>pinMode(…, INPUT / INPUT_PULLUP)</code>, <code>digitalRead()</code>, <code>analogRead()</code>. Outputs show level or PWM, FastLED pin — number of LEDs.</p>
+            </div>
+          </div>
+          <div class="devsub gone" data-sub="oled">
+            <div class="card">
+              <h3>OLED display</h3>
+              <div class="optgrid">
+                <label for="oledsize">Size</label>
+                <select id="oledsize"><option value="128x64">128 × 64</option><option value="128x32">128 × 32</option></select>
+                <label for="oledcolor">Color</label>
+                <select id="oledcolor"><option value="white">White</option><option value="blue">Blue</option><option value="yb">Yellow / blue (16 rows yellow)</option><option value="green">Green</option><option value="amber">Amber</option></select>
+                <label for="oledconn">Connection</label>
+                <select id="oledconn"><option value="i2c">I²C (Wire)</option><option value="spi">SPI</option></select>
+                <label for="oledaddr" class="oi2c">I²C address</label>
+                <input type="text" id="oledaddr" class="oi2c" spellcheck="false" placeholder="0x3C">
+                <label for="oleddc" class="ospi">DC pin</label>
+                <input type="number" id="oleddc" class="ospi" min="0" max="69">
+                <label for="oledcs" class="ospi">CS pin</label>
+                <input type="number" id="oledcs" class="ospi" min="-1" max="69" title="-1: always selected">
+                <label class="chk span2"><input type="checkbox" id="oledgrid"> Pixel grid</label>
+              </div>
+              <p class="note">Controller SSD1306 as display sees it: commands and RAM come over I²C (Nano: A4 SDA, A5 SCL; Mega: 20, 21) or SPI.
+                Libraries: <b>GyverOLED</b>, <b>SSD1306Wire</b> (ThingPulse esp8266-oled-ssd1306; ESP8266 sketches run in emulator as AVR ones).
+                Size, address and SPI pins are taken from sketch on load; set here, they go into webfastled.json of project.</p>
+            </div>
+          </div>
+          <div class="devsub gone" data-sub="none">
+            <div class="card"><h3>No devices</h3><p class="note">Add device with + on toolbar (Devices group).</p></div>
+          </div>
+        </div>
       </div>
     </div>
     <div class="pane gone" data-pane="editor">
@@ -846,6 +904,8 @@ code { font-family: var(--ed-font); font-size: .95em; }
         <table class="keys credits">
           <tr><td>Web FastLED</td><td>ae485 — editor, emulator, real build, debugger; MIT license (<a href="#" id="licenselink">LICENSE</a>)</td></tr>
           <tr><td>FastLED 3.7.8</td><td>Daniel Garcia, Mark Kriegsman and contributors — MIT license</td></tr>
+          <tr><td>GyverOLED 1.6.4</td><td>AlexGyver — OLED library of emulator, MIT license</td></tr>
+          <tr><td>esp8266-oled-ssd1306 4.6.2</td><td>ThingPulse, Daniel Eichhorn, Fabrice Weinberg and contributors — SSD1306Wire, OLEDDisplay of emulator, MIT license</td></tr>
           <tr><td>Arduino AVR core 1.8.6</td><td>Arduino and contributors, with SPI, Wire, SoftwareSerial, EEPROM libraries — LGPL 2.1</td></tr>
           <tr><td>LLVM / Clang 21</td><td>LLVM project — Apache 2.0 with LLVM exception; YoWASP build for WebAssembly (whitequark) — ISC license</td></tr>
           <tr><td>GCC 7.3.0, Binutils 2.26</td><td>Free Software Foundation; avr-gcc of Arduino toolchain (Atmel 3.6.1 patches), built for WebAssembly — GPL 3 (runtime library exception for libgcc)</td></tr>
@@ -865,6 +925,11 @@ code { font-family: var(--ed-font); font-size: .95em; }
 <div id="ledwin" class="fwin ledwin" hidden role="dialog" aria-label="LED">
   <header class="fhead ledhead">
     <input type="text" id="ledsize" class="ledsize" spellcheck="false" autocomplete="off" title="Matrix size: 24x12, 24-12, 2412">
+    <button class="hb" id="getwh" title="Get W×H: matrix size (and wiring) from sketch"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="1.5"/><path d="M4 9h16M9 4v16" stroke-dasharray="2 2"/><path d="M12.5 13.5l3 3M15.5 13.5l-3 3"/></svg></button>
+    <button class="hb" id="ledrebuild" title="Rebuild sketch with WIDTH and HEIGHT of LED window size box"><svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 0 1 15.5-6.2L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15.5 6.2L3 16"/><path d="M3 21v-5h5"/><rect x="9" y="9" width="6" height="6" rx=".5"/></svg></button>
+    <span class="hsep"></span>
+    <button class="hb" id="ledrot" title="Rotate view 90° clockwise (now 0°)"><span class="badge" id="ledrotv"></span><svg viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/></svg></button>
+    <button class="hb" id="ledflip" title="Mirror horizontally"><svg viewBox="0 0 24 24"><path d="M12 3v18" stroke-dasharray="2 2"/><path d="M9 7L4 12l5 5z"/><path d="M15 7l5 5-5 5z"/></svg></button>
     <span class="hsep"></span>
     <button class="hb txt" id="ledspeed" title="Speed: 5…500 fps (double click: 1×)"><svg viewBox="0 0 24 24"><path d="M4 18a9 9 0 1 1 16 0"/><path d="M12 14l4-5"/><circle cx="12" cy="14" r="1.3" fill="currentColor"/></svg><span id="ledspeedv"></span></button>
     <button class="hb" id="ledfit" title="Fit window to matrix (3D: to figure)"><svg viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
@@ -884,6 +949,8 @@ code { font-family: var(--ed-font); font-size: .95em; }
   <input type="range" id="speedrange" min="0" max="12" step="1" value="5">
   <div class="ticks" id="speedticks"></div>
 </div>
+<div class="hpop lmenu" id="devpop" hidden></div>
+<div class="hpop lmenu" id="devctx" hidden></div>
 <div class="hpop lmenu" id="uppop" hidden>
   <div class="mnote" id="upinfo"></div>
   <button class="mi" id="upgo"><span class="mn">Upload to board</span><kbd>Ctrl+U</kbd></button>
@@ -935,6 +1002,15 @@ code { font-family: var(--ed-font); font-size: .95em; }
   <label class="chk"><input type="checkbox" id="ledroute">Strip route</label>
 </div>
 
+<!-- OLED display (SSD1306): picture of controller RAM as panel shows it -->
+<div id="oledwin" class="fwin oledwin" hidden role="dialog" aria-label="OLED">
+  <header class="fhead ledhead"><h2 id="oledtitle">OLED</h2><span class="oinfo" id="oledinfo"></span><span class="hsep"></span>
+    <button class="hb txt" id="oledspeed" title="Speed of sketch: 0.1…10× (double click: 1×)"><svg viewBox="0 0 24 24"><path d="M4 18a9 9 0 1 1 16 0"/><path d="M12 14l4-5"/><circle cx="12" cy="14" r="1.3" fill="currentColor"/></svg><span id="oledspeedv"></span></button>
+    <span class="hgap"></span><button data-close title="Close (stops sketch)">✕</button></header>
+  <div id="oledview"><canvas id="oledcanvas"></canvas><div class="ohud"><span id="oledfps"></span></div></div>
+  <div class="rz se" data-rz="se"></div><div class="rz e" data-rz="e"></div><div class="rz s" data-rz="s"></div>
+</div>
+
 <!-- Inputs: pins of the running sketch -->
 <div id="inwin" class="fwin inwin" hidden role="dialog" aria-label="Inputs">
   <header class="fhead"><h2>Inputs</h2><button data-close title="Close (Esc)">✕</button></header>
@@ -974,6 +1050,7 @@ code { font-family: var(--ed-font); font-size: .95em; }
       <h3>Keys</h3>
       <table class="keys">
         <tr><td><kbd>Ctrl</kbd>+<kbd>O</kbd></td><td>Load project: local file</td></tr>
+        <tr><td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>W</kbd></td><td>Close project (all its files)</td></tr>
         <tr><td><kbd>Ctrl</kbd>+<kbd>S</kbd></td><td>Save project (.zip)</td></tr>
         <tr><td><kbd>F5</kbd></td><td>Compile and start / stop</td></tr>
         <tr><td><kbd>F7</kbd>, <kbd>Ctrl</kbd>+<kbd>R</kbd></td><td>Compile only</td></tr>
@@ -1110,11 +1187,19 @@ code { font-family: var(--ed-font); font-size: .95em; }
       <p class="note">So global variables and types of one .ino are visible in .ino files that come after it, not before. .h files are not compiled by themselves: they are included where <code>#include</code> says. .c / .cpp files of sketch folder (and src/) are compiled separately, each must include what it needs (<code>Arduino.h</code>, <code>FastLED.h</code>).
         Prototypes are not made for functions with default arguments and for templates — declare them yourself.</p>
     </div>
+    <div class="card" data-sec="devices">
+      <h3>Devices</h3>
+      <p>What is connected to board: <b>LED Matrix</b> (FastLED strip / matrix), <b>Inputs</b> (buttons, pots), <b>OLED display</b> (SSD1306 128×64 / 128×32 over I²C or SPI: libraries GyverOLED and SSD1306Wire of ThingPulse — controller is emulated as display sees it: commands, RAM, flip, invert, contrast; I²C scanner finds it at its address; closing its window stops sketch; emulator only for now). Devices group of toolbar:
+        <b>+</b> adds device (or <b>Detect from sketch</b>: LED matrix when sketch uses FastLED, inputs always), device button shows / hides its window,
+        right click on it — Show / hide window, Settings…, Remove. Settings: Options → Devices (list of devices, settings of picked one).
+        Project keeps its devices in <code>webfastled.json</code> (no tab; Arduino IDE ignores it): it appears when devices differ from what sketch gives by itself
+        (then LED wiring, rotation, mirror and 3D view go there too) and is saved with project. Without it devices come from sketch.</p>
+    </div>
     <div class="card" data-sec="led">
       <h3>LED window</h3>
       <p>Controls are in title bar: <b>size</b> (24x12, 24-12, 2412) — Enter or leaving box rebuilds sketch with these <code>WIDTH</code> and <code>HEIGHT</code> (only for this build, code is not changed; with catch-up on running sketch continues from same moment, new size is shown once new build has caught up;
         <code>#define NUM_LEDS 256</code> given as number equal to old WIDTH × HEIGHT follows new size),
-        <b>speed</b> (see “Speed and Real CPU timing”), <b>fit</b> window to matrix, <b>effects</b> ▾ menu (grid, coordinates under cursor, strip route — line from <code>leds[0]</code> along indexes, green dot at start). Closing window stops sketch.</p>
+        <b>speed</b> (see “Speed and Real CPU timing”), <b>fit</b> window to matrix, <b>effects</b> ▾ menu (grid, coordinates under cursor, strip route — line from <code>leds[0]</code> along indexes, green dot at start). Also there: <b>Get W×H</b> (size and wiring from sketch), <b>rebuild</b> with size of box, <b>rotate</b> view 90°, <b>mirror</b>. Closing window stops sketch.</p>
       <p><b>3D</b> wraps matrix (as window shows it, after rotate / mirror) on figure; ▾ next to it: figure, mode, rotation.
         <b>Cylinder</b> — matrix is its side: columns go round, rows go down, so running text runs round cylinder. <b>Sphere</b> — as many points as LEDs, spread by golden angle; each point shows LED under its longitude (x) and latitude (y, top row at north pole).
         <b>Globe</b> — latitude / longitude grid: rows are parallels, columns meridians, LEDs crowd to poles (as on real LED spheres, maps like Earth fit it best).
@@ -1167,6 +1252,8 @@ code { font-family: var(--ed-font); font-size: .95em; }
         <tr><td>project=</td><td>library project: file of repo/index.json (GyverMatrixOS_v1.12_24x12.zip, Matrix10x10-nano, adjustive.c) or its name; <b>brw:</b>name — project of browser storage (opens only in same browser); else path / URL of .zip, .ino, .c on this site (another site: when it allows, CORS)</td></tr>
         <tr><td>board=</td><td>nano or mega (library item brings its own)</td></tr>
         <tr><td>w= h=</td><td>matrix size, 1…256 (size=24x12 too): build gets it instead of sketch's WIDTH / HEIGHT</td></tr>
+        <tr><td>led.w= led.3d= …</td><td>same keys with type of device (keys without type are of LED matrix); led=0 / inputs=0 — without that device for this visit</td></tr>
+        <tr><td>oled=128x64</td><td>OLED display (128x32; oled=0 — without it); oled.color= white, blue, yb (yellow / blue), green, amber; oled.addr=0x3D; oled.dc= oled.cs= (SPI); oled.grid=1</td></tr>
         <tr><td>3d=1</td><td>3D view on (3d=0 — off)</td></tr>
         <tr><td>shape=</td><td>figure of 3D view: cylinder, sphere, globe, torus, disc, dome (turns 3D on)</td></tr>
         <tr><td>solid=1</td><td>3D: solid (WebGL) instead of dots</td></tr>
@@ -1325,11 +1412,19 @@ code { font-family: var(--ed-font); font-size: .95em; }
       <p class="note">Поэтому глобальные переменные и типы одного .ino видны в .ino, идущих после него, но не до. Файлы .h сами не компилируются: они включаются там, где стоит <code>#include</code>. Файлы .c / .cpp папки скетча (и src/) компилируются отдельно, каждый должен подключать то, что ему нужно (<code>Arduino.h</code>, <code>FastLED.h</code>).
         Прототипы не создаются для функций с аргументами по умолчанию и для шаблонов — объявите их сами.</p>
     </div>
+    <div class="card" data-sec="devices">
+      <h3>Устройства</h3>
+      <p>То, что подключено к плате: <b>LED Matrix</b> (лента / матрица FastLED), <b>Inputs</b> (кнопки, потенциометры), <b>OLED display</b> (SSD1306 128×64 / 128×32 по I²C или SPI: библиотеки GyverOLED и SSD1306Wire от ThingPulse — контроллер эмулируется так, как его видит дисплей: команды, RAM, переворот, инверсия, контраст; I²C-сканер находит его по адресу; закрытие окна останавливает скетч; пока только в эмуляторе). Группа Devices на панели:
+        <b>+</b> добавляет устройство (или <b>Detect from sketch</b>: LED-матрица, если скетч использует FastLED, Inputs — всегда), кнопка устройства показывает / прячет его окно,
+        правый клик по ней — Show / hide window, Settings…, Remove. Настройки: Options → Devices (список устройств, настройки выбранного).
+        Проект хранит свои устройства в <code>webfastled.json</code> (без вкладки; Arduino IDE его не замечает): файл появляется, когда устройства отличаются от тех, что дает сам скетч
+        (тогда туда же идут разводка, поворот, отражение и 3D-вид матрицы), и сохраняется с проектом. Без него устройства берутся из скетча.</p>
+    </div>
     <div class="card" data-sec="led">
       <h3>Окно LED</h3>
       <p>Управление в заголовке окна: <b>размер</b> (24x12, 24-12, 2412) — Enter или выход из поля пересобирает скетч с этими <code>WIDTH</code> и <code>HEIGHT</code> (только для этой сборки, код не меняется; при включённом catch-up работающий скетч продолжает с того же момента, новый размер показывается, когда новая сборка догонит;
         <code>#define NUM_LEDS 256</code>, заданный числом, равным старому WIDTH × HEIGHT, следует за новым размером),
-        <b>скорость</b> (см. «Скорость и Real CPU timing»), <b>fit</b> — окно по матрице, меню <b>эффектов</b> ▾ (сетка, координаты под курсором, маршрут ленты — линия от <code>leds[0]</code> по индексам, зелёная точка в начале). Закрытие окна останавливает скетч.</p>
+        <b>скорость</b> (см. «Скорость и Real CPU timing»), <b>fit</b> — окно по матрице, меню <b>эффектов</b> ▾ (сетка, координаты под курсором, маршрут ленты — линия от <code>leds[0]</code> по индексам, зелёная точка в начале). Там же: <b>Get W×H</b> (размер и разводка из скетча), <b>пересборка</b> с размером из поля, <b>поворот</b> вида на 90°, <b>отражение</b>. Закрытие окна останавливает скетч.</p>
       <p><b>3D</b> натягивает матрицу (как её показывает окно, после поворота / зеркала) на фигуру; ▾ рядом: фигура, режим, вращение.
         <b>Cylinder</b> — матрица — его бок: столбцы идут по кругу, строки вниз, поэтому бегущая строка бежит вокруг цилиндра. <b>Sphere</b> — столько точек, сколько светодиодов, разложенных по золотому углу; каждая точка показывает светодиод под своей долготой (x) и широтой (y, верхняя строка на северном полюсе).
         <b>Globe</b> — сетка широт / долгот: строки — параллели, столбцы — меридианы, светодиоды сгущаются к полюсам (как на настоящих LED-сферах, карты вроде Земли ложатся лучше всего).
@@ -1382,6 +1477,8 @@ code { font-family: var(--ed-font); font-size: .95em; }
         <tr><td>project=</td><td>проект библиотеки: файл из repo/index.json (GyverMatrixOS_v1.12_24x12.zip, Matrix10x10-nano, adjustive.c) или его название; <b>brw:</b>имя — проект из хранилища браузера (открывается только в том же браузере); иначе путь / URL файла .zip, .ino, .c на этом сайте (другой сайт — если он разрешает, CORS)</td></tr>
         <tr><td>board=</td><td>nano или mega (у проекта библиотеки своя плата)</td></tr>
         <tr><td>w= h=</td><td>размер матрицы, 1…256 (или size=24x12): сборка берёт его вместо WIDTH / HEIGHT скетча</td></tr>
+        <tr><td>led.w= led.3d= …</td><td>те же ключи с типом устройства (ключи без типа — LED-матрицы); led=0 / inputs=0 — без этого устройства на этот визит</td></tr>
+        <tr><td>oled=128x64</td><td>OLED-дисплей (128x32; oled=0 — без него); oled.color= white, blue, yb (желтый / синий), green, amber; oled.addr=0x3D; oled.dc= oled.cs= (SPI); oled.grid=1</td></tr>
         <tr><td>3d=1</td><td>3D-вид (3d=0 — выключен)</td></tr>
         <tr><td>shape=</td><td>фигура 3D: cylinder, sphere, globe, torus, disc, dome (включает 3D)</td></tr>
         <tr><td>solid=1</td><td>3D: сплошной (WebGL) вместо точек</td></tr>

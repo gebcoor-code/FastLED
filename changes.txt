@@ -700,3 +700,99 @@ Web FastLED — version history
 ! __builtin_avr_cli(), sei(), sleep(), wdr() in sketch crashed avr-gcc of
   real build: built as same instruction in inline asm; in emulator they
   do nothing (as cli() / sei())
+
+
+        version 0.37.0                  12 nov 2026
+
++ devices: what is connected to board — LED Matrix, Inputs (OLED display
+  next). Toolbar group Devices: + adds device (or Detect from sketch),
+  device button shows / hides its window, right click: Show / hide
+  window, Settings…, Remove. Sketch without FastLED gets no LED matrix
+  (its run does not open LED window)
++ project keeps its devices in webfastled.json (no tab, saved with
+  project): written when devices differ from what sketch gives, with LED
+  wiring, rotation, mirror and 3D view; read on load
+@ Options: tab LED is Devices — list of devices on left, settings of
+  picked one on right
+@ Get W×H, rebuild with size, rotate and mirror moved from toolbar to
+  title bar of LED window; Real CPU timing button is in run group
++ REST API: led.w=, led.3d= … (keys without type stay of LED matrix),
+  led=0 / inputs=0; oled= reported as not supported yet
+
+
+        version 0.38.0                  12 nov 2026
+
++ OLED display (device): SSD1306 128x64 / 128x32 over I2C or SPI in
+  emulator — controller as display sees it (commands, RAM, addressing
+  modes, flip, invert, contrast, display on / off). Libraries GyverOLED
+  1.6.4 and SSD1306Wire (ThingPulse esp8266-oled-ssd1306 4.6.2) built in;
+  ESP8266 sketches with them run as AVR ones. Found in sketch with its
+  size, I2C address or SPI pins (DC, CS); window with color (white,
+  blue, yellow / blue, green, amber) and pixel grid; Options -> Devices
+  -> OLED display. Not in Real CPU timing and board binary yet
++ Wire and SPI in emulator: bytes go to devices of page; I2C scanner
+  finds display at its address (endTransmission() gives 2 elsewhere)
++ REST API: oled=128x64 (128x32, 0), oled.color, oled.addr, oled.dc,
+  oled.cs, oled.grid
+! sketch with WIDTH / HEIGHT and no LED matrix (OLED sketch) was built
+  with size of LED window instead of its own
+! project with empty text file could not be built
+
+
+        version 0.39.0                  12 nov 2026
+
++ Close project: button next to Save, Ctrl+Shift+W (asks when project has
+  unsaved changes)
+@ project without webfastled.json: devices follow sketch on every build
+  (OLED declaration changed in code — size, I2C / SPI, address, pins)
++ OLED that stays dark: Output says why — nothing came at its address /
+  pins, display not switched on, or picture never sent (update() /
+  display() missing with buffer)
+
+
+        version 0.39.1                  12 nov 2026
+
+@ closing OLED window stops sketch, as LED window does
+
+
+        version 0.40.0                  12 nov 2026
+
+@ I2C and SPI take bus time in emulator, as on board (I2C 100 kHz unless
+  Wire.setClock(), SPI clock of SPISettings / setClockDivider, 4 MHz by
+  default): display update of 1 KB over I2C takes about 90 ms, sketch
+  runs as slow as on board
++ runtime error of sketch says where: function (Output: "divide by zero
+  in loop()"); division by zero explained (AVR board goes on with
+  garbage result, ESP board resets)
+
+
+        version 0.40.1                  12 nov 2026
+
+@ Close project always asks
+* status bar: OLED frames/s counts whole pictures sent to display (was
+  every redraw of window, also halfway through picture)
+
+
+        version 0.40.2                  12 nov 2026
+
+! I2C / SPI bus time of emulator was waited after every transfer (64 short
+  waits per OLED picture): on some computers each wait took longer than
+  asked and sketch ran slower than on board; now it is waited at once
+  when sketch looks at time, waits or loop() ends
+
+
+        version 0.40.3                  12 nov 2026
+
+! waits of sketch came back late on computers with coarse system timer
+  (Windows: 15.6 ms), sketch ran slower than board (OLED cube: 15 frames/s
+  instead of 37 at 400 kHz); lateness is measured now and end of each
+  wait is busy loop (Output says so once)
+
+
+        version 0.41.0                  12 nov 2026
+
++ OLED window: frames per second of display and speed of sketch
+  (0.1…10×, same as speed of LED window)
+! GyverOLED stayed slow whatever Wire.setClock(): its delayMicroseconds(2)
+  after every I2C transfer made 64 real waits per picture; short waits
+  (under 2 ms) are added up now as bus time is and waited at once

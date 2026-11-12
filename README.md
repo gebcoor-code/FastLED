@@ -27,6 +27,8 @@ Everything runs in browser: editor, compilers, emulator, upload to board. No ins
   and library in advance.
 - **FastLED** 3.7.8 built in (last version before big rework of library) or 3.10.9, for emulator and board binary;
   Options → FastLED chooses version and checks GitHub for newer release.
+- **Devices**: LED Matrix, Inputs, OLED display SSD1306 (GyverOLED, SSD1306Wire; emulator) — toolbar + adds device, Options → Devices; project keeps them in
+  `webfastled.json`.
 - **REST API**: link opens page with project, matrix size, 3D view set and sketch running —
   `index.html?project=GyverMatrixOS_v1.12_24x12.zip&w=24&h=12&3d=1&shape=cylinder&run=1`; Options → REST API builds it.
 

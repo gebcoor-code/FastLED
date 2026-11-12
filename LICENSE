@@ -37,6 +37,14 @@ FastLED 3.7.8
   Used in WebAssembly SDK (stub platform: clockless_stub.h, led_sysdefs_stub.h
   patched) and in real build for AVR.
 
+GyverOLED 1.6.4 (OLED library of emulator, runtime/libs)
+  AlexGyver. MIT license.
+  https://github.com/GyverLibs/GyverOLED
+
+esp8266-oled-ssd1306 4.6.2 (SSD1306Wire, OLEDDisplay of emulator, runtime/libs)
+  ThingPulse, Daniel Eichhorn, Fabrice Weinberg and contributors. MIT license.
+  https://github.com/ThingPulse/esp8266-oled-ssd1306
+
 Arduino AVR core 1.8.6, libraries SPI, Wire, SoftwareSerial, EEPROM
   Arduino and contributors. GNU Lesser General Public License 2.1.
   https://github.com/arduino/ArduinoCore-avr
