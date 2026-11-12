@@ -6,8 +6,8 @@
 //   /avr/…                      toolchain: gcc lib (include, device-specs, libgcc), avr-libc, ldscripts
 //   /ard/cores/arduino, /ard/variants/<v>, /ard/bootloaders/…, /ard/libraries/<Lib>/…   Arduino AVR core 1.8.6 + FastLED
 //   /ard/pre/<board>/core.a, /ard/pre/<board>/<Lib>/*.o      precompiled core and libraries (LTO objects)
-import { preprocessSketch, cNames, mergePattern, findFunctions } from './sketch.js?v=20261108131927';
-import { sketchLines } from './avr-dwarf.js?v=20261108131927';
+import { preprocessSketch, cNames, mergePattern, findFunctions } from './sketch.js?v=20261112084515';
+import { sketchLines } from './avr-dwarf.js?v=20261112084515';
 
 export const AVR_BOARDS = {
   nano: {

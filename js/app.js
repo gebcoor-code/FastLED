@@ -1,8 +1,8 @@
 // Web FastLED — UI: projects (zip), editor tabs, themes, options, LED matrix window.
 (function () {
   'use strict';
-  const VERSION = '0.31.0';
-  const BUILD = '20261108131927';
+  const VERSION = '0.32.0';
+  const BUILD = '20261112084515';
   const $ = (id) => document.getElementById(id);
   const load = (k) => { try { return localStorage.getItem('wfl.' + k); } catch (e) { return null; } };
   // REST API link (?project=…&w=…): what it sets is for this visit only — these keys are not stored then
@@ -396,11 +396,34 @@
     if (!pop.hidden) { pop.hidden = true; return; }
     libItems = null; $('libfilter').value = ''; libUI();
     popup(pop, anchor || $('loadbtn'));
-    libLoadList().then(() => { if (!pop.hidden) popup(pop, anchor || $('loadbtn'), true); });
+    Promise.all([libLoadList(), stMenuUI()]).then(() => { if (!pop.hidden) popup(pop, anchor || $('loadbtn'), true); });
   }
 
-  async function saveProject() {
+  // Save (button, Ctrl+S): window — name, Download .zip or Browser storage (last choice is default, Enter)
+  function saveProject() {
     if (!project) return;
+    const w = $('savewin'), nm = $('svname');
+    nm.value = project.name;
+    const last = load('saveto') === 'store' ? 'svstore' : 'svdown';
+    $('svdown').classList.toggle('primary', last === 'svdown'); $('svstore').classList.toggle('primary', last === 'svstore');
+    const note = async () => {
+      const v = nm.value.trim(); let have = null;
+      try { have = v ? await ST.get(v) : null; } catch (e) {}
+      $('svnote').textContent = !v ? 'Name is empty' : have ? `Browser storage has "${v}" (${fmtDate(have.time)}): it will be replaced` : '';
+    };
+    nm.oninput = note; note();
+    w.hidden = false;
+    const done = () => { w.hidden = true; document.removeEventListener('keydown', key, true); };
+    const go = (to) => { const v = nm.value.trim().replace(/[\\/:*?"<>|]+/g, '_'); if (!v) { nm.focus(); return; } done(); store('saveto', to); doSave(to, v); };
+    const key = (e) => {
+      if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); done(); }
+      else if (e.key === 'Enter' && document.activeElement === nm) { e.preventDefault(); e.stopPropagation(); go(last === 'svstore' ? 'store' : 'down'); }
+    };
+    $('svdown').onclick = () => go('down'); $('svstore').onclick = () => go('store'); $('svno').onclick = done;
+    document.addEventListener('keydown', key, true);
+    setTimeout(() => { nm.focus(); nm.select(); }, 0);
+  }
+  async function doSave(to, name) {
     let bad = 0;
     const out = project.files.map((f) => {
       if (f.kind === 'bin' || !f.mod) return { name: f.path, data: f.orig, f };
@@ -408,10 +431,16 @@
       return { name: f.path, data: r.bytes, f };
     });
     const blob = await FLZip.create(out.map((x) => ({ name: x.name, data: x.data })));
-    download(blob, project.name + '.zip');
+    if (to === 'store') {
+      try { await ST.put(name, new Uint8Array(await blob.arrayBuffer()), board.id); }
+      catch (e) { toast('Browser storage: ' + (e.message || e), true); return; }
+      project.src = 'brw:' + name;
+    } else download(blob, name + '.zip');
+    project.name = name;
     for (const x of out) if (x.f.kind !== 'bin') { x.f.orig = x.data; x.f.base = ed.text(x.f.id); x.f.mod = false; }
     buildTabs(); projectUI(); saveSession();
-    toast('Saved ' + project.name + '.zip' + (bad ? ` — ${bad} character(s) not in Windows-1251 written as "?"` : ''), bad > 0);
+    const warn = bad ? ` — ${bad} character(s) not in Windows-1251 written as "?"` : '';
+    toast((to === 'store' ? 'Saved to browser storage: ' + name : 'Saved ' + name + '.zip') + warn, bad > 0);
   }
   function download(blob, name) {
     const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name;
@@ -441,7 +470,7 @@
       const key = (e) => { if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); done(false); } };
       $('askok').onclick = () => done(true); $('askno').onclick = () => done(false);
       document.addEventListener('keydown', key, true);
-      setTimeout(() => $('askok').focus(), 0);
+      $('askok').focus(); setTimeout(() => $('askok').focus(), 0);
     });
   }
   function doRemove(f, left) {
@@ -563,7 +592,96 @@
     async get(k) { const db = await this.open(); return new Promise((res, rej) => { const q = db.transaction('kv').objectStore('kv').get(k); q.onsuccess = () => res(q.result); q.onerror = () => rej(q.error); }); },
     async put(k, v) { const db = await this.open(); return new Promise((res, rej) => { const t = db.transaction('kv', 'readwrite'); t.objectStore('kv').put(v, k); t.oncomplete = res; t.onerror = () => rej(t.error); }); },
     async del(k) { const db = await this.open(); return new Promise((res) => { const t = db.transaction('kv', 'readwrite'); t.objectStore('kv').delete(k); t.oncomplete = res; t.onerror = res; }); },
+    async keys() { const db = await this.open(); return new Promise((res, rej) => { const q = db.transaction('kv').objectStore('kv').getAllKeys(); q.onsuccess = () => res(q.result); q.onerror = () => rej(q.error); }); },
   };
+  // ---------------------------------------------------------------- browser storage: projects kept in this browser
+  // kv 'proj:<name>' = { name, zip (bytes of .zip, as Save gives), board, time, size }; Load menu lists them, Manage… window
+  // adds (drop), downloads, deletes; Save can put project here instead of Downloads
+  const ST = {
+    async list() {
+      let ks = []; try { ks = (await DB.keys()).filter((k) => typeof k === 'string' && k.startsWith('proj:')); } catch (e) { return []; }
+      const out = [];
+      for (const k of ks) { const v = await DB.get(k); if (v && v.zip) out.push(v); }
+      return out.sort((a, b) => b.time - a.time);
+    },
+    get: (name) => DB.get('proj:' + name),
+    put: (name, zip, board) => DB.put('proj:' + name, { name, zip, board: board || '', time: Date.now(), size: zip.length }),
+    del: (name) => DB.del('proj:' + name),
+    async clear() { for (const p of await this.list()) await DB.del('proj:' + p.name); },
+  };
+  const fmtSize = (n) => (n < 1024 ? n + ' B' : n < 1048576 ? (n / 1024).toFixed(1) + ' KB' : (n / 1048576).toFixed(1) + ' MB');
+  const fmtDate = (t) => { const d = new Date(t), p = (x) => String(x).padStart(2, '0'); return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`; };
+  async function stLoad(name) {
+    let v; try { v = await ST.get(name); } catch (e) { v = null; }
+    if (!v) throw new Error('not in browser storage');
+    return openBytes(name + '.zip', v.zip, v.board, 'brw:' + name);
+  }
+  async function stMenuUI() {
+    const box = $('stlist'); box.innerHTML = '';
+    const list = await ST.list();
+    if (!list.length) { box.innerHTML = '<div class="mnote">Empty: Save → Browser storage, or Manage…</div>'; return; }
+    for (const it of list) {
+      const b = document.createElement('button');
+      b.className = 'mi'; b.title = `${it.name} · ${fmtSize(it.size)} · ${fmtDate(it.time)}` + (it.board ? ' · ' + it.board : '');
+      b.innerHTML = '<span class="mn"></span><span class="mt"></span>';
+      b.firstChild.textContent = it.name; b.lastChild.textContent = fmtDate(it.time).slice(5);
+      b.onclick = () => { $('loadpop').hidden = true; stLoad(it.name).catch((e) => toast(it.name + ': ' + e.message, true)); };
+      box.appendChild(b);
+    }
+  }
+  // file(s) dropped / chosen in Manage… window → stored (.zip as is; .ino / .c / .h of one drop → one .zip)
+  async function stAdd(fl) {
+    fl = Array.from(fl || []); if (!fl.length) return;
+    const zips = fl.filter((f) => /\.zip$/i.test(f.name)), src = fl.filter((f) => /\.(ino|c|h|cpp|hpp)$/i.test(f.name));
+    let n = 0;
+    for (const z of zips) {
+      const b = new Uint8Array(await z.arrayBuffer());
+      if (!FLZip.isZip(b)) { toast(z.name + ': not ZIP archive', true); continue; }
+      await ST.put(z.name.replace(/\.zip$/i, ''), b, ''); n++;
+    }
+    if (src.length) {
+      const main = src.find((f) => /\.(ino|c)$/i.test(f.name)) || src[0];
+      const items = await Promise.all(src.map(async (f) => ({ name: f.name, data: new Uint8Array(await f.arrayBuffer()) })));
+      await ST.put(main.name.replace(/\.[^.]*$/, ''), new Uint8Array(await (await FLZip.create(items)).arrayBuffer()), ''); n++;
+    }
+    for (const f of fl) if (!zips.includes(f) && !src.includes(f)) toast(f.name + ': not .zip / .ino / .c', true);
+    if (n) toast(`Browser storage: ${n} project${n > 1 ? 's' : ''} added`);
+    stWinUI();
+  }
+  async function stWinUI() {
+    const box = $('sttable'), list = await ST.list();
+    box.innerHTML = list.length ? '' : '<p class="note">No projects yet.</p>';
+    for (const it of list) {
+      const r = document.createElement('div'); r.className = 'strow';
+      r.innerHTML = '<span class="stn" title="Open"></span><span class="stm"></span><button class="sto" title="Open">Open</button><button class="std" title="Download .zip">⤓</button><button class="stx" title="Delete">✕</button>';
+      r.querySelector('.stn').textContent = it.name;
+      r.querySelector('.stm').textContent = (it.board ? it.board + ' · ' : '') + fmtSize(it.size) + ' · ' + fmtDate(it.time);
+      const open = () => { if (!confirmDiscard()) return; stLoad(it.name).then(() => { $('stwin').hidden = true; }).catch((e) => toast(it.name + ': ' + e.message, true)); };
+      r.querySelector('.stn').onclick = open; r.querySelector('.sto').onclick = open;
+      r.querySelector('.std').onclick = () => download(new Blob([it.zip], { type: 'application/zip' }), it.name + '.zip');
+      r.querySelector('.stx').onclick = async () => { if (await askOk(`Delete "${it.name}" from browser storage?`)) { await ST.del(it.name); stWinUI(); } };
+      box.appendChild(r);
+    }
+    $('stclear').disabled = !list.length;
+    let u = list.length + ' project' + (list.length === 1 ? '' : 's') + ', ' + fmtSize(list.reduce((a, b) => a + b.size, 0));
+    try { const e = await navigator.storage.estimate(); if (e && e.quota) u += ' · site uses ' + fmtSize(e.usage) + ' of ' + fmtSize(e.quota); } catch (e) {}
+    $('stusage').textContent = u;
+  }
+  function stWin() {
+    const w = $('stwin');
+    if (!w.dataset.bound) {
+      w.dataset.bound = '1';
+      floatWin(w, 'stpos', centerPos(w)); resizable(w, 'stsz', 360, 260);
+      const d = $('stdrop');
+      d.onclick = () => $('stfile').click();
+      $('stfile').onchange = () => { stAdd($('stfile').files); $('stfile').value = ''; };
+      d.addEventListener('dragover', (e) => { e.preventDefault(); e.stopPropagation(); d.classList.add('over'); });
+      d.addEventListener('dragleave', () => d.classList.remove('over'));
+      d.addEventListener('drop', (e) => { e.preventDefault(); e.stopPropagation(); d.classList.remove('over'); stAdd(e.dataTransfer.files); });
+      $('stclear').onclick = async () => { if (await askOk('Delete all projects of browser storage?')) { await ST.clear(); stWinUI(); } };
+    }
+    w.hidden = false; stWinUI();
+  }
   let sessT = 0;
   function saveSessionSoon() { clearTimeout(sessT); sessT = setTimeout(saveSession, 700); }
   function saveSession() {
@@ -1148,7 +1266,7 @@
     if (cOpts.pattern) await loadPattern();
     if (project !== pr) return;
     let sk;
-    try { sk = await import('./sketch.js?v=20261108131927'); } catch (e) { outLine('sketch.js cannot be loaded: ' + e.message); return; }
+    try { sk = await import('./sketch.js?v=20261112084515'); } catch (e) { outLine('sketch.js cannot be loaded: ' + e.message); return; }
     const cf = pr.files.filter((f) => f.ext === 'c' && f.kind === 'src' && !f.path.slice(pr.prefix.length).includes('/'));
     if (!cf.length) return;
     const codes = {};
@@ -1198,7 +1316,7 @@
   function ensureCompiler() {
     if (compiler) return compiler;
     compilerState = 'loading'; compilerPct = 0;
-    try { compiler = new Worker('js/compiler.js?v=20261108131927', { type: 'module' }); }
+    try { compiler = new Worker('js/compiler.js?v=20261112084515', { type: 'module' }); }
     catch (e) { compilerState = 'fail'; outLine('Cannot start compiler: ' + e.message); return null; }
     compiler.onmessage = (e) => {
       const m = e.data;
@@ -1290,7 +1408,7 @@
   function ensureAvr() {
     if (avr) return avr;
     avrState = 'loading'; avrPct = 0;
-    try { avr = new Worker('js/avr-worker.js?v=20261108131927', { type: 'module' }); }
+    try { avr = new Worker('js/avr-worker.js?v=20261112084515', { type: 'module' }); }
     catch (e) { avrState = 'fail'; outLine('Cannot start avr-gcc: ' + e.message); return null; }
     avr.onmessage = (e) => {
       const m = e.data;
@@ -1420,7 +1538,7 @@
     building = false; buildUI();
     if (!r) return null;
     if (lastBuild && lastBuild.real && lastBuild.key === r.key) return lastBuild;
-    if (!dbgMod) dbgMod = await import('./avr-dwarf.js?v=20261108131927');
+    if (!dbgMod) dbgMod = await import('./avr-dwarf.js?v=20261112084515');
     return (lastBuild = { key: r.key, real: true, hex: r.hex, elf: r.elf, funcs: r.funcs, lines: r.lines, board: board.id, prof: null, size: r.size });
   }
   // ---------------------------------------------------------------- USB (Web Serial): upload through bootloader as avrdude does,
@@ -1453,7 +1571,7 @@
     usbPort = p; store('usbport', portKey(p)); hexUI();
     return p;
   }
-  async function usbMod() { if (!upMod) upMod = await import('./avr-upload.js?v=20261108131927'); return upMod; }
+  async function usbMod() { if (!upMod) upMod = await import('./avr-upload.js?v=20261112084515'); return upMod; }
   const BOOT_BAUD = { atmega328: 115200, atmega328old: 57600, atmega2560: 115200 };
   async function upload() {
     if (!project || upBusy || avrBusy) return;
@@ -2221,6 +2339,7 @@ void loop() {
     $('wload').onclick = () => $('fileinp').click();
     $('wlib').onclick = () => loadMenu($('wlib'));
     $('ldlocal').onclick = () => { $('loadpop').hidden = true; $('fileinp').click(); };
+    $('stmanage').onclick = () => { $('loadpop').hidden = true; stWin(); };
     $('libfilter').oninput = () => libUI();
     $('libfilter').onkeydown = (e) => { e.stopPropagation(); if (e.key === 'Escape') $('loadpop').hidden = true; if (e.key === 'Enter') { const b = $('liblist').querySelector('button'); if (b) b.click(); } };
     $('fileinp').onchange = (e) => { loadFiles(e.target.files); e.target.value = ''; };
@@ -2417,6 +2536,7 @@ void loop() {
   }
   // project= : library item (file of repo/index.json, with or without extension, or its name) or path / URL of .zip / .ino / .c
   async function linkProject(v) {
+    if (/^brw:/i.test(v)) return stLoad(v.slice(4)); // project of browser storage (this browser only)
     if (!libItems) await libLoadList();
     const n = (x) => String(x).toLowerCase().replace(/[\s_×x-]/g, '');
     const it = (libItems || []).find((i) => i.file.toLowerCase() === v.toLowerCase() || i.file.replace(/\.[^.]*$/, '').toLowerCase() === v.toLowerCase() || n(i.name) === n(v));
@@ -2462,13 +2582,19 @@ void loop() {
   let linkBuilder = null;
   function bindRest() {
     const host = $('restbox');
-    $('options').querySelector('.tabs button[data-tab="rest"]').addEventListener('click', async () => {
+    // built anew each time tab opens: project list (library, browser storage) as it is now, values = what is open now
+    const restPane = $('options').querySelector('[data-pane="rest"]');
+    $('options').querySelector('.tabs button[data-tab="rest"]').addEventListener('click', () => restOpen());
+    new MutationObserver(() => { if (!$('options').hidden && !restPane.classList.contains('gone')) restOpen(); }).observe($('options'), { attributes: true, attributeFilter: ['hidden'] });
+    async function restOpen() {
       if (!libItems) await libLoadList();
-      if (linkBuilder) { linkBuilder.update(); return; }
+      const stored = await ST.list();
+      const projOpts = [...(libItems || []).map((i) => [i.file, i.name + '  (library)']), ...stored.map((p) => ['brw:' + p.name, p.name + '  (browser storage: this browser only)'])];
+      if (project && project.src && !projOpts.some((o) => o[0] === project.src)) projOpts.unshift([project.src, project.src]);
+      host.innerHTML = '';
       linkBuilder = RestBuilder.create(host, {
         rows: [
-          { key: 'project', type: 'file', placeholder: 'library file, or path / URL of .zip, .ino, .c', title: 'project of library (repo/index.json) or file on site; another site needs CORS',
-            list: () => (libItems || []).map((i) => [i.file, i.name]), on: true },
+          { key: 'project', type: 'select', options: projOpts, title: 'project of library (repo/index.json) or browser storage (brw:, this browser only); link may also carry path / URL of .zip, .ino, .c' },
           { key: 'board', type: 'select', options: BOARDS.map((b) => [b.id, b.name]), title: 'board (library item brings its own)' },
           { key: 'w', type: 'text', placeholder: '1…256', title: 'width of matrix: build gets it instead of sketch\'s WIDTH' },
           { key: 'h', type: 'text', placeholder: '1…256', title: 'height of matrix: build gets it instead of sketch\'s HEIGHT' },
@@ -2484,16 +2610,21 @@ void loop() {
           const n = [];
           if (on('real') && val('real') === '1' && (on('w') || on('h') || on('3d') || on('shape') || on('speed'))) n.push('real=1: sketch runs as it is — size, 3D and speed do not apply');
           if (on('run') && !on('project')) n.push('run= starts project visitor has open');
+          if (on('project') && /^brw:/.test(val('project'))) n.push('brw: project opens only in this browser');
           return n.join('; ');
         },
-        current: () => ({
+        current: () => linkCurrent(),
+      });
+      function linkCurrent() {
+        return ({
           project: project && project.src ? project.src : false, board: board.id, w: String(led.w), h: String(led.h), '3d': !!led.v3d,
           shape: led.v3d ? led.shape3 || 'cylinder' : false, solid: !!led.v3d && led.mode3 === 'solid', spin: led.v3d && led.rot3 === false ? '0' : false,
           speed: simSpeed !== 1 ? String(simSpeed) : false, real: realOn ? '1' : false, run: running,
-        }),
-      });
-      $('restnote').textContent = project && !project.src ? 'Open project came from this computer: link can carry only projects of library or site' : '';
-    });
+        });
+      }
+      linkBuilder.set(linkCurrent());
+      $('restnote').textContent = project && !project.src ? 'Open project came from this computer: link can carry only projects of library, site or browser storage (Save → Browser storage)' : '';
+    }
   }
 
   buildBoards(); bindOptions(); bindLed(); bindHelp(); bindPanel(); bindSearch(); bind(); bindOffline(); bindNet(); bindRest();

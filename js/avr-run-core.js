@@ -6,9 +6,9 @@ import {
   AVRIOPort, portAConfig, portBConfig, portCConfig, portDConfig, portEConfig, portFConfig, portGConfig, portHConfig, portJConfig, portKConfig, portLConfig,
   AVRADC, adcConfig, ADCMuxInputType, ADCReference, AVREEPROM, EEPROMMemoryBackend, eepromConfig,
   AVRClock, clockConfig, AVRWatchdog, watchdogConfig, AVRSPI, spiConfig, AVRTWI, twiConfig,
-} from './avr8.js?v=20261108131927';
-import { parseHex } from './avr-build.js?v=20261108131927';
-import { LineMap } from './avr-dwarf.js?v=20261108131927';
+} from './avr8.js?v=20261112084515';
+import { parseHex } from './avr-build.js?v=20261112084515';
+import { LineMap } from './avr-dwarf.js?v=20261112084515';
 
 export const MHZ = 16;
 const PAINT = 0xa5;

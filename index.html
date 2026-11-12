@@ -2,7 +2,7 @@
 <html lang="en" data-theme="dark-plus">
 <head>
 <meta charset="utf-8">
-<meta name="build" content="20261108131927">
+<meta name="build" content="20261112084515">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="icon" href="icon.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -380,6 +380,28 @@ table.keys td + td { color: var(--dim); }
 #askwin p { margin: 0 0 12px; line-height: 1.45; }
 #askwin .askbtns { display: flex; gap: 8px; justify-content: flex-end; }
 #askwin .btn.primary { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
+/* Save window (modal, as askwin) */
+#savewin { position: fixed; inset: 0; z-index: 90; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,.35); }
+#savewin[hidden] { display: none; }
+#savewin .askbox { width: min(440px, calc(100vw - 24px)); background: var(--panel); color: var(--text); border: 1px solid var(--line); border-radius: 8px; box-shadow: 0 12px 32px var(--shadow); padding: 14px 16px 12px; }
+#savewin h3 { margin: 0 0 10px; font-size: 14px; }
+#savewin .svname { display: flex; gap: 8px; align-items: center; }
+#savewin .svname input { flex: 1; min-width: 0; background: var(--bg); color: var(--text); border: 1px solid var(--line); border-radius: 4px; padding: 4px 6px; font: inherit; }
+#savewin .note { min-height: 1.2em; margin: 6px 0 10px; }
+#savewin .askbtns { display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; }
+#savewin .btn.primary { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
+/* browser storage window */
+.stwin { width: min(560px, calc(100vw - 8px)); height: min(460px, calc(100vh - 16px)); }
+.stdrop { border: 2px dashed var(--line); border-radius: 8px; padding: 18px 12px; text-align: center; color: var(--dim); cursor: pointer; flex: none; }
+.stdrop.over { border-color: var(--focus); color: var(--text); background: color-mix(in srgb, var(--focus) 10%, transparent); }
+.sttable { flex: 1; overflow: auto; margin: 8px 0; }
+.sttable .strow { display: flex; align-items: center; gap: 8px; padding: 4px 6px; border-bottom: 1px solid var(--line); }
+.sttable .strow:hover { background: var(--panel2); }
+.sttable .stn { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; cursor: pointer; }
+.sttable .stm { color: var(--dim); font-size: 12px; white-space: nowrap; }
+.sttable .strow button { background: transparent; border: 1px solid transparent; color: var(--dim); border-radius: 4px; padding: 1px 6px; cursor: pointer; font: inherit; }
+.sttable .strow button:hover { color: var(--text); border-color: var(--line); }
+.stbar { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex: none; }
 /* phones: bottom line kept off screen edge (protective glass, rounded corners); status bar scrolls sideways */
 @media (pointer: coarse) {
   #app { padding-bottom: max(12px, env(safe-area-inset-bottom)); }
@@ -541,9 +563,9 @@ code { font-family: var(--ed-font); font-size: .95em; }
 <div id="app">
   <div id="toolbar">
     <div class="brand"><img src="icon.png" alt=""><span>FastLED</span></div>
-    <button class="ico drop" id="loadbtn" title="Load: local file (Ctrl+O) or library" aria-haspopup="true"><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v1"/><path d="M3 7v11a1 1 0 0 0 1 1h14.5a1 1 0 0 0 1-.8L21.8 12a1 1 0 0 0-1-1.2H7.4a1 1 0 0 0-1 .8L4 19"/></svg><svg class="caret" viewBox="0 0 8 8"><path d="M1.5 3l2.5 2.5L6.5 3"/></svg></button>
+    <button class="ico drop" id="loadbtn" title="Load: local file (Ctrl+O), library or browser storage" aria-haspopup="true"><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v1"/><path d="M3 7v11a1 1 0 0 0 1 1h14.5a1 1 0 0 0 1-.8L21.8 12a1 1 0 0 0-1-1.2H7.4a1 1 0 0 0-1 .8L4 19"/></svg><svg class="caret" viewBox="0 0 8 8"><path d="M1.5 3l2.5 2.5L6.5 3"/></svg></button>
     <button class="ico" id="getwh" title="Get W×H" disabled><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="1.5"/><path d="M4 9h16M9 4v16" stroke-dasharray="2 2"/><path d="M12.5 13.5l3 3M15.5 13.5l-3 3"/></svg></button>
-    <button class="ico" id="savebtn" title="Save project as .zip (Ctrl+S)" disabled><svg viewBox="0 0 24 24"><path d="M5 3h11l4 4v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 1-2z"/><path d="M8 3v5h7V3"/><rect x="7" y="13" width="10" height="6" rx="1"/></svg></button>
+    <button class="ico" id="savebtn" title="Save project: download .zip or browser storage (Ctrl+S)" disabled><svg viewBox="0 0 24 24"><path d="M5 3h11l4 4v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 1-2z"/><path d="M8 3v5h7V3"/><rect x="7" y="13" width="10" height="6" rx="1"/></svg></button>
     <button class="ico drop" id="hexbtn" title="Board binary: real build with avr-gcc as in Arduino IDE (.hex, .elf, with bootloader)" aria-haspopup="true" disabled><svg viewBox="0 0 24 24"><rect x="7" y="2.5" width="10" height="9" rx="1.2"/><path d="M9.5 2.5V1M14.5 2.5V1M7 5.5H5M7 8.5H5M17 5.5h2M17 8.5h2"/><path d="M12 13.5V21M8.5 17.5L12 21l3.5-3.5"/></svg><svg class="caret" viewBox="0 0 8 8"><path d="M1.5 3l2.5 2.5L6.5 3"/></svg></button>
     <button class="ico" id="uploadbtn" title="Upload to board over USB (Ctrl+U)" disabled><svg viewBox="0 0 24 24"><path d="M3 12h10"/><path d="M9.5 8.5L13 12l-3.5 3.5"/><rect x="15" y="5" width="6.5" height="14" rx="1"/><path d="M17 8.5h2.5M17 11h2.5"/></svg></button><button class="ico caretbtn" id="uploadm" title="Upload: port, bootloader, USB drivers" aria-haspopup="true"><svg class="caret" viewBox="0 0 8 8"><path d="M1.5 3l2.5 2.5L6.5 3"/></svg></button>
     <select id="boardsel" class="tsel" title="Board"><option value="nano">Nano</option><option value="mega">Mega 2560</option></select>
@@ -751,7 +773,7 @@ code { font-family: var(--ed-font); font-size: .95em; }
     <div class="pane gone" data-pane="rest">
       <div class="card" id="restcard">
         <h3>Link to this page</h3>
-        <p class="note">Link opens page with project, matrix size and view set; checked keys go into it. Current takes what is open now. What link sets is for this visit only: visitor's own settings and session stay. Keys: Help → REST API.</p>
+        <p class="note">Link opens page with project, matrix size and view set; checked keys go into it. Values of what is open now are filled in when tab opens (Current fills them again). What link sets is for this visit only: visitor's own settings and session stay. Keys: Help → REST API.</p>
         <div id="restbox"></div>
         <p class="note" id="restnote"></p>
       </div>
@@ -848,6 +870,9 @@ code { font-family: var(--ed-font); font-size: .95em; }
   <div class="mhead">Library</div>
   <input type="text" id="libfilter" placeholder="Filter" spellcheck="false" autocomplete="off" hidden>
   <div id="liblist" class="mlist"></div>
+  <div class="mhead">Browser storage</div>
+  <div id="stlist" class="mlist"></div>
+  <button class="mi" id="stmanage"><span class="mn">Manage…</span></button>
 </div>
 <div class="hpop menu" id="pop3d" hidden>
   <div class="mh">Figure</div>
@@ -887,6 +912,17 @@ code { font-family: var(--ed-font); font-size: .95em; }
 <div id="chwin" class="fwin chwin" hidden role="dialog" aria-label="Changes">
   <header class="fhead"><h2>Changes</h2><button data-close title="Close (Esc)">✕</button></header>
   <div class="body"><pre id="chtext"></pre></div>
+</div>
+
+<!-- browser storage: projects kept in this browser (IndexedDB) -->
+<div id="stwin" class="fwin stwin" hidden role="dialog" aria-label="Browser storage">
+  <header class="fhead"><h2>Browser storage</h2><button data-close title="Close (Esc)">✕</button></header>
+  <div class="body">
+    <div id="stdrop" class="stdrop" title="Drop .zip, .ino or .c here, or click to choose">Drop project here (.zip, .ino, .c) or <u>choose file</u></div>
+    <input type="file" id="stfile" accept=".zip,.ino,.c,.h" multiple hidden>
+    <div id="sttable" class="sttable"></div>
+    <div class="stbar"><span class="note" id="stusage"></span><button class="btn" id="stclear" title="Delete all projects of browser storage">Clear all</button></div>
+  </div>
 </div>
 
 <!-- Help -->
@@ -934,7 +970,10 @@ code { font-family: var(--ed-font); font-size: .95em; }
 ] }</pre>
       <p class="note"><code>file</code> — path inside repo/: .zip project, .c sketch or .ino; <code>name</code> — text of menu (file name if omitted); <code>board</code> (nano / mega) is optional and is selected on load.
         Plain list <code>["a.zip", "b.c"]</code> works too. Library item always opens as new project. With 10 and more items menu gets filter box.</p>
-      <p class="note">Save writes whole project back as .zip with same file names, encodings and line endings. Files that are not sketch sources stay in archive untouched.</p>
+      <p><b>Browser storage</b> (last part of Load menu): projects kept in this browser, newest first; <b>Manage…</b> opens window — drop .zip / .ino / .c there (or click to choose) to add, Open, ⤓ download, ✕ delete, <b>Clear all</b>.
+        Storage belongs to this browser on this computer: clearing site data of browser removes it.</p>
+      <p class="note"><b>Save</b> (<kbd>Ctrl</kbd>+<kbd>S</kbd>) opens window: name, <b>Download .zip</b> or <b>Browser storage</b> (stored project of same name is replaced); last choice is default for <kbd>Enter</kbd>.
+        Project goes as .zip with same file names, encodings and line endings; files that are not sketch sources stay in archive untouched.</p>
     </div>
     <div class="card" data-sec="compile">
       <h3>Compile and run</h3>
@@ -1080,10 +1119,10 @@ code { font-family: var(--ed-font); font-size: .95em; }
     <div class="card" data-sec="rest">
       <h3>REST API</h3>
       <p>Link to this page with parameters opens it as set: <b>index.html?project=GyverMatrixOS_v1.12_24x12.zip&amp;w=24&amp;h=12&amp;3d=1&amp;shape=cylinder&amp;run=1</b>.
-        Parameters may also follow <b>#</b> (open page takes them without reload). Keys are case-insensitive. <b>Options → REST API</b> builds such link (Current: what is open now).
+        Parameters may also follow <b>#</b> (open page takes them without reload). Keys are case-insensitive. <b>Options → REST API</b> builds such link: project from list (library, browser storage), values of what is open now are filled in when tab opens (Current fills them again).
         What link sets is for this visit only: visitor's own settings and session (open project) stay.</p>
       <table class="keys">
-        <tr><td>project=</td><td>library project: file of repo/index.json (GyverMatrixOS_v1.12_24x12.zip, Matrix10x10-nano, adjustive.c) or its name; else path / URL of .zip, .ino, .c on this site (another site: when it allows, CORS)</td></tr>
+        <tr><td>project=</td><td>library project: file of repo/index.json (GyverMatrixOS_v1.12_24x12.zip, Matrix10x10-nano, adjustive.c) or its name; <b>brw:</b>name — project of browser storage (opens only in same browser); else path / URL of .zip, .ino, .c on this site (another site: when it allows, CORS)</td></tr>
         <tr><td>board=</td><td>nano or mega (library item brings its own)</td></tr>
         <tr><td>w= h=</td><td>matrix size, 1…256 (size=24x12 too): build gets it instead of sketch's WIDTH / HEIGHT</td></tr>
         <tr><td>3d=1</td><td>3D view on (3d=0 — off)</td></tr>
@@ -1145,7 +1184,10 @@ code { font-family: var(--ed-font); font-size: .95em; }
 ] }</pre>
       <p class="note"><code>file</code> — путь внутри repo/: проект .zip, скетч .c или .ino; <code>name</code> — текст в меню (если нет — имя файла); <code>board</code> (nano / mega) необязателен и выбирается при загрузке.
         Простой список <code>["a.zip", "b.c"]</code> тоже работает. Пункт библиотеки всегда открывается как новый проект. При 10 и более пунктах в меню появляется поле фильтра.</p>
-      <p class="note">Save записывает весь проект обратно в .zip с теми же именами файлов, кодировками и концами строк. Файлы, которые не являются исходниками скетча, остаются в архиве нетронутыми.</p>
+      <p><b>Browser storage</b> (последний раздел меню Load): проекты, сохранённые в этом браузере, новые сверху; <b>Manage…</b> открывает окно — перетащите туда .zip / .ino / .c (или щёлкните, чтобы выбрать) для добавления; Open, ⤓ скачать, ✕ удалить, <b>Clear all</b>.
+        Хранилище принадлежит этому браузеру на этом компьютере: очистка данных сайта в браузере удаляет его.</p>
+      <p class="note"><b>Save</b> (<kbd>Ctrl</kbd>+<kbd>S</kbd>) открывает окно: имя, <b>Download .zip</b> или <b>Browser storage</b> (проект с тем же именем в хранилище заменяется); последний выбор — по умолчанию для <kbd>Enter</kbd>.
+        Проект сохраняется как .zip с теми же именами файлов, кодировками и концами строк; файлы, которые не являются исходниками скетча, остаются в архиве нетронутыми.</p>
     </div>
     <div class="card" data-sec="compile">
       <h3>Компиляция и запуск</h3>
@@ -1291,10 +1333,10 @@ code { font-family: var(--ed-font); font-size: .95em; }
     <div class="card" data-sec="rest">
       <h3>REST API</h3>
       <p>Ссылка на страницу с параметрами открывает её в заданном виде: <b>index.html?project=GyverMatrixOS_v1.12_24x12.zip&amp;w=24&amp;h=12&amp;3d=1&amp;shape=cylinder&amp;run=1</b>.
-        Параметры можно писать и после <b>#</b> (открытая страница примет их без перезагрузки). Регистр ключей не важен. Ссылку собирает <b>Options → REST API</b> (Current — то, что открыто сейчас).
+        Параметры можно писать и после <b>#</b> (открытая страница примет их без перезагрузки). Регистр ключей не важен. Ссылку собирает <b>Options → REST API</b>: проект из списка (библиотека, хранилище браузера), при открытии закладки сразу подставляются значения того, что открыто сейчас (Current — подставить заново).
         Заданное ссылкой действует только в этот визит: собственные настройки и сессия посетителя (открытый проект) остаются.</p>
       <table class="keys">
-        <tr><td>project=</td><td>проект библиотеки: файл из repo/index.json (GyverMatrixOS_v1.12_24x12.zip, Matrix10x10-nano, adjustive.c) или его название; иначе путь / URL файла .zip, .ino, .c на этом сайте (другой сайт — если он разрешает, CORS)</td></tr>
+        <tr><td>project=</td><td>проект библиотеки: файл из repo/index.json (GyverMatrixOS_v1.12_24x12.zip, Matrix10x10-nano, adjustive.c) или его название; <b>brw:</b>имя — проект из хранилища браузера (открывается только в том же браузере); иначе путь / URL файла .zip, .ino, .c на этом сайте (другой сайт — если он разрешает, CORS)</td></tr>
         <tr><td>board=</td><td>nano или mega (у проекта библиотеки своя плата)</td></tr>
         <tr><td>w= h=</td><td>размер матрицы, 1…256 (или size=24x12): сборка берёт его вместо WIDTH / HEIGHT скетча</td></tr>
         <tr><td>3d=1</td><td>3D-вид (3d=0 — выключен)</td></tr>
@@ -1317,13 +1359,20 @@ code { font-family: var(--ed-font); font-size: .95em; }
   <div class="rz se" data-rz="se"></div><div class="rz e" data-rz="e"></div><div class="rz s" data-rz="s"></div>
 </div>
 
+<!-- Save: where to -->
+<div id="savewin" class="modal" hidden role="dialog" aria-modal="true" aria-label="Save project"><div class="askbox">
+  <h3>Save project</h3>
+  <label class="svname">Name <input type="text" id="svname" spellcheck="false" autocomplete="off"></label>
+  <p class="note" id="svnote"></p>
+  <div class="askbtns"><button class="btn" id="svdown" title="Project as .zip into Downloads">Download .zip</button><button class="btn" id="svstore" title="Copy kept in this browser (Load → Browser storage)">Browser storage</button><button class="btn" id="svno">Cancel</button></div>
+</div></div>
 <div id="askwin" hidden role="alertdialog" aria-modal="true"><div class="askbox"><p id="askmsg"></p><div class="askbtns"><button class="btn primary" id="askok">OK</button><button class="btn" id="askno">Cancel</button></div></div></div>
 <div id="toast"></div>
-<script src="js/unzip.js?v=20261108131927"></script>
-<script src="js/editor.js?v=20261108131927"></script>
-<script src="js/led3d.js?v=20261108131927"></script>
-<script src="js/rest.js?v=20261108131927"></script>
-<script src="js/rest-builder.js?v=20261108131927"></script>
-<script src="js/app.js?v=20261108131927"></script>
+<script src="js/unzip.js?v=20261112084515"></script>
+<script src="js/editor.js?v=20261112084515"></script>
+<script src="js/led3d.js?v=20261112084515"></script>
+<script src="js/rest.js?v=20261112084515"></script>
+<script src="js/rest-builder.js?v=20261112084515"></script>
+<script src="js/app.js?v=20261112084515"></script>
 </body>
 </html>

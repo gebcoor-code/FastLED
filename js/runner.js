@@ -7,7 +7,7 @@
 //   ← { type: 'frame', pin, rgb, count } / { type: 'serial', port, bytes } / { type: 'stats', ... } / { type: 'pins', list } / { type: 'baud', port, value }
 //   ← { type: 'snapshot', t, seed, events } / { type: 'ff', done, t, to } / { type: 'crash', message } / { type: 'started' }
 // Stop = page terminates worker.
-import { instantiate, Exit } from './runner-core.js?v=20261108131927';
+import { instantiate, Exit } from './runner-core.js?v=20261112084515';
 
 const pins = new Uint8Array(128).fill(255);
 const analogVals = new Int16Array(128).fill(-1);

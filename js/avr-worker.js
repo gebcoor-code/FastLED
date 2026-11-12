@@ -2,9 +2,9 @@
 // Tools are downloaded once (browser cache keeps them), SDK is unpacked into in-memory file system.
 //   → { type: 'init' }                                         ← { type: 'progress', done, total } / { type: 'ready', ms } / { type: 'fail', error }
 //   → { type: 'build', id, files, main, board, cpu, warnings }   ← { type: 'log', id, line } / { type: 'result', id, ok, … }
-import { MemFS, Toolchain } from './avr-wasi.js?v=20261108131927';
-import { AVR_TOOLS, AVR_ALIAS, buildAvr } from './avr-build.js?v=20261108131927';
-import { parseDiagnostics } from './sketch.js?v=20261108131927';
+import { MemFS, Toolchain } from './avr-wasi.js?v=20261112084515';
+import { AVR_TOOLS, AVR_ALIAS, buildAvr } from './avr-build.js?v=20261112084515';
+import { parseDiagnostics } from './sketch.js?v=20261112084515';
 
 const RT = new URL('../rt/avr/', import.meta.url);
 let tc = null, initP = null, man = null;

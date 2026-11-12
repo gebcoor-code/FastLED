@@ -615,3 +615,16 @@ Web FastLED — version history
   stay); errors go to Output, rest of link still applies
 + Options -> REST API: link builder (key on / off, value, Current — what
   is open now, Copy, Open)
+
+
+        version 0.32.0                  12 nov 2026
+
++ browser storage: projects kept in this browser (IndexedDB); Load menu
+  lists them (last part, newest first), Manage… opens window — drop
+  .zip / .ino / .c to add, open, download, delete, clear all
+@ Save opens window: name, Download .zip or Browser storage (project of
+  same name is replaced); last choice is default for Enter
++ REST API: project=brw:<name> opens project of browser storage (same
+  browser only)
+@ Options -> REST API: project is chosen from list (library, browser
+  storage); values of what is open now are filled in when tab opens

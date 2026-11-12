@@ -1,7 +1,7 @@
 // Web FastLED: upload of .hex to board through its bootloader, as avrdude does it for Arduino IDE:
 // STK500v1 ("arduino": Nano — Optiboot 115200 / old ATmegaBOOT 57600), STK500v2 ("wiring": Mega 2560, 115200).
 // Link: serial port (Web Serial in page, emulated board in tests) with reset by DTR / RTS.
-import { parseHex } from './avr-build.js?v=20261108131927';
+import { parseHex } from './avr-build.js?v=20261112084515';
 
 export class UploadError extends Error {}
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));

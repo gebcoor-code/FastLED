@@ -6,7 +6,7 @@
 //   ← { type: 'started' } / { type: 'frame', pin, rgb, count } / { type: 'serial', port, bytes } / { type: 'baud', port, value }
 //   ← { type: 'stats', loops, fps, shown, ms, rate } / { type: 'pins', list } / { type: 'snapshot', t } / { type: 'crash', message }
 //   ← { type: 'mem', ram, data, bss, heap, heapMax, stack, stackMax, free, freeMin, sp, collide, ms } / { type: 'prof', real, rows, isr, samples }
-import { AvrBoard, MHZ } from './avr-run-core.js?v=20261108131927';
+import { AvrBoard, MHZ } from './avr-run-core.js?v=20261112084515';
 
 const CPM = MHZ * 1000; // cycles per ms
 let bd = null, paused = false, base = 0, pBase = 0, ticking = false;
