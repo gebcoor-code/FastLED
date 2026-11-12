@@ -58,5 +58,11 @@
    "file": "nm.wasm.gz",
    "size": 341713
   }
+ },
+ "fastledPacks": {
+  "3.10.9": {
+   "file": "fastled-3.10.9.tar.gz",
+   "size": 2733744
+  }
  }
 }

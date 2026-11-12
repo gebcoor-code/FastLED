@@ -673,3 +673,18 @@ Web FastLED — version history
 + REST API: fastled=3.10.9
 @ Options -> REST API: defaults of keys not checked are spin off, speed
   1x, real off, shape globe
+
+
+        version 0.35.0                  12 nov 2026
+
++ FastLED 3.10.9 for board binary, upload and Real CPU timing too: library
+  comes as rt/avr/fastled-3.10.9.tar.gz (2.7 MB); first real build with
+  it compiles library for board (about a minute), browser keeps result;
+  rarely used parts (audio, fx, video, …) are compiled only when sketch
+  needs them. With 3.10.9 programs are about 2 KB bigger: Matrix 10x10
+  does not fit Nano
++ REST API: fastled=last (newest version on site), fastled=builtin;
+  Options -> REST API makes fastled=last when newest version is chosen
+@ library projects GyverMatrixOS and Matrix 10x10: BRIGHTNESS renamed to
+  LED_BRIGHTNESS (clashed with FastLED 3.10), so FastLED 3.10.9 is used
+  as it is, without patch

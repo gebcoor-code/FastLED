@@ -2,7 +2,7 @@
 <html lang="en" data-theme="dark-plus">
 <head>
 <meta charset="utf-8">
-<meta name="build" content="20261112124133">
+<meta name="build" content="20261112150445">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="icon" href="icon.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -1060,9 +1060,10 @@ code { font-family: var(--ed-font); font-size: .95em; }
     <div class="card" data-sec="binary">
       <h3>Board binary (real build)</h3>
       <p>Button with chip and arrow (next to Save) builds sketch for real board with <b>avr-gcc 7.3.0</b>, same compiler, flags and steps as Arduino IDE 2
-        (Arduino AVR core 1.8.6, FastLED 3.7.8, link-time optimization). Result is byte for byte what IDE gives:
+        (Arduino AVR core 1.8.6, FastLED 3.7.8 or version chosen in Options → FastLED, link-time optimization). Result is byte for byte what IDE gives:
         <code>.hex</code>, <code>.hex</code> with bootloader, <code>.elf</code> (with debug info), <code>.eep</code>, or all of them in .zip; <b>Build only</b> shows size report as IDE does.
-        Compiler runs in browser: first time it is downloaded (about 16 MB), then comes from browser cache; first build of session takes some seconds more.</p>
+        Compiler runs in browser: first time it is downloaded (about 16 MB), then comes from browser cache; first build of session takes some seconds more.
+        FastLED 3.10.9 comes as source (rt/avr/fastled-3.10.9.tar.gz, 2.7 MB): first real build with it compiles library for board (about a minute), browser keeps it.</p>
       <p class="note">Whole project is built as saved (its encoding and line ends), with sizes from sketch itself: LED window size box does not apply. Libraries are found by <code>#include</code>, as in IDE:
         FastLED, SPI, Wire, SoftwareSerial, EEPROM. Errors are in Problems, log in Output. .c sketch (no .ino) is built as in emulator: its .c files are sketch, COLS / ROWS become WIDTH / HEIGHT, pattern.c gives <code>setup()</code> / <code>loop()</code> (Options → Build).
         “With bootloader” file uses bootloader chosen in Upload menu.</p>
