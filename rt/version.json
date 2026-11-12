@@ -1,1 +1,1 @@
-{"clang":"21.1.4-3","built":"2026-10-28T16:34:02.392Z","parts":{"llvm.core.wasm.gz":4}}
+{"clang":"21.1.4-3","built":"2026-11-12T09:29:17.216Z","parts":{"llvm.core.wasm.gz":4},"fastled":["3.7.8","3.10.9"]}
