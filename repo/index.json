@@ -3,6 +3,7 @@
     { "file": "GyverMatrixOS_v1.12_24x12.zip", "name": "GyverMatrixOS 1.12 (24×12)", "board": "mega" },
     { "file": "Matrix10x10-nano.zip", "name": "Matrix 10×10", "board": "nano" },
     { "file": "Earth-new-smooth.zip", "name": "Earth 24x24", "board": "mega" },    
+    { "file": "CylinderEffects.zip", "name": "Cylinder-friendly effects", "board": "mega" },        
     { "file": "new3dscroll.c", "name": "Scrolling String 3D" },    
     { "file": "adjustive.c", "name": "Adjustive (Soulmate)" },
     { "file": "AttractingBoids.c", "name": "Attracting Boids (Soulmate)" },
