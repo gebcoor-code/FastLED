@@ -2,7 +2,7 @@
 <html lang="en" data-theme="dark-plus">
 <head>
 <meta charset="utf-8">
-<meta name="build" content="20261112194335">
+<meta name="build" content="20261113102055">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="icon" href="icon.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -263,14 +263,15 @@ select option { background: var(--panel); color: var(--text); }
 .hb .badge { position: absolute; right: 0; bottom: -1px; font: 600 7.5px/1 ui-monospace, Consolas, monospace; color: var(--focus); pointer-events: none; }
 .hb .badge:empty { display: none; }
 #devpop .mi .mt { opacity: .7; } #devpop .mi:disabled { opacity: .45; cursor: default; }
-.devopt { display: grid; grid-template-columns: 138px minmax(0, 1fr); gap: 10px; align-items: start; }
+.devopt { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 10px; align-items: start; }
 .devnav { display: flex; flex-direction: column; gap: 2px; border-right: 1px solid var(--line); padding-right: 8px; position: sticky; top: 0; }
-.devnav button { text-align: left; padding: 5px 8px; border: 1px solid transparent; border-radius: 5px; background: transparent; color: var(--text); font: inherit; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+.devnav button { white-space: nowrap; text-align: left; padding: 5px 8px; border: 1px solid transparent; border-radius: 5px; background: transparent; color: var(--text); font: inherit; cursor: pointer; display: flex; align-items: center; gap: 6px; }
 .devnav button:hover { background: var(--btn-hover); }
 .devnav button.on { background: var(--btn-hover); border-color: var(--line); color: var(--focus); }
 .devnav button svg { width: 16px; height: 16px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 .devnav .devoff { opacity: .55; }
 .devnav .note { margin: 6px 2px 0; font-size: 11px; }
+.devsub { display: flex; flex-direction: column; gap: 10px; }
 .devsub.gone { display: none; }
 #toolbar .tgroup .ico.on, #toolbar .tgroup .ico.open { color: var(--focus); }
 /* inputs: blue while its window is open; green dot — sketch reads pins (buttons, pots) */
@@ -341,6 +342,9 @@ body.drag #dropmark { display: flex; }
   background: linear-gradient(135deg, transparent 55%, var(--dim) 55%, var(--dim) 62%, transparent 62%, transparent 72%, var(--dim) 72%, var(--dim) 79%, transparent 79%); opacity: .6; }
 .card { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 9px 12px; }
 .card h3 { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--dim); margin: 0 0 8px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+.hq { margin-left: auto; flex: none; width: 17px; height: 17px; padding: 0; border: 1px solid var(--line); border-radius: 50%; background: transparent; color: var(--dim); font: 600 11px/1 system-ui, sans-serif; cursor: pointer; text-transform: none; letter-spacing: 0; }
+.hq:hover { color: var(--focus); border-color: var(--focus); }
+.fhead .hq { margin-left: 8px; }
 .note { font-size: 12px; color: var(--dim); margin: 6px 0 0; }
 .optgrid { display: grid; grid-template-columns: 130px minmax(0, 1fr); gap: 7px 10px; align-items: center; }
 .optgrid label { color: var(--text); }
@@ -400,7 +404,7 @@ table.keys td + td { color: var(--dim); }
 .chwin pre { flex: none; margin: 0; font: 12px/1.45 var(--ed-font); white-space: pre; overflow-x: auto; color: var(--text); }
 .chwin.locked pre { user-select: none; -webkit-user-select: none; }
 #licenselink { color: inherit; }
-.optwin { width: min(640px, calc(100vw - 8px)); }
+.optwin { width: min(480px, calc(100vw - 8px)); }
 .optwin .pane.gone { display: none; }
 .optwin .pane { display: flex; flex-direction: column; gap: 10px; }
 #askwin { position: fixed; inset: 0; z-index: 90; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,.35); }
@@ -624,10 +628,10 @@ code { font-family: var(--ed-font); font-size: .95em; }
       <button class="ico" id="realbtn" title="Real CPU timing: off"><svg viewBox="0 0 24 24"><rect x="5.5" y="5.5" width="13" height="13" rx="1.5"/><path d="M9 5.5V3M12 5.5V3M15 5.5V3M9 21v-2.5M12 21v-2.5M15 21v-2.5M5.5 9H3M5.5 12H3M5.5 15H3M21 9h-2.5M21 12h-2.5M21 15h-2.5"/><path d="M12 8.5V12l2.5 1.5"/></svg></button>
     </div>
     <div class="tgroup" id="devgroup">
-      <button class="ico drop" id="devadd" title="Devices: add LED matrix, inputs… (connected to board)" aria-haspopup="true"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><svg class="caret" viewBox="0 0 8 8"><path d="M1.5 3l2.5 2.5L6.5 3"/></svg></button>
-      <button class="ico" id="ledbtn" title="LED matrix window (F6)"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><g fill="currentColor" stroke="none"><circle cx="8" cy="8" r="1.6"/><circle cx="12" cy="8" r="1.6"/><circle cx="16" cy="8" r="1.6"/><circle cx="8" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="16" cy="12" r="1.6"/><circle cx="8" cy="16" r="1.6"/><circle cx="12" cy="16" r="1.6"/><circle cx="16" cy="16" r="1.6"/></g></svg></button>
-      <button class="ico" id="oledbtn" title="OLED display window" hidden><svg viewBox="0 0 24 24"><rect x="2.5" y="5" width="19" height="14" rx="1.5"/><rect x="5" y="7.5" width="14" height="9" fill="currentColor" stroke="none" opacity=".35"/><path d="M7 10h5M7 13h8"/></svg></button>
-      <button class="ico" id="ledinputs" title="Inputs"><svg viewBox="0 0 24 24"><rect x="3" y="8" width="18" height="8" rx="4"/><circle cx="16" cy="12" r="2.2" fill="currentColor"/><path d="M8 4v4M8 16v4"/></svg></button>
+      <button class="ico drop" id="devadd" title="Add device: LED matrix, OLED display, inputs" aria-haspopup="true"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><svg class="caret" viewBox="0 0 8 8"><path d="M1.5 3l2.5 2.5L6.5 3"/></svg></button>
+      <button class="ico" id="ledbtn" title="LED matrix window (F6). Right click: menu"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><g fill="currentColor" stroke="none"><circle cx="8" cy="8" r="1.6"/><circle cx="12" cy="8" r="1.6"/><circle cx="16" cy="8" r="1.6"/><circle cx="8" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="16" cy="12" r="1.6"/><circle cx="8" cy="16" r="1.6"/><circle cx="12" cy="16" r="1.6"/><circle cx="16" cy="16" r="1.6"/></g></svg></button>
+      <button class="ico" id="oledbtn" title="OLED display window (F6). Right click: menu" hidden><svg viewBox="0 0 24 24"><rect x="2.5" y="5" width="19" height="14" rx="1.5"/><rect x="5" y="7.5" width="14" height="9" fill="currentColor" stroke="none" opacity=".35"/><path d="M7 10h5M7 13h8"/></svg></button>
+      <button class="ico" id="ledinputs" title="Inputs. Right click: menu"><svg viewBox="0 0 24 24"><rect x="3" y="8" width="18" height="8" rx="4"/><circle cx="16" cy="12" r="2.2" fill="currentColor"/><path d="M8 4v4M8 16v4"/></svg></button>
     </div>
     <button class="ico" id="panelbtn" title="Panel: Problems, Output, Serial monitor (Ctrl+J)"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 14h18"/><path d="M7 17h4" stroke-width="1.6"/></svg></button>
     <button class="ico" id="optbtn" title="Options (Ctrl+,)"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
@@ -708,23 +712,20 @@ code { font-family: var(--ed-font); font-size: .95em; }
   <div class="body">
     <div class="pane" data-pane="board">
       <div class="card">
-        <h3>Board / CPU</h3>
+        <h3>Board / CPU<button class="hq" data-help="optboard" title="Help">?</button></h3>
         <div class="boards" id="boards"></div>
-        <p class="note">Board sets pins (A0…, Serial1-3 on Mega), EEPROM size and defines (ARDUINO_AVR_NANO / ARDUINO_AVR_MEGA2560).</p>
       </div>
       <div class="card">
-        <h3>Build</h3>
+        <h3>Build<button class="hq" data-help="optbuild" title="Help">?</button></h3>
         <div class="optgrid">
           <label for="opopt">Optimization</label>
           <select id="opopt"></select>
-          <label class="chk span2" title="After rebuild of running sketch (new size, profile on / off) new build runs fast from start up to moment of old one, with same inputs, then goes on; off — it starts from beginning"><input type="checkbox" id="opcatch">Catch-up: continue from same moment after rebuild</label>
-          <label class="chk span2" title="FastLED.setMaxPowerInVoltsAndMilliamps / setMaxPowerInMilliWatts of sketch: when estimated current is over limit, FastLED dims whole frame (as on real strip). Off — these calls are dropped for build"><input type="checkbox" id="oppower">Power limit of sketch (setMaxPower…)</label>
+          <label class="chk span2" title="After rebuild of running sketch (new size, profile on / off) new build runs fast from start up to moment of old one, with same inputs, then goes on; off — it starts from beginning"><input type="checkbox" id="opcatch">Catch-up after rebuild</label>
+          <label class="chk span2" title="FastLED.setMaxPowerInVoltsAndMilliamps / setMaxPowerInMilliWatts of sketch: when estimated current is over limit, FastLED dims whole frame (as on real strip). Off — these calls are dropped for build"><input type="checkbox" id="oppower">Power limit of sketch</label>
           <label class="chk span2" title="Headers of C++ standard library (libc++): &lt;vector&gt;, &lt;algorithm&gt; ... AVR has none of them; with it some sketch functions (float sqrt(float) ...) clash with its overloads"><input type="checkbox" id="opstdlib">C++ standard library</label>
           <label class="chk span2" title="Sketch of .c files without setup(): on loading, pattern.c from server root is inserted into it — includes, sizes, leds[], XY(), setup(), loop(); what sketch has itself is commented in pattern"><input type="checkbox" id="opcpat" checked>.c sketches: add pattern.c</label>
           <label class="chk span2" title="On loading .c sketch, LED_COLS / COLS become WIDTH, LED_ROWS / ROWS become HEIGHT"><input type="checkbox" id="opcnames" checked>.c sketches: ROWS / COLS → WIDTH / HEIGHT</label>
         </div>
-        <p class="note">Sketch is compiled by clang (LLVM) in browser and runs as WebAssembly in real time. As with avr-gcc, -fpermissive conversions get cast and warning.
-          Unlike AVR: <code>int</code> is 32 bit, <code>double</code> is 64 bit, RAM / flash limits are not checked yet.</p>
       </div>
     </div>
     <div class="pane gone" data-pane="led">
@@ -733,54 +734,46 @@ code { font-family: var(--ed-font); font-size: .95em; }
         <div>
           <div class="devsub" data-sub="led">
       <div class="card">
-        <h3>Matrix wiring</h3>
+        <h3>Matrix wiring<button class="hq" data-help="optwiring" title="Help">?</button></h3>
         <div class="optgrid">
           <label for="ledtype">Layout</label>
-          <select id="ledtype"><option value="0">Zigzag (serpentine)</option><option value="1">Parallel</option></select>
+          <select id="ledtype"><option value="0" title="Serpentine: every second row runs backwards">Zigzag</option><option value="1">Parallel</option></select>
           <label for="ledangle">Start corner</label>
           <select id="ledangle"><option value="0">Bottom left</option><option value="1">Top left</option><option value="2">Top right</option><option value="3">Bottom right</option></select>
           <label for="leddir">Direction</label>
           <select id="leddir"></select>
           <label class="chk span2" title="On: loading project / file sets LED window to WIDTH × HEIGHT of sketch (or pattern.c). Off: window keeps its size, build gets it instead of sketch's (as size box does); Get W×H takes sketch's"><input type="checkbox" id="opsizeload">W×H from sketch on load</label>
         </div>
-        <p class="note">How strip index maps to X / Y — as GyverMatrix MATRIX_TYPE, CONNECTION_ANGLE, STRIP_DIRECTION. Wiring is taken from sketch on load anyway.</p>
       </div>
       <div class="card">
-        <h3>3D</h3>
+        <h3>3D<button class="hq" data-help="opt3d" title="Help">?</button></h3>
         <div class="optgrid">
           <label for="led3ds">Dot size</label>
           <div class="rangebox" title="Double click: 100% (default, largest)"><input type="range" id="led3ds" min="0.3" max="1" step="0.05" value="1"><output id="led3dsv" style="width:64px">100%</output></div>
           <label for="led3dh">Cylinder height</label>
           <div class="rangebox" title="Double click: 100% (LED pitch same round and along axis)"><input type="range" id="led3dh" min="0.2" max="3" step="0.05" value="1"><output id="led3dhv" style="width:64px">100%</output></div>
         </div>
-        <p class="note">Dot size — LEDs of 3D view (dots and solid), 100% is largest. Cylinder height — 100%: LED pitch is same round and along axis (matrix 24×24 is tall narrow tube); less — lower and wider, more — taller.</p>
       </div>
       <div class="card">
-        <h3>Display</h3>
+        <h3>Display<button class="hq" data-help="optdisplay" title="Help">?</button></h3>
         <div class="optgrid">
           <label for="oporder" title="Real CPU timing reads colors from data pin: bytes come in strip's own order">Strip color order</label>
-          <select id="oporder" title="Real CPU timing: order of color bytes strip expects on wire (WS2812 / WS2812B / SK6812: GRB, many WS2811: RGB)"><option value="auto">As sketch (addLeds)</option><option>GRB</option><option>RGB</option><option>BRG</option><option>BGR</option><option>RBG</option><option>GBR</option></select>
+          <select id="oporder" title="Real CPU timing: order of color bytes strip expects on wire (WS2812 / WS2812B / SK6812: GRB, many WS2811: RGB)"><option value="auto" title="Order from addLeds / COLOR_ORDER of sketch">As sketch</option><option>GRB</option><option>RGB</option><option>BRG</option><option>BGR</option><option>RBG</option><option>GBR</option></select>
           <label for="ledgam">Dim colors</label>
           <div class="rangebox" title="Double click: +100% (default)"><input type="range" id="ledgam" min="0" max="3" step="0.05" value="2"><output id="ledgamv" style="width:64px">LED-like</output></div>
           <label for="ledcon">Contrast</label>
           <div class="rangebox" title="Double click: 0% (default)"><input type="range" id="ledcon" min="0" max="1" step="0.05" value="0"><output id="ledconv" style="width:64px">0%</output></div>
         </div>
-        <p class="note"><b>Strip color order</b> is used by Real CPU timing: colors are read from data pin as strip reads them. <b>As sketch</b> (default): strip has order that sketch gives in <code>addLeds&lt;…, ORDER&gt;</code> (or its <code>#define COLOR_ORDER</code>), so colors come out as sketch means them. Fixed order (GRB for WS2812, WS2812B, SK6812; RGB for many WS2811) shows what that strip would show: wrong order in sketch swaps colors, as on real strip.<br>
-          LED gives light proportional to its value (PWM); monitor does not. LED-like converts, so dim colors look as on real LEDs; Raw (slider left) shows values as they are; right of LED-like dim colors get brighter still, up to +200%; default +100%, double click returns it.
-          Brightness is taken from brightest channel of LED, others keep their proportion, so lifted colors stay saturated.
-          <b>Contrast</b> darkens dark and middle tones, full brightness stays: 0% — no change (default, double click returns it), 100% — strongest; dim picture gets darker with it. Raw ignores both.</p>
       </div>
           </div>
           <div class="devsub gone" data-sub="inputs">
             <div class="card">
-              <h3>Inputs</h3>
-              <p class="note">Buttons and pots on pins of board. Nothing to set: rows appear by themselves for pins running sketch uses —
-                <code>pinMode(…, INPUT / INPUT_PULLUP)</code>, <code>digitalRead()</code>, <code>analogRead()</code>. Outputs show level or PWM, FastLED pin — number of LEDs.</p>
+              <h3>Inputs<button class="hq" data-help="inputs" title="Help">?</button></h3>
             </div>
           </div>
           <div class="devsub gone" data-sub="oled">
             <div class="card">
-              <h3>OLED display</h3>
+              <h3>OLED display<button class="hq" data-help="oled" title="Help">?</button></h3>
               <div class="optgrid">
                 <label for="oledsize">Size</label>
                 <select id="oledsize"><option value="128x64">128 × 64</option><option value="128x32">128 × 32</option></select>
@@ -794,15 +787,12 @@ code { font-family: var(--ed-font); font-size: .95em; }
                 <input type="number" id="oleddc" class="ospi" min="0" max="69">
                 <label for="oledcs" class="ospi">CS pin</label>
                 <input type="number" id="oledcs" class="ospi" min="-1" max="69" title="-1: always selected">
-                <label class="chk span2"><input type="checkbox" id="oledgrid"> Pixel grid</label>
+                <label class="chk span2" title="Dark lines between pixels (when window is large enough)"><input type="checkbox" id="oledgrid"> Pixel grid</label>
               </div>
-              <p class="note">Controller SSD1306 as display sees it: commands and RAM come over I²C (Nano: A4 SDA, A5 SCL; Mega: 20, 21) or SPI.
-                Libraries: <b>GyverOLED</b>, <b>SSD1306Wire</b> (ThingPulse esp8266-oled-ssd1306; ESP8266 sketches run in emulator as AVR ones).
-                Size, address and SPI pins are taken from sketch on load; set here, they go into webfastled.json of project.</p>
             </div>
           </div>
           <div class="devsub gone" data-sub="none">
-            <div class="card"><h3>No devices</h3><p class="note">Add device with + on toolbar (Devices group).</p></div>
+            <div class="card"><h3>No devices<button class="hq" data-help="devices" title="Help">?</button></h3><p class="note">Add device with + on toolbar (Devices group).</p></div>
           </div>
         </div>
       </div>
@@ -836,7 +826,7 @@ code { font-family: var(--ed-font); font-size: .95em; }
         </div>
       </div>
       <div class="card">
-        <h3>Editing</h3>
+        <h3>Editing<button class="hq" data-help="optedit" title="Help">?</button></h3>
         <div class="optgrid">
           <label for="optab">Tab size</label>
           <select id="optab"><option value="2">2 spaces</option><option value="4">4 spaces</option><option value="8">8 spaces</option></select>
@@ -846,43 +836,37 @@ code { font-family: var(--ed-font); font-size: .95em; }
             <label class="chk"><input type="checkbox" id="opact" checked>Highlight current line</label>
             <label class="chk"><input type="checkbox" id="opws">Show whitespace</label>
             <label class="chk"><input type="checkbox" id="opbr" checked>Auto-close brackets</label>
-            <label class="chk"><input type="checkbox" id="opauto" checked>Keep session</label>
+            <label class="chk" title="Open project is stored in browser and restored next time"><input type="checkbox" id="opauto" checked>Keep session</label>
           </div>
         </div>
-        <p class="note">Encoding (UTF-8 / Windows-1251) and line endings (CRLF / LF) of each file are kept on save. Keep session — open project is stored in browser and restored next time.</p>
       </div>
     </div>
     <div class="pane gone" data-pane="fastled">
       <div class="card" id="flcard">
-        <h3>FastLED library</h3>
+        <h3>FastLED library<button class="hq" data-help="fastled" title="Help">?</button></h3>
         <div class="flrow"><label for="flver">Version</label><select id="flver" title="FastLED that sketches are built with"><option value="3.7.8">3.7.8 — built in</option></select></div>
-        <p class="note">Project can fix its version: line <code>// @fastled 3.7.8</code> (or <code>last</code> — newest on site, <code>builtin</code>) in any source of sketch. It works for every project, wherever it is opened from, and wins over choice here; link with <code>fastled=</code> wins over it.</p>
         <p class="note" id="flmark"></p>
         <p class="note" id="flinfo2"></p>
-        <p class="note" id="flinfo">FastLED 3.7.8 (Daniel Garcia, Mark Kriegsman and contributors, MIT license) is built into compilers of this site: emulator (rt/wfl-sdk.tar.gz, own stub platform: frames go to LED window) and board binary / Real CPU timing (rt/avr/avr-sdk.tar.gz, AVR code as in Arduino IDE). 3.7.8 is last version before big rework of library (3.9, 3.10); all projects of library are made for it.</p>
-        <p class="note">Settings of sketch build that touch FastLED: Options → Board → <b>Power limit of sketch</b> (setMaxPower… calls), LED → Display → strip color order (Real CPU timing).</p>
         <div class="flrow"><button class="btn" id="flcheck" title="Ask GitHub for latest release of FastLED">Check for updates</button><span class="note" id="flupd"></span></div>
         <p class="note"><a href="https://github.com/FastLED/FastLED" target="_blank" rel="noopener">github.com/FastLED/FastLED</a> · <a href="https://github.com/FastLED/FastLED/releases" target="_blank" rel="noopener">releases</a> · <a href="https://fastled.io/docs/" target="_blank" rel="noopener">documentation</a></p>
       </div>
     </div>
     <div class="pane gone" data-pane="rest">
       <div class="card" id="restcard">
-        <h3>Link to this page</h3>
-        <p class="note">Link opens page with project, matrix size and view set; checked keys go into it. Values of what is open now are filled in when tab opens (Current fills them again). What link sets is for this visit only: visitor's own settings and session stay. Keys: Help → REST API.</p>
+        <h3>Link to this page<button class="hq" data-help="rest" title="Help">?</button></h3>
         <div id="restbox"></div>
         <p class="note" id="restnote"></p>
       </div>
     </div>
     <div class="pane gone" data-pane="offline">
       <div class="card" id="offcard">
-        <h3>Offline mode</h3>
-        <p class="note">Site opened once: editor and emulator start without internet (also from iOS home screen). Make offline downloads checked parts in advance; compilers and library are otherwise kept only once used.</p>
+        <h3>Offline mode<button class="hq" data-help="offline" title="Help">?</button></h3>
         <p class="note" id="offstat" hidden></p>
         <div class="offgrid">
-          <label class="chk"><input type="checkbox" id="of_core" checked disabled> Editor and emulator (page, scripts)</label>
-          <label class="chk" title="rt/: clang 21 for WebAssembly and SDK (FastLED, Arduino core): Start / Verify of sketch"><input type="checkbox" id="of_clang" checked> Compiler of sketch (clang, about 26 MB)</label>
-          <label class="chk" title="rt/avr/: avr-gcc 7.3 and Arduino AVR core 1.8.6"><input type="checkbox" id="of_avr" checked> avr-gcc: board binary, upload, Real CPU timing (about 16 MB)</label>
-          <label class="chk" title="Projects of repo/index.json (Load → library) and pattern.c of .c sketches"><input type="checkbox" id="of_repo" checked> Library (repo/) and pattern.c</label>
+          <label class="chk" title="Page and scripts: always kept once site was opened"><input type="checkbox" id="of_core" checked disabled> Editor, emulator</label>
+          <label class="chk" title="rt/: clang 21 for WebAssembly and SDK (FastLED, Arduino core): Start / Verify of sketch"><input type="checkbox" id="of_clang" checked> Compiler (26 MB)</label>
+          <label class="chk" title="rt/avr/: avr-gcc 7.3 and Arduino AVR core 1.8.6 — board binary, upload, Real CPU timing"><input type="checkbox" id="of_avr" checked> avr-gcc (16 MB)</label>
+          <label class="chk" title="Projects of repo/index.json (Load → library) and pattern.c of .c sketches"><input type="checkbox" id="of_repo" checked> Library</label>
         </div>
         <label class="chk" title="Site is checked at start (and later too, with option below): when it does not answer, red &quot;offline&quot; is shown in LED window, left of fps"><input type="checkbox" id="of_label" checked> Show 'offline'</label>
         <label class="chk" title="Off: site is checked once, at start"><input type="checkbox" id="of_poll"> Check connection every 20 sec</label>
@@ -1013,12 +997,8 @@ code { font-family: var(--ed-font); font-size: .95em; }
 
 <!-- Inputs: pins of the running sketch -->
 <div id="inwin" class="fwin inwin" hidden role="dialog" aria-label="Inputs">
-  <header class="fhead"><h2>Inputs</h2><button data-close title="Close (Esc)">✕</button></header>
+  <header class="fhead"><h2>Inputs</h2><button class="hq" data-help="inputs" title="Help">?</button><span style="flex:1"></span><button data-close title="Close (Esc)">✕</button></header>
   <div class="body">
-    <p class="note intro">Pins used by running sketch, as if wires were connected to board.
-      <b>INPUT_PULLUP</b> — button to GND: press = <b>LOW</b> (GyverMatrix: D3 is mode button, <code>pinMode(dpin, INPUT_PULLUP)</code>).
-      <b>INPUT</b> — button to 5V: press = HIGH, released pin floats (random). <b>analogRead</b> pins get slider instead of noise.
-      Hold <b>Press</b>; Shift+click keeps it pressed.</p>
     <table class="pins" id="pintable"></table>
     <p class="note" id="pinnone">Start sketch: its pins appear here.</p>
   </div>
@@ -1044,7 +1024,7 @@ code { font-family: var(--ed-font); font-size: .95em; }
 
 <!-- Help -->
 <div id="helpwin" class="fwin helpwin" hidden role="dialog" aria-label="Help">
-  <header class="fhead"><h2>Help</h2><button class="helplang" id="helplang" title="Русский">EN</button><span style="flex:1"></span><button data-close title="Close (Esc)">✕</button></header>
+  <header class="fhead"><h2>Help</h2><span style="flex:1"></span><button class="helplang" id="helplang" title="Русский">EN</button><button data-close title="Close (Esc)">✕</button></header>
   <div class="body" data-lang="en">
     <div class="card" data-sec="keys">
       <h3>Keys</h3>
@@ -1242,6 +1222,52 @@ code { font-family: var(--ed-font); font-size: .95em; }
       <p>Pins used by running sketch, as if wires were connected to board. Pin in <code>INPUT_PULLUP</code> mode is button to GND (press = LOW) —
         D3 of GyverMatrix is its mode button. <code>INPUT</code> is button to 5V (press = HIGH; released, pin floats). Pins read by <code>analogRead()</code> get slider
         (or noise, as unconnected). Outputs show level or PWM, FastLED pin — number of LEDs. Hold <b>Press</b>; <kbd>Shift</kbd>+click keeps it pressed.</p>
+    </div>
+    <div class="card" data-sec="optboard">
+      <h3>Options: Board / CPU</h3>
+      <p>Board sets pins (A0…, Serial1-3 on Mega), EEPROM size and defines (ARDUINO_AVR_NANO / ARDUINO_AVR_MEGA2560); same board is used for board binary and Real CPU timing.</p>
+      <p>Sketch is compiled by clang (LLVM) in browser and runs as WebAssembly in real time. As with avr-gcc, -fpermissive conversions get cast and warning. Unlike AVR: <code>int</code> is 32 bit, <code>double</code> is 64 bit, RAM / flash limits are not checked (board binary and Real CPU timing are real AVR build).</p>
+    </div>
+    <div class="card" data-sec="optbuild">
+      <h3>Options: Build</h3>
+      <p><b>Optimization</b> — level of compiler for emulator build. <b>Catch-up after rebuild</b>: after rebuild of running sketch (new size, profile on / off) new build runs fast up to moment of old one with same inputs, then goes on; off — it starts from beginning.</p>
+      <p><b>Power limit of sketch</b>: <code>FastLED.setMaxPowerInVoltsAndMilliamps</code> of sketch dims whole frame when estimated current is over limit, as on real strip; off — these calls are dropped. <b>C++ standard library</b> gives headers of libc++ (&lt;vector&gt;, &lt;algorithm&gt;) that AVR has not; some sketch functions (float sqrt(float)) may clash with its overloads.</p>
+      <p><b>.c sketches: add pattern.c</b> — sketch of .c files without setup() gets pattern.c of server root (includes, sizes, leds[], XY(), setup(), loop()); what sketch has itself is commented in pattern.</p>
+    </div>
+    <div class="card" data-sec="optedit">
+      <h3>Options: Editing</h3>
+      <p>Encoding (UTF-8 / Windows-1251) and line endings (CRLF / LF) of each file are kept on save. Tab size, line numbers, word wrap, current line, whitespace and auto-close brackets are editor settings only.</p>
+      <p><b>Keep session</b> — open project is stored in browser and restored next time.</p>
+    </div>
+    <div class="card" data-sec="optwiring">
+      <h3>Options: Matrix wiring</h3>
+      <p>How strip index maps to X / Y, as GyverMatrix MATRIX_TYPE (layout), CONNECTION_ANGLE (start corner), STRIP_DIRECTION (direction); taken from sketch on load.</p>
+      <p><b>W×H from sketch on load</b>: on — loading project or file sets LED window to WIDTH × HEIGHT of sketch; off — window keeps its size and build gets it instead of sketch's. <b>.c sketches: ROWS / COLS → WIDTH / HEIGHT</b> renames them on load.</p>
+    </div>
+    <div class="card" data-sec="opt3d">
+      <h3>Options: 3D</h3>
+      <p>3D view of LED matrix (cylinder or flat, button in LED window). <b>Dot size</b> — LEDs of 3D view, 100% is largest. <b>Cylinder height</b> — 100%: LED pitch is same round and along axis, less — lower and wider, more — taller. Double click on slider returns default.</p>
+    </div>
+    <div class="card" data-sec="optdisplay">
+      <h3>Options: Display</h3>
+      <p><b>Strip color order</b> is used by Real CPU timing: colors are read from data pin as strip reads them. <b>As sketch</b> (default): order from <code>addLeds&lt;…, ORDER&gt;</code> (or <code>#define COLOR_ORDER</code>). Fixed order (GRB for WS2812, WS2812B, SK6812; RGB for many WS2811) shows what that strip would show: wrong order in sketch swaps colors, as on real strip.</p>
+      <p><b>Dim colors</b>: LED gives light proportional to its value (PWM), monitor does not. LED-like converts, so dim colors look as on real LEDs; Raw (slider left) shows values as they are; further right dim colors get brighter, up to +200% (default +100%, double click returns it). Brightest channel sets lift, others keep proportion, so colors stay saturated. <b>Contrast</b> darkens dark and middle tones, full brightness stays (default 0%). Raw ignores both.</p>
+    </div>
+    <div class="card" data-sec="oled">
+      <h3>OLED display</h3>
+      <p>Controller SSD1306 (128×64, 128×32) is emulated as display sees it: commands and RAM come over I²C (Nano: A4 SDA, A5 SCL; Mega: 20, 21) or SPI (DC, CS pins).
+        Libraries built in: <b>GyverOLED</b>, <b>SSD1306Wire</b> (ThingPulse; ESP8266 sketches run in emulator as AVR ones). Size, address and SPI pins come from sketch
+        (on every build while project has no webfastled.json); set in Options → Devices, they go into webfastled.json. Emulator only for now.</p>
+      <p>Bus takes time as on board: I²C is 100 kHz unless <code>Wire.setClock(400000)</code> (SSD1306Wire sets 700 kHz itself) — picture of 1 KB takes about 100 ms at 100 kHz.
+        With buffer picture goes to display only by <code>update()</code> (GyverOLED) / <code>display()</code> (SSD1306Wire); display that stays dark is explained in Output.
+        Window: color, pixel grid (Options), speed of sketch, frames per second. Closing window stops sketch.</p>
+    </div>
+    <div class="card" data-sec="fastled">
+      <h3>FastLED</h3>
+      <p>FastLED 3.7.8 (Daniel Garcia, Mark Kriegsman and contributors, MIT license) is built in — last version before big rework of library (3.9, 3.10); projects of library are made for it.
+        3.10.9 can be chosen in Options → FastLED: emulator and real build (first real build compiles library for board, about a minute, then browser keeps it); programs get about 2 KB bigger.</p>
+      <p>Project can fix its version: line <code>// @fastled 3.7.8</code> (or <code>last</code> — newest on site, <code>builtin</code>) in any source of sketch. It wins over Options; link with <code>fastled=</code> wins over it.
+        Other settings that touch FastLED: Options → Board → Power limit of sketch, Devices → LED Matrix → Strip color order.</p>
     </div>
     <div class="card" data-sec="rest">
       <h3>REST API</h3>
@@ -1467,6 +1493,52 @@ code { font-family: var(--ed-font); font-size: .95em; }
       <p>Пины, которые использует работающий скетч, как если бы к плате были подключены провода. Пин в режиме <code>INPUT_PULLUP</code> — кнопка на GND (нажата = LOW) —
         D3 в GyverMatrix — кнопка режимов. <code>INPUT</code> — кнопка на 5V (нажата = HIGH; отпущена — пин висит). Пины, читаемые <code>analogRead()</code>, получают ползунок
         (или шум, как неподключённые). Выходы показывают уровень или ШИМ, пин FastLED — число светодиодов. Удерживайте <b>Press</b>; <kbd>Shift</kbd>+клик оставляет её нажатой.</p>
+    </div>
+    <div class="card" data-sec="optboard">
+      <h3>Options: Board / CPU</h3>
+      <p>Плата задает пины (A0…, Serial1-3 у Mega), размер EEPROM и определения (ARDUINO_AVR_NANO / ARDUINO_AVR_MEGA2560); та же плата используется для прошивки и Real CPU timing.</p>
+      <p>Скетч компилируется clang (LLVM) в браузере и выполняется как WebAssembly в реальном времени. Как и в avr-gcc, преобразования -fpermissive получают приведение типа и предупреждение. В отличие от AVR: <code>int</code> — 32 бита, <code>double</code> — 64 бита, пределы RAM / flash не проверяются (прошивка и Real CPU timing — настоящая сборка для AVR).</p>
+    </div>
+    <div class="card" data-sec="optbuild">
+      <h3>Options: Build</h3>
+      <p><b>Optimization</b> — уровень компилятора для сборки эмулятора. <b>Catch-up after rebuild</b>: после пересборки работающего скетча (новый размер, профиль вкл / выкл) новая сборка быстро доходит до момента старой с теми же вводами и идет дальше; выкл — начинает с нуля.</p>
+      <p><b>Power limit of sketch</b>: <code>FastLED.setMaxPowerInVoltsAndMilliamps</code> скетча приглушает весь кадр, когда расчетный ток выше предела, как на настоящей ленте; выкл — эти вызовы отбрасываются. <b>C++ standard library</b> дает заголовки libc++ (&lt;vector&gt;, &lt;algorithm&gt;), которых нет в AVR; некоторые функции скетча (float sqrt(float)) могут конфликтовать с ее перегрузками.</p>
+      <p><b>.c sketches: add pattern.c</b> — скетч из .c-файлов без setup() получает pattern.c из корня сервера (includes, размеры, leds[], XY(), setup(), loop()); то, что есть в скетче, в pattern закомментировано.</p>
+    </div>
+    <div class="card" data-sec="optedit">
+      <h3>Options: Editing</h3>
+      <p>Кодировка (UTF-8 / Windows-1251) и концы строк (CRLF / LF) каждого файла сохраняются. Размер табуляции, номера строк, перенос, текущая строка, пробелы и автозакрытие скобок — только настройки редактора.</p>
+      <p><b>Keep session</b> — открытый проект хранится в браузере и восстанавливается при следующем запуске.</p>
+    </div>
+    <div class="card" data-sec="optwiring">
+      <h3>Options: Matrix wiring</h3>
+      <p>Как номер светодиода ленты соответствует X / Y, как в GyverMatrix: MATRIX_TYPE (layout), CONNECTION_ANGLE (start corner), STRIP_DIRECTION (direction); берется из скетча при загрузке.</p>
+      <p><b>W×H from sketch on load</b>: вкл — загрузка проекта или файла ставит окну LED размер WIDTH × HEIGHT скетча; выкл — окно сохраняет размер, а сборка получает его вместо размера скетча. <b>.c sketches: ROWS / COLS → WIDTH / HEIGHT</b> переименовывает их при загрузке.</p>
+    </div>
+    <div class="card" data-sec="opt3d">
+      <h3>Options: 3D</h3>
+      <p>3D-вид LED-матрицы (цилиндр или плоскость, кнопка в окне LED). <b>Dot size</b> — размер светодиодов 3D-вида, 100% — наибольший. <b>Cylinder height</b> — 100%: шаг светодиодов одинаков по окружности и вдоль оси, меньше — ниже и шире, больше — выше. Двойной клик по ползунку возвращает значение по умолчанию.</p>
+    </div>
+    <div class="card" data-sec="optdisplay">
+      <h3>Options: Display</h3>
+      <p><b>Strip color order</b> используется в Real CPU timing: цвета читаются с пина данных так, как их читает лента. <b>As sketch</b> (по умолчанию): порядок из <code>addLeds&lt;…, ORDER&gt;</code> (или <code>#define COLOR_ORDER</code>). Заданный порядок (GRB у WS2812, WS2812B, SK6812; RGB у многих WS2811) показывает то, что показала бы такая лента: неверный порядок в скетче меняет цвета местами, как на настоящей ленте.</p>
+      <p><b>Dim colors</b>: светодиод светит пропорционально значению (ШИМ), монитор — нет. LED-like пересчитывает, и тусклые цвета выглядят как на настоящих светодиодах; Raw (ползунок слева) показывает значения как есть; правее тусклые цвета еще ярче, до +200% (по умолчанию +100%, двойной клик возвращает). Подъем задается самым ярким каналом, остальные сохраняют пропорцию — цвета остаются насыщенными. <b>Contrast</b> затемняет темные и средние тона, полная яркость остается (по умолчанию 0%). Raw игнорирует оба.</p>
+    </div>
+    <div class="card" data-sec="oled">
+      <h3>OLED-дисплей</h3>
+      <p>Контроллер SSD1306 (128×64, 128×32) эмулируется так, как его видит дисплей: команды и RAM приходят по I²C (Nano: A4 SDA, A5 SCL; Mega: 20, 21) или SPI (пины DC, CS).
+        Встроены библиотеки <b>GyverOLED</b> и <b>SSD1306Wire</b> (ThingPulse; скетчи для ESP8266 идут в эмуляторе как для AVR). Размер, адрес и пины SPI берутся из скетча
+        (при каждой сборке, пока в проекте нет webfastled.json); заданные в Options → Devices попадают в webfastled.json. Пока только в эмуляторе.</p>
+      <p>Шина занимает время, как на плате: I²C — 100 кГц, если нет <code>Wire.setClock(400000)</code> (SSD1306Wire сам ставит 700 кГц) — кадр в 1 КБ идет около 100 мс на 100 кГц.
+        С буфером картинка уходит на дисплей только по <code>update()</code> (GyverOLED) / <code>display()</code> (SSD1306Wire); почему дисплей темный — пишется в Output.
+        Окно: цвет, сетка пикселей (Options), скорость скетча, кадры в секунду. Закрытие окна останавливает скетч.</p>
+    </div>
+    <div class="card" data-sec="fastled">
+      <h3>FastLED</h3>
+      <p>Встроена FastLED 3.7.8 (Daniel Garcia, Mark Kriegsman и другие, лицензия MIT) — последняя версия до большой переделки библиотеки (3.9, 3.10); проекты библиотеки сделаны под нее.
+        В Options → FastLED можно выбрать 3.10.9: эмулятор и настоящая сборка (первая сборка для платы компилирует библиотеку, около минуты, дальше браузер ее хранит); программы примерно на 2 КБ больше.</p>
+      <p>Проект может задать версию сам: строка <code>// @fastled 3.7.8</code> (или <code>last</code> — самая новая на сайте, <code>builtin</code>) в любом исходнике скетча. Она главнее Options; <code>fastled=</code> в ссылке главнее ее.
+        Другие настройки, касающиеся FastLED: Options → Board → Power limit of sketch, Devices → LED Matrix → Strip color order.</p>
     </div>
     <div class="card" data-sec="rest">
       <h3>REST API</h3>

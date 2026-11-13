@@ -796,3 +796,15 @@ Web FastLED — version history
 ! GyverOLED stayed slow whatever Wire.setClock(): its delayMicroseconds(2)
   after every I2C transfer made 64 real waits per picture; short waits
   (under 2 ms) are added up now as bus time is and waited at once
+
+
+        version 0.42.0                  12 nov 2026
+
+@ Options: long notes moved to Help — ? in corner of each group opens
+  Help at its section (new sections: Options, OLED display, FastLED);
+  short labels, details in tooltips
++ REST API builder: oled key; Current leaves out matrix keys when project
+  has no LED matrix
+@ F6 shows / hides windows of LED matrix and OLED display together
++ real build of sketch with OLED library says that these libraries are in
+  emulator only for now
