@@ -1,7 +1,6 @@
-Web FastLED
-Copyright (c) 2026 ae485
-
 MIT License
+
+Copyright (c) 2026 ae485
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -26,76 +25,111 @@ SOFTWARE.
 Third-party components
 -------------------------------------------------------------------------------
 
-MIT license above covers code of Web FastLED itself (page, scripts, service
-worker, Arduino core for WebAssembly in runtime/core, build tools, tests).
-Components below are distributed with it under their own licenses; their full
-texts come with their sources.
+The license above covers the code written for the web port. The following
+parts keep their own terms.
 
-FastLED 3.7.8
-  Daniel Garcia, Mark Kriegsman and contributors. MIT license.
-  https://github.com/FastLED/FastLED
-  Used in WebAssembly SDK (stub platform: clockless_stub.h, led_sysdefs_stub.h
-  patched) and in real build for AVR.
+UnrealSpeccy 0.39.0
+  by SMT and contributors. From its documentation:
 
-GyverOLED 1.6.4 (OLED library of emulator, runtime/libs)
-  AlexGyver. MIT license.
-  https://github.com/GyverLibs/GyverOLED
+    UnrealSpeccy is completely freeware. You may use this emulator and its
+    sources without any restrictions. You may use the sources in your own
+    emul or to release bugfixed/new versions. in this case you do not have
+    to release updated source code, (unlike GNU Public License requires,
+    for example). You may port emulator to any other platform.
 
-esp8266-oled-ssd1306 4.6.2 (SSD1306Wire, OLEDDisplay of emulator, runtime/libs)
-  ThingPulse, Daniel Eichhorn, Fabrice Weinberg and contributors. MIT license.
-  https://github.com/ThingPulse/esp8266-oled-ssd1306
+Xpeccy (the model for the deBUGa debugger)
+  by SAM style, MIT License. https://github.com/samstyle/Xpeccy
 
-Arduino AVR core 1.8.6, libraries SPI, Wire, SoftwareSerial, EEPROM
-  Arduino and contributors. GNU Lesser General Public License 2.1.
-  https://github.com/arduino/ArduinoCore-avr
-  Precompiled for real build (rt/avr/avr-sdk.tar.gz); sources of core and
-  libraries are inside that archive.
+ymfm (OPL3 / OPL4 emulation)
+  Copyright (c) 2021, Aaron Giles. BSD 3-Clause License, the full text is at
+  the top of each of its files. https://github.com/aaronsgiles/ymfm
 
-Bootloaders of Arduino AVR core 1.8.6: Optiboot (Peter Knight, Bill
-Westfield), ATmegaBOOT (Arduino), stk500v2 (Peter Fleury, Mark Sproul)
-  GNU General Public License 2.
-  Their .hex files are merged into ".hex with bootloader" files, as Arduino
-  IDE does. Sources: https://github.com/arduino/ArduinoCore-avr/tree/1.8.6/bootloaders
+xBR level 2 (the shader of the xBR filter, web/glfx.js, rewritten from its GLSL)
+  Copyright (C) 2011-2016 Hyllian - sergiogdb@gmail.com. MIT License.
 
-LLVM / Clang 21
-  LLVM project. Apache License 2.0 with LLVM exceptions.
-  https://llvm.org
-YoWASP build of LLVM for WebAssembly (rt/clang.js, rt/llvm*.gz)
-  whitequark and contributors. ISC license.
-  https://github.com/YoWASP/clang
+stb_image v2.30 (JPEG / PNG decoding for the FT812)
+  by Sean Barrett. Public domain or MIT License, at your choice (see the end
+  of the file). http://nothings.org/stb
 
-GCC 7.3.0 (avr-gcc of Arduino toolchain 7.3.0-atmel3.6.1-arduino7)
-  Free Software Foundation. GNU General Public License 3; libgcc with GCC
-  Runtime Library Exception 3.1 (code of libgcc linked into sketch may be
-  used under any terms).
-GNU Binutils 2.26 (avr-as, avr-ld, avr-ar, avr-nm, avr-objcopy, avr-size)
-  Free Software Foundation. GNU General Public License 3.
-  Built for WebAssembly (rt/avr/*.wasm.gz) from Arduino toolchain sources
-  (https://github.com/arduino/toolchain-avr, Atmel 3.6.1 patches) with
-  WASI patches of Web FastLED. Complete corresponding source of these
-  WebAssembly builds (upstream sources, patches, build scripts) is available
-  from the author on request, for at least three years from distribution.
+sjasmplus (the Z80 assembler of File Commander, built from https://github.com/z00m128/sjasmplus)
+  Copyright (c) 2016, aprisobal; and contributors. BSD 3-Clause License:
 
-avr-libc 2.0.0 (with Arduino patch: malloc margin)
-  avr-libc developers. Modified BSD license.
-  https://github.com/avrdudes/avr-libc
+    Redistribution and use in source and binary forms, with or without
+    modification, are permitted provided that the following conditions are met:
+    * Redistributions of source code must retain the above copyright notice, this
+      list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above copyright notice,
+      this list of conditions and the following disclaimer in the documentation
+      and/or other materials provided with the distribution.
+    * Neither the name of sjasmplus nor the names of its contributors may be used
+      to endorse or promote products derived from this software without specific
+      prior written permission.
 
-REST API kit (web/js/rest.js, web/js/rest-builder.js)
-  Web Unreal Speccy authors. MIT license.
+    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+    AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+    IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+    DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+    FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+    DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+    SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+    CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+    OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-avr8js 0.21
-  Uri Shaked and contributors. MIT license.
-  https://github.com/wokwi/avr8js
-  Bundled as web/js/avr8.js (emulator of Real CPU timing).
+puff (the inflate decoder of the FT812 follows it)
+  Copyright (C) 2002-2013 Mark Adler. zlib License.
 
-CodeMirror 6
-  Marijn Haverbeke and contributors. MIT license.
-  https://codemirror.net
-  Bundled as web/js/editor.js.
+MAME Sprinter driver (the Sprinter Sp2000 model follows it and the MAME
+Z84C015 / Z80 CTC / Z80 SIO devices) and MAME Spectrum Next driver (the ZX
+Spectrum Next model, web/web_nx.cpp, follows it and the Next's documentation
+at wiki.specnext.dev: Z80N, memory, registers, layers, copper, DMA, DivMMC)
+  Copyright Andrei I. Holub and the MAME contributors. BSD 3-Clause License:
+  redistributions must keep the copyright notice, this condition and the
+  disclaimer of the BSD 3-Clause License (the same text as for sjasmplus
+  above); the names of the copyright holders may not be used to endorse or
+  promote derived products without permission. https://github.com/mamedev/mame
 
-Color themes
-  Palettes of Visual Studio Code themes Dark+, Light+, High Contrast
-  (Microsoft, MIT license), Monokai, Solarized (Ethan Schoonover, MIT license).
+SAASound (the SAA1099 follows it: the latches of the generators, the
+envelope, the noise, the mixer and its tables)
+  Copyright (c) 1998-2025 Dave Hooper, Simon Owen. BSD 3-Clause License:
+  redistributions must keep the copyright notice, this condition and the
+  disclaimer of the BSD 3-Clause License (the same text as for sjasmplus
+  above); the names of the copyright holders may not be used to endorse or
+  promote derived products without permission.
+  https://github.com/stripwax/SAASound
 
-Library samples (repo/, separate package)
-  GyverMatrixOS (AlexGyver) and Soulmate sketches belong to their authors.
+SAM Coupe is written for this port from the SAM Coupe Technical Manual;
+SimCoupe (Simon Owen) and the MAME driver (both GPL) were read for the
+hardware's behavior only, no code is taken from them. The SAM Coupe ROM 3.0
+is Dr Andy Wright's, distributed with his kind permission (as SimCoupe
+distributes it).
+
+ROM images (the rom/ folder of the site), disk, HDD and SD card images
+and other software that the emulator loads are not covered by this license.
+They belong to their copyright holders, among them: the GMX flash of LW / PLM
+(GMX Loader, Shadow Service Monitor of MOA), OSZ by izzx
+(https://github.com/izzx-git/OSZ), NedoOS by Alone Coder and the NedoOS team,
+TS-BIOS and Wild Commander, TR-DOS, the Sprinter BIOS and Estex DSS of Peters
+Plus and the Sprinter Team (BIOS 3.06, Estex DSS 1.71), the Sprinter programs
+on hdd/dss.zip (the system.zip of the Sprinter Team update 3.06, Flex Navigator,
+TASM and GFX Viewer of Anton Enin, FM of Vasil Ivanov, WAVPLAY, the games, demos
+and tools of their authors), the BIOS and ROMs of the machines.
+
+ZX Spectrum Next: NextZXOS (enNextZX.rom, Garry Lancaster), esxDOS for the Next
+(enNxtmmc.rom), the Multiface ROM (enNextMf.rom) and the System/Next
+distribution on the SD card (sd/next.zip)
+  Copyright SpecNext Ltd and the authors of each part. The Next License (the
+  license itself under CC BY-SA), the full text is LICENSE.md in the
+  distribution: it cannot be sold, no duplication fee; it may be copied
+  without its source code when the copy has a link to it (link.txt in
+  sd/next.zip). The full distribution: https://www.specnext.com/latestdistro/
+  Sources: https://gitlab.com/thesmog358/tbblue
+
+SymbOS 4.0 for the ZX Spectrum Next (on the card of sd/next.zip)
+  Copyright Prodatron / SymbiosiS et al. As distributed by its authors, with
+  their readme (symbos.txt in sd/next.zip). http://www.symbos.org
+
+ZX Spectrum ROMs (48, 128 and +2 ROMs, for RZX playback)
+  Copyright Amstrad plc. Amstrad allows them to be distributed with
+  emulators, keeping the copyright message unchanged; they may not be sold or
+  used in commercial products.
