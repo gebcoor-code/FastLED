@@ -1,80 +1,74 @@
-// Web Unreal Speccy: offline copy (service worker). Registered by the page as sw.js?v=<build>.
-// The emulator itself (page, scripts, wasm, ini…) is kept per build; files of the site (ROMs, disks, HDD / SD images, lists)
-// are kept once fetched (and by Options / System / Offline: Make offline). The network first, the copy when it fails or is
-// slow; a file of this build (?v=<build>) straight from the copy; the site down (no answer a moment ago): the copies at once.
+// Web FastLED: service worker. Registered by page as sw.js?v=<build>.
+// 1. Cross-origin isolation: COOP / COEP added to every response of site (servers without mod_headers / .htaccess,
+//    static hosting): running sketch then waits in delay() without loading CPU (Atomics.wait).
+// 2. Offline copy: page and scripts are kept per build; files of site (rt/: compilers, repo/: library, pattern.c) are
+//    kept once fetched (and by Options / Offline: Make offline). Always network first, copy when it fails.
 'use strict';
 const BUILD = new URL(self.location.href).searchParams.get('v') || 'dev';
-const NET_WAIT = 1500; // ms the site has to answer before the kept copy is used
-const DOWN_FOR = 30000; // the site did not answer: for this long the copies come at once (no wait for each file)
-let downUntil = 0;
-const SCOPE = new URL(self.registration.scope).pathname; // copies in other folders of the site keep their own caches
-const CORE = 'ue-core:' + SCOPE + ':' + BUILD, FILES = 'ue-files:' + SCOPE;
-const SHELL = ['./', 'index.html', 'changes.zip', 'LICENSE', 'icon.png', 'apple-touch-icon.png',
-  'js/js.zip',
-  'unreal/unreal.zip', 'unreal/unreal.wasm', 'unreal/sjasm.zip', 'unreal/unreal.ini', 'unreal/boot6.$b', 'unreal/CMOS', 'unreal/sos.l'];
-const NEED = ['index.html', 'js/js.zip', 'unreal/unreal.ini', 'unreal/boot6.$b']; // and unreal.zip or unreal.wasm
+const NET_WAIT = 4000; // ms site has to answer before kept copy is used
+const SCOPE = new URL(self.registration.scope).pathname; // copies in other folders of site keep their own caches
+const CORE = 'wfl-core:' + SCOPE + ':' + BUILD, FILES = 'wfl-files:' + SCOPE;
+const SHELL = ['./', 'index.html', 'changes.txt', 'LICENSE', 'icon.png', 'apple-touch-icon.png', 'js/js.zip']; // js.zip: all scripts (page unpacks it)
 
 self.addEventListener('install', (e) => {
   e.waitUntil((async () => {
     const c = await caches.open(CORE);
-    // one by one: a missing optional file (icon, sos.l) must not stop the rest; the ones the emulator cannot start
-    // without must all be there, else this build is not installed (the copy of the build before stays as it was)
-    const got = new Set();
-    await Promise.all(SHELL.map(async (u) => { try { const r = await fetch(new Request(u.replace(/\$/g, '%24'), { cache: 'reload' })); if (r.ok) { await c.put(u.replace(/\$/g, '%24'), r); got.add(u); } } catch (err) {} }));
-    if (!NEED.every((u) => got.has(u)) || !(got.has('unreal/unreal.zip') || got.has('unreal/unreal.wasm'))) { await caches.delete(CORE); throw new Error('offline copy: files missing'); }
+    // one by one: missing optional file (icon) must not stop the rest
+    await Promise.all(SHELL.map(async (u) => { try { const r = await fetch(new Request(u, { cache: 'reload' })); if (r.ok) await c.put(new URL(u, self.registration.scope).href, r); } catch (err) {} }));
     self.skipWaiting();
   })());
 });
 self.addEventListener('activate', (e) => {
   e.waitUntil((async () => {
-    for (const k of await caches.keys()) if (k.startsWith('ue-core:' + SCOPE + ':') && k !== CORE) await caches.delete(k); // older builds
+    for (const k of await caches.keys()) if (k.startsWith('wfl-core:' + SCOPE + ':') && k !== CORE) await caches.delete(k); // older builds
     await self.clients.claim();
   })());
 });
 
+// COOP / COEP / CORP on response (also on kept copy)
+function isolated(res) {
+  if (!res || res.status === 0 || res.type === 'opaque') return res;
+  const h = new Headers(res.headers);
+  h.set('Cross-Origin-Embedder-Policy', 'require-corp');
+  h.set('Cross-Origin-Opener-Policy', 'same-origin');
+  h.set('Cross-Origin-Resource-Policy', 'same-origin');
+  return new Response(res.body, { status: res.status, statusText: res.statusText, headers: h });
+}
 const inScope = (u) => u.origin === self.location.origin && u.pathname.startsWith(SCOPE);
-const isFile = (p) => /^(rom|trd|hdd|sd)\//i.test(p) || /\.json$/i.test(p);
+const isFile = (p) => /^(rt|repo)\//i.test(p) || /^pattern\.c$/i.test(p) || /\.json$/i.test(p);
 self.addEventListener('fetch', (e) => {
   const req = e.request, u = new URL(req.url);
-  if (req.method !== 'GET' || !inScope(u) || req.headers.has('range')) return;
+  if (req.cache === 'only-if-cached' && req.mode !== 'same-origin') return;
+  if (u.origin !== self.location.origin) return; // only own files
+  if (req.method !== 'GET' || !inScope(u) || req.headers.has('range')) { e.respondWith(fetch(req).then(isolated)); return; } // HEAD (connection check) etc.: server only
   const rel = decodeURIComponent(u.pathname.slice(SCOPE.length));
   e.respondWith((async () => {
     const store = isFile(rel) ? FILES : CORE;
-    // the copy of this build only (not of an older build or another copy of the site: caches.match looks into all of them)
-    const copy = async () => { const c = await caches.open(store), core = store === CORE ? c : await caches.open(CORE);
-      return (await c.match(u.origin + u.pathname, { ignoreSearch: true })) ||
-        (req.mode === 'navigate' ? (await core.match(new URL('index.html', self.registration.scope).href, { ignoreSearch: true })) || (await core.match(self.registration.scope, { ignoreSearch: true })) : null); };
-    const mine = u.searchParams.get('v') === BUILD; // a file of this very build: it does not change
-    // a file of another build (the page of a newer one while this worker still runs): the copy here is of this build, and
-    // mixed with that page it breaks it; the network only, as long as it takes (the page tries again when it fails)
-    if (u.searchParams.has('v') && !mine) return fetch(req).catch(() => Response.error());
-    const have = await copy();
-    if (have && (mine || self.navigator.onLine === false || Date.now() < downUntil)) return have;
-    if (!have && store === FILES && Date.now() < downUntil) return Response.error(); // the site down and no copy of a site file: fails at once (was: waited for ever); the page's own files are always asked for
+    const copy = async () => (await caches.match(u.origin + u.pathname, { ignoreSearch: true })) ||
+      (req.mode === 'navigate' ? (await caches.match(new URL('index.html', self.registration.scope).href, { ignoreSearch: true })) || (await caches.match(self.registration.scope, { ignoreSearch: true })) : null);
     const net = fetch(req).then((r) => {
-      downUntil = 0;
-      // the page's own files and the site's files: refreshed copy (a 404 or an HTML error page is not kept)
-      // the copy is cloned at once: later (after caches.open) the page may be reading the body already, and clone() throws
-      if (r.ok && !(isFile(rel) && /text\/html/i.test(r.headers.get('content-type') || '') && !/\.html?$/i.test(rel))) {
-        const keep = r.clone();
+      // page's own files and files of site: refreshed copy (404 or HTML error page of host is not kept)
+      if (r.ok && !(/text\/html/i.test(r.headers.get('content-type') || '') && !/(^|\/)$|\.html?$/i.test(rel))) {
+        const keep = r.clone(); // now: body of r is read by page right after
         caches.open(store).then((c) => c.put(u.origin + u.pathname, keep)).catch(() => {});
       }
       return r;
     });
-    // a site that does not answer (a network that drops the packets silently: fetch would wait for the browser's own
-    // timeout, a black screen on the phone): with a copy at hand, the copy after NET_WAIT ms; the network keeps going
-    // and refreshes the copy if it answers later. No copy: the network as long as it takes
-    if (!have) { try { return await net; } catch (err) { downUntil = Date.now() + DOWN_FOR; return Response.error(); } }
+    // site that does not answer (network that drops packets silently: fetch would wait for browser's own timeout):
+    // with copy at hand, copy after NET_WAIT ms; network keeps going and refreshes copy if it answers later.
+    // No copy: network as long as it takes
+    const have = await copy();
+    if (!have) { try { return isolated(await net); } catch (err) { return Response.error(); } }
     const late = new Promise((res) => setTimeout(() => res('late'), NET_WAIT));
     try {
       const r = await Promise.race([net, late]);
-      if (r !== 'late') return r;
-      net.catch(() => { downUntil = Date.now() + DOWN_FOR; }); // slow: this one from the copy; the site is taken for down only when it fails
-      return have;
-    } catch (err) { downUntil = Date.now() + DOWN_FOR; return have; } // offline: the copy (the build's ?v= does not matter; the page itself for any navigation)
+      if (r !== 'late') return isolated(r);
+      net.catch(() => {});
+      return isolated(have);
+    } catch (err) { return isolated(have); } // offline: copy (build's ?v= does not matter; page itself for any navigation)
   })());
 });
-// the page asks: how much is kept, or to drop the files
+// page asks: what is kept, or to drop files of site
 self.addEventListener('message', (e) => {
   const d = e.data || {}, port = e.ports && e.ports[0];
   (async () => {
