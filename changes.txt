@@ -808,3 +808,11 @@ Web FastLED — version history
 @ F6 shows / hides windows of LED matrix and OLED display together
 + real build of sketch with OLED library says that these libraries are in
   emulator only for now
+
+
+        version 0.42.7                  16 nov 2026
+
+@ upload to board: error tells which step / page failed and how many
+  bytes of answer came; page without answer is sent again (3 tries) —
+  lost bytes of USB-serial (clone boards on CH340) no longer break whole
+  upload
