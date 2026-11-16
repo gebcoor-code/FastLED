@@ -4,7 +4,7 @@
 //upd: fixed for dW>9
 //upd: fixed some hex-symbols like '2,3,4,M,V'. They have some difficulties to vectorize pixel combinations,forming angles. It was easier to fix bitmaps to avoid these angles.
 //upd: JavaScript fork: https://kodomo.fbb.msu.ru/~dudka2007/term2/files/scr.html
-//upd: É fix
+//upd: Ð™ fix
 const uint8_t fontHEX[][5] PROGMEM = {
   {0x00, 0x00, 0x00, 0x00, 0x00}, //   0x20 32
   {0x00, 0x00, 0x6f, 0x00, 0x00}, // ! 0x21 33
@@ -72,38 +72,38 @@ const uint8_t fontHEX[][5] PROGMEM = {
   {0x40, 0x40, 0x40, 0x40, 0x40}, // _ 0x5f 95
   {0x00, 0x00, 0x03, 0x04, 0x00}, // ` 0x60 96
 
-  {0x7e, 0x09, 0x09, 0x09, 0x7e}, // À 192
-  {0x7F, 0x49, 0x49, 0x49, 0x71}, // Á
-  {0x7f, 0x49, 0x49, 0x49, 0x36}, // Â
-  {0x7F, 0x01, 0x01, 0x01, 0x01}, // Ã
-  {0x60, 0x3E, 0x21, 0x3F, 0x60}, // Ä
-  {0x7f, 0x49, 0x49, 0x49, 0x41}, // Å
-  {0x77, 0x08, 0x7F, 0x08, 0x77}, // Æ+
-  {0x22, 0x41, 0x49, 0x49, 0x36}, // Ç+
-  {0x7F, 0x20, 0x10, 0x08, 0x7F}, // È
-  {0x7F, 0x20, 0x13, 0x08, 0x7F}, // É
-  {0x7f, 0x08, 0x14, 0x22, 0x41}, // Ê
-  {0x40, 0x3E, 0x01, 0x01, 0x7F}, // Ë+
-  {0x7f, 0x01, 0x1e, 0x01, 0x7f}, // Ì+
-  {0x7f, 0x08, 0x08, 0x08, 0x7f}, // Í
-  {0x3e, 0x41, 0x41, 0x41, 0x3e}, // Î
-  {0x7F, 0x01, 0x01, 0x01, 0x7F}, // Ï
-  {0x7f, 0x09, 0x09, 0x09, 0x06}, // Ð
-  {0x3e, 0x41, 0x41, 0x41, 0x22}, // Ñ
-  {0x01, 0x01, 0x7f, 0x01, 0x01}, // Ò
-  {0x07, 0x48, 0x48, 0x48, 0x7F}, // Ó
-  {0x1C, 0x22, 0x7F, 0x22, 0x1C}, // Ô
-  {0x63, 0x14, 0x08, 0x14, 0x63}, // Õ
-  {0x7F, 0x40, 0x40, 0x7F, 0xC0}, // Ö
-  {0x07, 0x08, 0x08, 0x08, 0x7F}, // ×
-  {0x7F, 0x40, 0x7F, 0x40, 0x7F}, // Ø
-  {0x7F, 0x40, 0x7F, 0x40, 0xFF}, // Ù
-  {0x01, 0x7F, 0x48, 0x48, 0x70}, // Ú
-  {0x7F, 0x48, 0x70, 0x00, 0x7F}, // Û
-  {0x00, 0x7F, 0x48, 0x48, 0x70}, // Ü
-  {0x22, 0x41, 0x49, 0x49, 0x3E}, // Ý
-  {0x7F, 0x08, 0x3E, 0x41, 0x3E}, // Þ
-  {0x46, 0x29, 0x19, 0x09, 0x7F}, // ß 223
+  {0x7e, 0x09, 0x09, 0x09, 0x7e}, // Ð 192
+  {0x7F, 0x49, 0x49, 0x49, 0x71}, // Ð‘
+  {0x7f, 0x49, 0x49, 0x49, 0x36}, // Ð’
+  {0x7F, 0x01, 0x01, 0x01, 0x01}, // Ð“
+  {0x60, 0x3E, 0x21, 0x3F, 0x60}, // Ð”
+  {0x7f, 0x49, 0x49, 0x49, 0x41}, // Ð•
+  {0x77, 0x08, 0x7F, 0x08, 0x77}, // Ð–+
+  {0x22, 0x41, 0x49, 0x49, 0x36}, // Ð—+
+  {0x7F, 0x20, 0x10, 0x08, 0x7F}, // Ð˜
+  {0x7F, 0x20, 0x13, 0x08, 0x7F}, // Ð™
+  {0x7f, 0x08, 0x14, 0x22, 0x41}, // Ðš
+  {0x40, 0x3E, 0x01, 0x01, 0x7F}, // Ð›+
+  {0x7f, 0x01, 0x1e, 0x01, 0x7f}, // Ðœ+
+  {0x7f, 0x08, 0x08, 0x08, 0x7f}, // Ð
+  {0x3e, 0x41, 0x41, 0x41, 0x3e}, // Ðž
+  {0x7F, 0x01, 0x01, 0x01, 0x7F}, // ÐŸ
+  {0x7f, 0x09, 0x09, 0x09, 0x06}, // Ð 
+  {0x3e, 0x41, 0x41, 0x41, 0x22}, // Ð¡
+  {0x01, 0x01, 0x7f, 0x01, 0x01}, // Ð¢
+  {0x07, 0x48, 0x48, 0x48, 0x7F}, // Ð£
+  {0x1C, 0x22, 0x7F, 0x22, 0x1C}, // Ð¤
+  {0x63, 0x14, 0x08, 0x14, 0x63}, // Ð¥
+  {0x7F, 0x40, 0x40, 0x7F, 0xC0}, // Ð¦
+  {0x07, 0x08, 0x08, 0x08, 0x7F}, // Ð§
+  {0x7F, 0x40, 0x7F, 0x40, 0x7F}, // Ð¨
+  {0x7F, 0x40, 0x7F, 0x40, 0xFF}, // Ð©
+  {0x01, 0x7F, 0x48, 0x48, 0x70}, // Ðª
+  {0x7F, 0x48, 0x70, 0x00, 0x7F}, // Ð«
+  {0x00, 0x7F, 0x48, 0x48, 0x70}, // Ð¬
+  {0x22, 0x41, 0x49, 0x49, 0x3E}, // Ð­
+  {0x7F, 0x08, 0x3E, 0x41, 0x3E}, // Ð®
+  {0x46, 0x29, 0x19, 0x09, 0x7F}, // Ð¯ 223
 };
 
 bool loadingFlag = true;
@@ -113,15 +113,16 @@ bool loadingFlag = true;
 #define rotAngle 15
 
 //string vars
-#define LET_WIDTH 5       // øèðèíà áóêâû øðèôòà
-#define dW 9     // øèðèíà îêíà, pt
-#define dH 8    // âûñîòà îêíà, pt
-uint16_t bitSub[dH]; //áèòîâàÿ ïîäëîæêà. ìîæíî èñïîëüçîâàòü uint32_t, íà áîëüøèõ ýêðàíàõ
-String text = "FULL-3D ÁÅÃÓÙÀß ÑÒÐÎÊÀ. ÌÎÆÍÎ ÊÐÓÒÈÒÜ ÏÎ ÎÑßÌ, ÌÀÑØÒÀÁÈÐÎÂÀÒÜ È ÍÀÒßÃÈÂÀÒÜ ÍÀ 3D-ÏÎÂÅÐÕÍÎÑÒÈ!...  "; 
+#define LET_WIDTH 5       // ÑˆÐ¸Ñ€Ð¸Ð½Ð° Ð±ÑƒÐºÐ²Ñ‹ ÑˆÑ€Ð¸Ñ„Ñ‚Ð°
+#define dW 9     // ÑˆÐ¸Ñ€Ð¸Ð½Ð° Ð¾ÐºÐ½Ð°, pt
+#define dH 8    // Ð²Ñ‹ÑÐ¾Ñ‚Ð° Ð¾ÐºÐ½Ð°, pt
+uint16_t bitSub[dH]; //Ð±Ð¸Ñ‚Ð¾Ð²Ð°Ñ Ð¿Ð¾Ð´Ð»Ð¾Ð¶ÐºÐ°. Ð¼Ð¾Ð¶Ð½Ð¾ Ð¸ÑÐ¿Ð¾Ð»ÑŒÐ·Ð¾Ð²Ð°Ñ‚ÑŒ uint32_t, Ð½Ð° Ð±Ð¾Ð»ÑŒÑˆÐ¸Ñ… ÑÐºÑ€Ð°Ð½Ð°Ñ…
+const char text[] PROGMEM = "FULL-3D Ð‘Ð•Ð“Ð£Ð©ÐÐ¯ Ð¡Ð¢Ð ÐžÐšÐ. ÐœÐžÐ–ÐÐž ÐšÐ Ð£Ð¢Ð˜Ð¢Ð¬ ÐŸÐž ÐžÐ¡Ð¯Ðœ, ÐœÐÐ¡Ð¨Ð¢ÐÐ‘Ð˜Ð ÐžÐ’ÐÐ¢Ð¬ Ð˜ ÐÐÐ¢Ð¯Ð“Ð˜Ð’ÐÐ¢Ð¬ ÐÐ 3D-ÐŸÐžÐ’Ð•Ð Ð¥ÐÐžÐ¡Ð¢Ð˜!...  "; 
 
-uint8_t chari = 0; //òåêóùèé ñèìâîë
+#define TEXT_LEN (sizeof(text) - 1)
+uint8_t chari = 0; //Ñ‚ÐµÐºÑƒÑ‰Ð¸Ð¹ ÑÐ¸Ð¼Ð²Ð¾Ð»
 uint8_t columni = 0;
-bool needSpace = false; //òàê ðåàëèçîâàë ïðîñâåòû ìåæäó ñèìâîëàìè.
+bool needSpace = false; //Ñ‚Ð°Ðº Ñ€ÐµÐ°Ð»Ð¸Ð·Ð¾Ð²Ð°Ð» Ð¿Ñ€Ð¾ÑÐ²ÐµÑ‚Ñ‹ Ð¼ÐµÐ¶Ð´Ñƒ ÑÐ¸Ð¼Ð²Ð¾Ð»Ð°Ð¼Ð¸.
 
 //3D vars
 #define dots dW*dH
@@ -134,7 +135,7 @@ float scaleDirection = 0.03;
 byte dotsCount;
 #define stepDirection 0.03
 
-//boolean fullTextFlag = false; //ïîêà áåç òðèããåðà îêîí÷àíèÿ, ïîòîì äîïèëþ.
+//boolean fullTextFlag = false; //Ð¿Ð¾ÐºÐ° Ð±ÐµÐ· Ñ‚Ñ€Ð¸Ð³Ð³ÐµÑ€Ð° Ð¾ÐºÐ¾Ð½Ñ‡Ð°Ð½Ð¸Ñ, Ð¿Ð¾Ñ‚Ð¾Ð¼ Ð´Ð¾Ð¿Ð¸Ð»ÑŽ.
 
 int8_t translateX(float x,  float z) {
   float scaledX = x * scale3D;
@@ -202,10 +203,10 @@ void ScaleAndRotate_Zonly(float maxSc, float minSc) {
   iter--;
 }
 
-uint8_t getFont(uint8_t font, uint8_t row) { //@ðåñïåêò to Gyver. Ðåàëüíî âçðûâ ìîçãîâ òóò.
+uint8_t getFont(uint8_t font, uint8_t row) { //@Ñ€ÐµÑÐ¿ÐµÐºÑ‚ to Gyver. Ð ÐµÐ°Ð»ÑŒÐ½Ð¾ Ð²Ð·Ñ€Ñ‹Ð² Ð¼Ð¾Ð·Ð³Ð¾Ð² Ñ‚ÑƒÑ‚.
   if ((font>=0x41 && font<=0x5A) || (font>=0xC0 && font<=0xDF)) font &= 0xDF; //set just letters as a capital.
-  font = font - '0' + 0x10;   // ïåðåâîä êîä ñèìâîëà èç òàáëèöû ASCII â íîìåð ñîãëàñíî íóìåðàöèè ìàññèâà
-  if (font <= 0x5A) return pgm_read_byte(&(fontHEX[font][row]));     // äëÿ àíãëèéñêèõ áóêâ è ñèìâîëîâ
+  font = font - '0' + 0x10;   // Ð¿ÐµÑ€ÐµÐ²Ð¾Ð´ ÐºÐ¾Ð´ ÑÐ¸Ð¼Ð²Ð¾Ð»Ð° Ð¸Ð· Ñ‚Ð°Ð±Ð»Ð¸Ñ†Ñ‹ ASCII Ð² Ð½Ð¾Ð¼ÐµÑ€ ÑÐ¾Ð³Ð»Ð°ÑÐ½Ð¾ Ð½ÑƒÐ¼ÐµÑ€Ð°Ñ†Ð¸Ð¸ Ð¼Ð°ÑÑÐ¸Ð²Ð°
+  if (font <= 0x5A) return pgm_read_byte(&(fontHEX[font][row]));     // Ð´Ð»Ñ Ð°Ð½Ð³Ð»Ð¸Ð¹ÑÐºÐ¸Ñ… Ð±ÑƒÐºÐ² Ð¸ ÑÐ¸Ð¼Ð²Ð¾Ð»Ð¾Ð²
   else if (font >= 0x70 && font <= 0x9F) {
     return pgm_read_byte(&(fontHEX[font - 0x2F][row]));
   } else if (font >= 0x60 && font <= 0x6F) {
@@ -237,16 +238,16 @@ void updateScrollingText() {
     return;
   }
   
-  while (chari < text.length() && (byte)text[chari] > 0xBF) chari++;
+  while (chari < TEXT_LEN && pgm_read_byte(&text[chari]) > 0xBF) chari++;
    
-  if (chari >= text.length()) {
+  if (chari >= TEXT_LEN) {
     chari = 0;
     columni = 0;
     needSpace = true;
     return;
   }
   
-  uint8_t charCode = (uint8_t)text[chari];
+  uint8_t charCode = pgm_read_byte(&text[chari]);
   uint8_t columnData = getFont(charCode, columni);
   
   for (uint8_t y = 0; y < dH; y++) {
@@ -267,15 +268,15 @@ void initSphereVectors(float radius) {
   
   for (uint8_t row = 0; row < dH; row++) {
     for (uint8_t col = 0; col < dW; col++) {
-      //èíâåðòèðóåì çäåñü
+      //Ð¸Ð½Ð²ÐµÑ€Ñ‚Ð¸Ñ€ÑƒÐµÐ¼ Ð·Ð´ÐµÑÑŒ
       float u = (float)(dW - 1 - col) / (dW - 1);  // 1..0
       float v = (float)(dH - 1 - row) / (dH - 1); // 1..0
       
-      //çàäàåì óìåðåííóþ êðèâèçíó, äëÿ ëó÷øåé ÷èòàåìîñòè
-      float phi = u * PI * 0.9;           // 90% ïîëîâèíû ñôåðû (0.6 - ìåíüøå èñêàæåíèé)
-      float theta = v * PI * 0.4;         // 40% îò ïîëþñà ê ïîëþñó
+      //Ð·Ð°Ð´Ð°ÐµÐ¼ ÑƒÐ¼ÐµÑ€ÐµÐ½Ð½ÑƒÑŽ ÐºÑ€Ð¸Ð²Ð¸Ð·Ð½Ñƒ, Ð´Ð»Ñ Ð»ÑƒÑ‡ÑˆÐµÐ¹ Ñ‡Ð¸Ñ‚Ð°ÐµÐ¼Ð¾ÑÑ‚Ð¸
+      float phi = u * PI * 0.9;           // 90% Ð¿Ð¾Ð»Ð¾Ð²Ð¸Ð½Ñ‹ ÑÑ„ÐµÑ€Ñ‹ (0.6 - Ð¼ÐµÐ½ÑŒÑˆÐµ Ð¸ÑÐºÐ°Ð¶ÐµÐ½Ð¸Ð¹)
+      float theta = v * PI * 0.4;         // 40% Ð¾Ñ‚ Ð¿Ð¾Ð»ÑŽÑÐ° Ðº Ð¿Ð¾Ð»ÑŽÑÑƒ
       
-      // Öåíòðèðóåì
+      // Ð¦ÐµÐ½Ñ‚Ñ€Ð¸Ñ€ÑƒÐµÐ¼
       phi += PI * 0.1;  //0.2
       theta += PI * 0.3;
       
@@ -283,16 +284,16 @@ void initSphereVectors(float radius) {
       vectors[i][1] = radius * cos(theta);             // y  
       vectors[i][2] = radius * sin(theta) * sin(phi);  // z
       
-      // Ìèíèìàëüíîå ìàñøòàáèðîâàíèå
-      vectors[i][0] *= 1.25;  // X (îïòèìàëüíî äëÿ x=24)
-      vectors[i][1] *= 0.8;  // Y (îïòèìàëüíî äëÿ y=12)
+      // ÐœÐ¸Ð½Ð¸Ð¼Ð°Ð»ÑŒÐ½Ð¾Ðµ Ð¼Ð°ÑÑˆÑ‚Ð°Ð±Ð¸Ñ€Ð¾Ð²Ð°Ð½Ð¸Ðµ
+      vectors[i][0] *= 1.25;  // X (Ð¾Ð¿Ñ‚Ð¸Ð¼Ð°Ð»ÑŒÐ½Ð¾ Ð´Ð»Ñ x=24)
+      vectors[i][1] *= 0.8;  // Y (Ð¾Ð¿Ñ‚Ð¸Ð¼Ð°Ð»ÑŒÐ½Ð¾ Ð´Ð»Ñ y=12)
       
       i++;
     }
   }
 }
 
-//äëÿ ïðîâåðêè, ïðÿìîé âûâîä íà LED
+//Ð´Ð»Ñ Ð¿Ñ€Ð¾Ð²ÐµÑ€ÐºÐ¸, Ð¿Ñ€ÑÐ¼Ð¾Ð¹ Ð²Ñ‹Ð²Ð¾Ð´ Ð½Ð° LED
 void renderToLED() {
   for (uint8_t y = 0; y < dH; y++) {
     for (uint8_t x = 0; x < dW; x++) {
@@ -313,8 +314,8 @@ void drawTextDots3D() {
   for (byte i = 0; i < dotsCount; i++) {
     uint8_t dRow = i / dW;
     uint8_t dCol = i % dW;
-    //uint8_t dRow = dH - 1 - (i / dW);  // åñëè íóæíî èíâåðòèðîâàòü ïî Y
-    //uint8_t dCol = dW - 1 - (i % dW);  //  åñëè íóæíî èíâåðòèðîâàòü ïî X
+    //uint8_t dRow = dH - 1 - (i / dW);  // ÐµÑÐ»Ð¸ Ð½ÑƒÐ¶Ð½Ð¾ Ð¸Ð½Ð²ÐµÑ€Ñ‚Ð¸Ñ€Ð¾Ð²Ð°Ñ‚ÑŒ Ð¿Ð¾ Y
+    //uint8_t dCol = dW - 1 - (i % dW);  //  ÐµÑÐ»Ð¸ Ð½ÑƒÐ¶Ð½Ð¾ Ð¸Ð½Ð²ÐµÑ€Ñ‚Ð¸Ñ€Ð¾Ð²Ð°Ñ‚ÑŒ Ð¿Ð¾ X
     
     if (getPixel(dCol, dRow)) {
       int8_t x = translateX(vectors[i][0], vectors[i][2]);
@@ -364,26 +365,26 @@ void connectPoints(uint8_t i1, uint8_t i2) {
 }
 
 void drawText3DConnected() {
-  // Ñîåäèíÿåì òî÷êè, êîòîðûå áûëè ñîñåäÿìè â èñõîäíîé òåêñòóðå. 0 - ïðàâî-íèç, íàïðàâëåíèå èíêðåìåíòà - ââåðõ è âëåâî
+  // Ð¡Ð¾ÐµÐ´Ð¸Ð½ÑÐµÐ¼ Ñ‚Ð¾Ñ‡ÐºÐ¸, ÐºÐ¾Ñ‚Ð¾Ñ€Ñ‹Ðµ Ð±Ñ‹Ð»Ð¸ ÑÐ¾ÑÐµÐ´ÑÐ¼Ð¸ Ð² Ð¸ÑÑ…Ð¾Ð´Ð½Ð¾Ð¹ Ñ‚ÐµÐºÑÑ‚ÑƒÑ€Ðµ. 0 - Ð¿Ñ€Ð°Ð²Ð¾-Ð½Ð¸Ð·, Ð½Ð°Ð¿Ñ€Ð°Ð²Ð»ÐµÐ½Ð¸Ðµ Ð¸Ð½ÐºÑ€ÐµÐ¼ÐµÐ½Ñ‚Ð° - Ð²Ð²ÐµÑ€Ñ… Ð¸ Ð²Ð»ÐµÐ²Ð¾
   for (byte i = 0; i < dotsCount; i++) {
     uint8_t dRow = i / dW;
     uint8_t dCol = i % dW;
     
     if (!getPixel(dCol, dRow)) continue;
     
-    // ñëåâà
+    // ÑÐ»ÐµÐ²Ð°
     if ((dCol < dW - 1) && getPixel(dCol + 1, dRow))
       connectPoints(i, i + 1);
     
-    // ñâåðõó
+    // ÑÐ²ÐµÑ€Ñ…Ñƒ
     if ((dRow < dH - 1) && getPixel(dCol, dRow + 1))
       connectPoints(i, i + dW);
     
-    // ñëåâà-ñâåðõó, åñëè (x+1,y+1), íî !(x,y+1) è !(x+1,y)
+    // ÑÐ»ÐµÐ²Ð°-ÑÐ²ÐµÑ€Ñ…Ñƒ, ÐµÑÐ»Ð¸ (x+1,y+1), Ð½Ð¾ !(x,y+1) Ð¸ !(x+1,y)
     if (dCol < dW - 1 && dRow < dH - 1 && getPixel(dCol + 1, dRow + 1) && !getPixel(dCol,dRow+1) && !getPixel(dCol+1,dRow))
         connectPoints(i, i + dW + 1);
     
-    // ñïðàâà-ñâåðõó, åñëè (x-1,y+1), íî !(x-1,y) è !(x,y+1)
+    // ÑÐ¿Ñ€Ð°Ð²Ð°-ÑÐ²ÐµÑ€Ñ…Ñƒ, ÐµÑÐ»Ð¸ (x-1,y+1), Ð½Ð¾ !(x-1,y) Ð¸ !(x,y+1)
     if (dCol > 0 && dRow < dH - 1 && getPixel(dCol - 1, dRow + 1) && !getPixel(dCol-1,dRow) && !getPixel(dCol,dRow+1))
         connectPoints(i, i + dW - 1);
   }
