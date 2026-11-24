@@ -8,7 +8,7 @@ const BUILD = new URL(self.location.href).searchParams.get('v') || 'dev';
 const NET_WAIT = 4000; // ms site has to answer before kept copy is used
 const SCOPE = new URL(self.registration.scope).pathname; // copies in other folders of site keep their own caches
 const CORE = 'wfl-core:' + SCOPE + ':' + BUILD, FILES = 'wfl-files:' + SCOPE;
-const SHELL = ['./', 'index.html', 'changes.txt', 'LICENSE', 'icon.png', 'apple-touch-icon.png', 'js/js.zip']; // js.zip: all scripts (page unpacks it)
+const SHELL = ['./', 'index.html', 'changes.zip', 'LICENSE', 'icon.png', 'apple-touch-icon.png', 'js/js.zip']; // js.zip: all scripts (page unpacks it)
 
 self.addEventListener('install', (e) => {
   e.waitUntil((async () => {
