@@ -2,18 +2,21 @@
 <html lang="en" data-theme="dark-plus">
 <head>
 <meta charset="utf-8">
-<meta name="build" content="20261124161437">
+<meta name="build" content="20261124164516">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <!-- iPhone / iPad: site of Home Screen opens as web app; iOS draws its blur (Liquid Glass scroll edge effect) over top of
      page unless top edge is sticky / fixed opaque box: status bar kept to itself (default), toolbar sticky (html.webapp) -->
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#323233">
 <script>
 (function () {
   try {
     var ua = navigator.userAgent, apple = /iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
     if (!apple) return;
     var h = document.documentElement; h.classList.add('apple');
+    // no zoom of page when input field gets focus (iOS zooms to fields with font under 16px; pinch zoom still works)
+    var v = document.querySelector('meta[name="viewport"]'); v.content += ', maximum-scale=1';
     if (navigator.standalone || (window.matchMedia && matchMedia('(display-mode: standalone)').matches)) h.classList.add('webapp');
   } catch (e) {}
 })();
@@ -163,6 +166,8 @@ html, body { font-feature-settings: "calt" 0; margin: 0; height: 100%; overflow:
 .gsearch { display: flex; align-items: center; gap: 2px; height: 26px; margin-left: 6px; padding: 0 3px 0 7px; width: 260px; min-width: 120px; flex: 0 1 260px;
   background: var(--input-bg); border: 1px solid var(--line); border-radius: 5px; color: var(--dim); }
 .gsearch:focus-within { border-color: var(--focus); }
+/* touch screens: search field without focus frame and without frame of its own input */
+@media (pointer: coarse) { .gsearch:focus-within { border-color: var(--line); } .gsearch input[type=text] { border: 0; background: transparent; height: 22px; padding: 0 4px; border-radius: 0; font: 12.5px system-ui, sans-serif; } }
 .gsearch svg { width: 14px; height: 14px; flex: none; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
 .gsearch input { flex: 1; min-width: 0; border: 0; background: transparent; color: var(--text); font: 12.5px system-ui, sans-serif; height: 22px; padding: 0 4px; outline: none !important; }
 .gsearch button { flex: none; height: 20px; min-width: 22px; padding: 0 3px; border: 1px solid transparent; border-radius: 3px; background: transparent; color: var(--dim); font: 600 11px ui-monospace, Consolas, monospace; }
