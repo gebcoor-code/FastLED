@@ -2,19 +2,19 @@
 <html lang="en" data-theme="dark-plus">
 <head>
 <meta charset="utf-8">
-<meta name="build" content="20261124155715">
+<meta name="build" content="20261124161437">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<!-- iPhone / iPad: site of Home Screen opens as web app; status bar (Liquid Glass) must not lie over toolbar and blur it:
-     page goes under status bar (black-translucent, viewport-fit=cover) and keeps its own strip of toolbar color there -->
+<!-- iPhone / iPad: site of Home Screen opens as web app; iOS draws its blur (Liquid Glass scroll edge effect) over top of
+     page unless top edge is sticky / fixed opaque box: status bar kept to itself (default), toolbar sticky (html.webapp) -->
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <script>
 (function () {
   try {
     var ua = navigator.userAgent, apple = /iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
     if (!apple) return;
-    document.documentElement.classList.add('apple');
-    var v = document.querySelector('meta[name="viewport"]'); v.content += ', viewport-fit=cover';
+    var h = document.documentElement; h.classList.add('apple');
+    if (navigator.standalone || (window.matchMedia && matchMedia('(display-mode: standalone)').matches)) h.classList.add('webapp');
   } catch (e) {}
 })();
 </script>
@@ -456,10 +456,8 @@ table.keys td + td { color: var(--dim); }
   #status::-webkit-scrollbar { display: none; }
   #status > * { flex-shrink: 0; }
 }
-/* iPhone / iPad (viewport-fit=cover): page kept out of status bar, notch and rounded corners; strip under status bar in
-   toolbar color, above everything (floating windows dragged up go under it, not under status bar) */
-html.apple #app { padding-top: env(safe-area-inset-top); padding-left: env(safe-area-inset-left); padding-right: env(safe-area-inset-right); }
-html.apple body::before { content: ""; position: fixed; left: 0; right: 0; top: 0; height: env(safe-area-inset-top); background: var(--title); z-index: 1000; pointer-events: none; }
+/* iPhone / iPad web app: toolbar is sticky opaque box at top edge, so iOS draws no blur over it (see head) */
+html.apple.webapp #toolbar { position: sticky; top: 0; }
 .helpwin { width: min(480px, calc(100vw - 8px)); height: min(560px, calc(100vh - 16px)); }
 .helpwin h4 { margin: 4px 0 2px; font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--dim); }
 .helpwin p { margin: 0; }
